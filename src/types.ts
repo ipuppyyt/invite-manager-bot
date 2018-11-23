@@ -51,6 +51,7 @@ export enum BotCommand {
 	interactiveConfig = 'interactiveConfig',
 
 	botInfo = 'botInfo',
+	credits = 'credits',
 	getBot = 'getBot',
 	help = 'help',
 	members = 'members',
@@ -68,6 +69,7 @@ export enum BotCommand {
 	inviteDetails = 'inviteDetails',
 	invites = 'invites',
 	leaderboard = 'leaderboard',
+	removeInvites = 'removeInvites',
 	restoreInvites = 'restoreInvites',
 	subtractFakes = 'subtractFakes',
 	subtractLeaves = 'subtractLeaves',

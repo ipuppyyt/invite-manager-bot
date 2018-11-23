@@ -27,10 +27,6 @@ export default class extends Command {
 					required: true
 				},
 				{
-					name: 'deleteMessageDays',
-					resolver: NumberResolver
-				},
-				{
 					name: 'reason',
 					resolver: StringResolver,
 					rest: true
@@ -44,7 +40,7 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[targetMember, deleteMessageDays, reason]: [Member, number, string],
+		[targetMember, reason]: [Member, string],
 		{ guild, me, settings, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -59,7 +55,7 @@ export default class extends Command {
 		if (!me.permission.has(Permissions.BAN_MEMBERS)) {
 			embed.description = t('cmd.ban.missingPermissions');
 		} else if (isPunishable(guild, targetMember, message.member, me)) {
-			let [error] = await to(targetMember.ban(deleteMessageDays, reason));
+			let [error] = await to(targetMember.ban(0, reason));
 			if (error) {
 				embed.description = t('cmd.ban.error');
 			} else {
