@@ -135,7 +135,7 @@ export default class extends Command {
 		args: any[],
 		{ t }: Context
 	): Promise<any> {
-		const embed = this.client.createEmbed();
+		const embed = this.createEmbed();
 
 		embed.fields.push({
 			name: t('cmd.credits.developers'),
@@ -157,16 +157,15 @@ export default class extends Command {
 			value: this.getList(translators)
 		});
 
-		return this.client.sendReply(message, embed);
+		return this.sendReply(message, embed);
 	}
 
 	private getList(array: any[]) {
 		return this.shuffle(array)
-			.map(
-				d =>
-					d.link
-						? `[${d.name}#${d.discriminator}](${d.link})`
-						: `${d.name}#${d.discriminator}`
+			.map(d =>
+				d.link
+					? `[${d.name}#${d.discriminator}](${d.link})`
+					: `${d.name}#${d.discriminator}`
 			)
 			.join('\n');
 	}
