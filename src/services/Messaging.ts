@@ -241,7 +241,7 @@ export class Messaging {
 			template.indexOf('{numFakeInvites}') >= 0 ||
 			template.indexOf('{numLeaveInvites}') >= 0
 		) {
-			invites = await this.client.getInviteCounts(guild.id, inviterId);
+			invites = await this.client.invs.getInviteCounts(guild.id, inviterId);
 		}
 
 		let numJoins = 0;

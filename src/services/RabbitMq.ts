@@ -278,7 +278,7 @@ export class RabbitMq {
 		if (!inviter) {
 			inviter = await guild.getRESTMember(inviterId).catch(() => null);
 		}
-		const invites = await this.client.getInviteCounts(guild.id, inviterId);
+		const invites = await this.client.invs.getInviteCounts(guild.id, inviterId);
 
 		// Add any roles for this invite code
 		let mem = guild.members.get(member.id);

@@ -44,7 +44,7 @@ export default class extends Command {
 			return this.sendReply(message, t('cmd.addInvites.zero'));
 		}
 
-		const invites = await this.client.getInviteCounts(guild.id, user.id);
+		const invites = await this.client.invs.getInviteCounts(guild.id, user.id);
 		const totalInvites = invites.total + amount;
 
 		await this.repo.members.save({

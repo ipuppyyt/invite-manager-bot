@@ -28,7 +28,7 @@ export default class extends Command {
 		{ guild, t, me }: Context
 	): Promise<any> {
 		let target = user ? user : message.author;
-		const invites = await this.client.getInviteCounts(guild.id, target.id);
+		const invites = await this.client.invs.getInviteCounts(guild.id, target.id);
 
 		let textMessage = '';
 		if (target.id === message.author.id) {

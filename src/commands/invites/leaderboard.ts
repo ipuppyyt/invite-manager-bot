@@ -2,7 +2,6 @@ import { Message } from 'eris';
 import moment from 'moment';
 
 import { IMClient } from '../../client';
-import { generateLeaderboard } from '../../functions/Leaderboard';
 import { LeaderboardStyle } from '../../models/Setting';
 import { NumberResolver, StringResolver } from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
@@ -63,7 +62,12 @@ export default class extends Command {
 
 		const hideLeft = settings.hideLeftMembersFromLeaderboard;
 
-		const { keys, oldKeys, invs, stillInServer } = await generateLeaderboard(
+		const {
+			keys,
+			oldKeys,
+			invs,
+			stillInServer
+		} = await this.client.invs.generateLeaderboard(
 			guild,
 			hideLeft,
 			from,

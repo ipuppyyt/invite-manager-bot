@@ -15,20 +15,15 @@ import { StrikesCache } from './cache/StrikesCache';
 import { CaptchaService } from './services/Captcha';
 import { Commands } from './services/Commands';
 import { DBQueue } from './services/DBQueue';
+import { InvitesService } from './services/Invites';
 import { Messaging } from './services/Messaging';
 import { Moderation } from './services/Moderation';
 import { RabbitMq } from './services/RabbitMq';
 import { Scheduler } from './services/Scheduler';
 
-import {
-	CustomInvite,
-	CustomInvitesGeneratedReason
-} from './models/CustomInvite';
 import { Guild as DBGuild } from './models/Guild';
-import { InviteCode } from './models/InviteCode';
 import { LogAction } from './models/Log';
 import { Member } from './models/Member';
-import { InviteCounts } from './types';
 
 const config = require('../config.json');
 
@@ -63,11 +58,13 @@ i18n.configure({
 });
 
 export class IMClient extends Client {
+	// General
 	public version: string;
 	public config: any;
 	public shardId: number;
 	public shardCount: number;
 
+	// Cache
 	public cache: {
 		settings: SettingsCache;
 		premium: PremiumCache;
@@ -76,15 +73,18 @@ export class IMClient extends Client {
 		punishments: PunishmentCache;
 		inviteCodes: InviteCodeSettingsCache;
 	};
-	public dbQueue: DBQueue;
 
+	// Services
+	public captcha: CaptchaService;
+	public cmds: Commands;
+	public dbQueue: DBQueue;
+	public invs: InvitesService;
+	public mod: Moderation;
 	public msg: Messaging;
 	public rabbitmq: RabbitMq;
-	public mod: Moderation;
 	public scheduler: Scheduler;
-	public cmds: Commands;
-	public captcha: CaptchaService;
 
+	// Misc
 	public startedAt: moment.Moment;
 	public activityInterval: NodeJS.Timer;
 
@@ -96,6 +96,7 @@ export class IMClient extends Client {
 
 	private dbl: DBL;
 
+	// Constructor
 	public constructor(
 		version: string,
 		conn: amqplib.Connection,
@@ -121,12 +122,14 @@ export class IMClient extends Client {
 			guildCreateTimeout: 60000
 		});
 
+		// General init
 		this.startedAt = moment();
 		this.version = version;
 		this.config = config;
 		this.shardId = shardId;
 		this.shardCount = shardCount;
 
+		// Cache init
 		this.cache = {
 			settings: new SettingsCache(this),
 			premium: new PremiumCache(this),
@@ -135,15 +138,18 @@ export class IMClient extends Client {
 			punishments: new PunishmentCache(this),
 			inviteCodes: new InviteCodeSettingsCache(this)
 		};
-		this.dbQueue = new DBQueue(this);
 
+		// Services init
+		this.captcha = new CaptchaService(this);
+		this.cmds = new Commands(this);
+		this.dbQueue = new DBQueue(this);
+		this.invs = new InvitesService(this);
+		this.mod = new Moderation(this);
 		this.msg = new Messaging(this);
 		this.rabbitmq = new RabbitMq(this, conn);
-		this.mod = new Moderation(this);
 		this.scheduler = new Scheduler(this);
-		this.cmds = new Commands(this);
-		this.captcha = new CaptchaService(this);
 
+		// Events init
 		this.on('ready', this.onClientReady);
 		this.on('guildCreate', this.onGuildCreate);
 		this.on('guildUnavailable', this.onGuildUnavailable);
@@ -160,8 +166,8 @@ export class IMClient extends Client {
 		Promise.all(Object.values(this.cache).map(c => c.init()));
 
 		// Other services
-		await this.rabbitmq.init();
 		await this.cmds.init();
+		await this.rabbitmq.init();
 		await this.scheduler.init();
 
 		// Setup discord bots api
@@ -272,70 +278,6 @@ export class IMClient extends Client {
 				name: message.author.username
 			}
 		);
-	}
-
-	public async getInviteCounts(
-		guildId: string,
-		memberId: string
-	): Promise<InviteCounts> {
-		const regularPromise = await getRepository(InviteCode)
-			.createQueryBuilder('ic')
-			.select('SUM(ic.uses)', 'total')
-			.where('ci.guildId = :guildId', { guildId: guildId })
-			.andWhere('ci.inviterId = :inviterId', { inviterId: memberId })
-			.getRawOne()
-			.then(val => val.total);
-
-		const customPromise = await getRepository(CustomInvite)
-			.createQueryBuilder('ci')
-			.select('ci.generatedReason')
-			.addSelect('SUM(ci.amount)', 'total')
-			.where('ci.guildId = :guildId', { guildId: guildId })
-			.andWhere('ci.inviterId = :inviterId', { inviterId: memberId })
-			.groupBy('ci.generatedReason')
-			.getRawMany();
-
-		const values = await Promise.all([regularPromise, customPromise]);
-
-		const reg = values[0] || 0;
-
-		const customUser = values[1].find(ci => ci.generatedReason === null) as any;
-		const ctm = customUser ? parseInt(customUser.total, 10) : 0;
-
-		const generated: { [x in CustomInvitesGeneratedReason]: number } = {
-			[CustomInvitesGeneratedReason.clear_regular]: 0,
-			[CustomInvitesGeneratedReason.clear_custom]: 0,
-			[CustomInvitesGeneratedReason.clear_fake]: 0,
-			[CustomInvitesGeneratedReason.clear_leave]: 0,
-			[CustomInvitesGeneratedReason.fake]: 0,
-			[CustomInvitesGeneratedReason.leave]: 0
-		};
-
-		values[1].forEach((ci: any) => {
-			if (ci.generatedReason === null) {
-				return;
-			}
-			const reason = ci.generatedReason as CustomInvitesGeneratedReason;
-			const amount = parseInt(ci.total, 10);
-			generated[reason] = amount;
-		});
-
-		const regular = reg + generated[CustomInvitesGeneratedReason.clear_regular];
-		const custom = ctm + generated[CustomInvitesGeneratedReason.clear_custom];
-		const fake =
-			generated[CustomInvitesGeneratedReason.fake] +
-			generated[CustomInvitesGeneratedReason.clear_fake];
-		const leave =
-			generated[CustomInvitesGeneratedReason.leave] +
-			generated[CustomInvitesGeneratedReason.clear_leave];
-
-		return {
-			regular,
-			custom,
-			fake,
-			leave,
-			total: regular + custom + fake + leave
-		};
 	}
 
 	public async getMembersCount() {
