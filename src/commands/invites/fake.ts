@@ -29,65 +29,29 @@ export default class extends Command {
 		[_page]: [number],
 		{ guild, t }: Context
 	): Promise<any> {
-		type ExtendedJoin = JoinAttributes & {
-			memberName: string;
-			totalJoins: string;
-			inviterIds: string | null;
-		};
-
-		const js: ExtendedJoin[] = (await joins.findAll({
-			attributes: [
-				'memberId',
-				[sequelize.literal('`member`.`name`'), 'memberName'],
-				[sequelize.fn('COUNT', sequelize.col('join.id')), 'totalJoins'],
-				[
-					sequelize.fn(
-						'GROUP_CONCAT',
-						sequelize.literal(
-							'CONCAT(`exactMatch`.`inviterId`, "|", `exactMatch->inviter`.`name`) SEPARATOR "\\t"'
-						)
-					),
-					'inviterIds'
-				]
-			],
-			where: {
-				guildId: guild.id
-			},
-			group: ['join.memberId'],
-			include: [
-				{
-					attributes: ['name'],
-					model: members,
-					required: true
-				},
-				{
-					attributes: [],
-					model: inviteCodes,
-					as: 'exactMatch',
-					required: true,
-					include: [
-						{
-							attributes: [],
-							as: 'inviter',
-							model: members,
-							required: true
-						}
-					]
-				}
-			],
-			raw: true
-		})) as any;
+		const js = await this.repo.joins
+			.createQueryBuilder('j')
+			.select('j.memberId')
+			.addSelect('m.name', 'memberName')
+			.addSelect('COUNT(j.id)', 'totalJoins')
+			.addSelect(
+				'GROUP_CONCAT(CONCAT(ic.inviterId, "|", i.name) SEPARATOR "\\t")',
+				'inviterIds'
+			)
+			.innerJoin('j.member', 'm')
+			.innerJoin('j.exactMatch', 'ic')
+			.innerJoin('ic.inviter', 'i')
+			.where('guildId = :guildId', { guildId: guild.id })
+			.groupBy('j.memberId')
+			.getRawMany();
 
 		if (js.length <= 0) {
 			return this.sendReply(message, t('cmd.fake.none'));
 		}
 
 		const suspiciousJoins = js
-			.filter((j: ExtendedJoin) => parseInt(j.totalJoins, 10) > 1)
-			.sort(
-				(a: ExtendedJoin, b: ExtendedJoin) =>
-					parseInt(b.totalJoins, 10) - parseInt(a.totalJoins, 10)
-			);
+			.filter(j => Number(j.totalJoins) > 1)
+			.sort((a, b) => Number(b.totalJoins) - Number(a.totalJoins));
 
 		if (suspiciousJoins.length === 0) {
 			return this.sendReply(message, t('cmd.fake.noneSinceJoin'));
@@ -101,7 +65,7 @@ export default class extends Command {
 
 			suspiciousJoins
 				.slice(page * usersPerPage, (page + 1) * usersPerPage)
-				.forEach((join: ExtendedJoin) => {
+				.forEach(join => {
 					if (!join.inviterIds) {
 						return;
 					}

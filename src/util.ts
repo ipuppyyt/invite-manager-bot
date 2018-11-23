@@ -7,8 +7,11 @@ import {
 	Role,
 	TextChannel
 } from 'eris';
+import { getRepository } from 'typeorm';
 
 import { IMClient } from './client';
+import { Rank } from './models/Rank';
+import { RankAssignmentStyle } from './models/Setting';
 import { Permissions } from './types';
 
 export async function promoteIfQualified(
@@ -19,16 +22,13 @@ export async function promoteIfQualified(
 	totalInvites: number
 ) {
 	let nextRankName = '';
-	let nextRank: RankInstance = null;
+	let nextRank: Rank = null;
 
 	const settings = await client.cache.settings.get(guild.id);
 	const style = settings.rankAssignmentStyle;
 
-	const allRanks = await ranks.findAll({
-		where: {
-			guildId: guild.id
-		},
-		raw: true
+	const allRanks = await getRepository(Rank).find({
+		where: { guildId: guild.id }
 	});
 
 	// Return early if we don't have any ranks so we do not

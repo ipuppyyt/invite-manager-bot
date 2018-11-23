@@ -42,6 +42,14 @@ export class Join extends BaseEntity {
 	@ManyToOne(type => Member, m => m.joins)
 	public member: Member;
 
+	@Column({
+		charset: 'utf8mb4',
+		collation: 'utf8mb4_bin',
+		length: 16,
+		nullable: true
+	})
+	public exactMatchCode: string;
+
 	@ManyToOne(type => InviteCode, i => i.joins)
 	public exactMatch: InviteCode;
 

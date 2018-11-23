@@ -1,14 +1,7 @@
 import { Message } from 'eris';
 
 import { IMClient } from '../../client';
-import {
-	customInvites,
-	CustomInvitesGeneratedReason,
-	inviteCodes,
-	joins,
-	leaves,
-	sequelize
-} from '../../sequelize';
+import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -28,55 +21,32 @@ export default class extends Command {
 		args: any[],
 		{ guild, t, settings }: Context
 	): Promise<any> {
-		const ls = await leaves.findAll({
-			attributes: [
-				'memberId',
-				[
-					sequelize.fn(
-						'TIMESTAMPDIFF',
-						sequelize.literal('SECOND'),
-						sequelize.fn('MAX', sequelize.col('join.createdAt')),
-						sequelize.fn('MAX', sequelize.col('leave.createdAt'))
-					),
-					'timeDiff'
-				]
-			],
-			where: {
-				guildId: guild.id
-			},
-			group: [
-				sequelize.col('leave.memberId'),
-				sequelize.col('join->exactMatch.code')
-			],
-			include: [
-				{
-					attributes: [],
-					model: joins,
-					required: true,
-					include: [
-						{
-							attributes: ['code', 'inviterId'],
-							model: inviteCodes,
-							as: 'exactMatch',
-							required: true
-						}
-					]
-				}
-			],
-			raw: true
-		});
+		const ls = await this.repo.leaves
+			.createQueryBuilder('l')
+			.select('l.memberId')
+			.addSelect(
+				'TIMESTAMPDIFF(SECOND, MAX(j.createdAt), MAX(l.createdAt))',
+				'timeDiff'
+			)
+			.innerJoin('l.join', 'j')
+			.innerJoin('j.exactMatch', 'ic')
+			.where('guildId = :guildId', { guildId: guild.id })
+			.groupBy('l.memberId')
+			.addGroupBy('ic.code')
+			.getRawMany();
 
 		if (ls.length === 0) {
-			return this.client.sendReply(message, t('cmd.subtractLeaves.none'));
+			return this.sendReply(message, t('cmd.subtractLeaves.none'));
 		}
 
 		// Delete old duplicate removals
-		await customInvites.destroy({
-			where: {
+		await this.repo.customInvs.update(
+			{
 				guildId: guild.id,
 				generatedReason: CustomInvitesGeneratedReason.leave
-			}
-		});
+			},
+			{ deletedAt: new Date() }
+		);
 
 		const threshold = settings.autoSubtractLeaveThreshold;
 
@@ -92,11 +62,10 @@ export default class extends Command {
 				reason: l.memberId,
 				generatedReason: CustomInvitesGeneratedReason.leave
 			}));
-		await customInvites.bulkCreate(customInvs, {
-			updateOnDuplicate: ['amount', 'updatedAt']
-		});
+		// TODO: updateOnDuplicate: ['amount', 'updatedAt']
+		await this.repo.customInvs.save(customInvs);
 
-		return this.client.sendReply(
+		return this.sendReply(
 			message,
 			t('cmd.subtractLeaves.done', { total: customInvs.length })
 		);

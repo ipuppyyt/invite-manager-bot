@@ -9,6 +9,7 @@ import { Guild as DBGuild } from '../models/Guild';
 import { InviteCode } from '../models/InviteCode';
 import { InviteCodeSetting } from '../models/InviteCodeSetting';
 import { Join } from '../models/Join';
+import { Leave } from '../models/Leave';
 import { Member as DBMember } from '../models/Member';
 import { MemberSetting } from '../models/MemberSetting';
 import { PremiumSubscription } from '../models/PremiumSubscription';
@@ -89,6 +90,7 @@ export abstract class Command {
 		invCodes: Repository<InviteCode>;
 		invCodeSettings: Repository<InviteCodeSetting>;
 		joins: Repository<Join>;
+		leaves: Repository<Leave>;
 		premium: Repository<PremiumSubscription>;
 		punishs: Repository<Punishment>;
 		punishConfigs: Repository<PunishmentConfig>;
@@ -136,6 +138,7 @@ export abstract class Command {
 			invCodes: getRepository(InviteCode),
 			invCodeSettings: getRepository(InviteCodeSetting),
 			joins: getRepository(Join),
+			leaves: getRepository(Leave),
 			members: getRepository(DBMember),
 			memberSettings: getRepository(MemberSetting),
 			premium: getRepository(PremiumSubscription),

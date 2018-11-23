@@ -2,11 +2,11 @@ import { Message, User } from 'eris';
 import moment from 'moment';
 
 import { IMClient } from '../../client';
+import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
+import { InviteCodeSettingsKey } from '../../models/InviteCodeSetting';
 import { UserResolver } from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
-import { InviteCodeSettingsKey } from '../../models/InviteCodeSetting';
-import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
 
 export default class extends Command {
 	public constructor(client: IMClient) {
@@ -350,35 +350,17 @@ export default class extends Command {
 			});
 		}
 
-		const js2 = await joins.findAll({
-			attributes: [
-				'memberId',
-				[sequelize.fn('MAX', sequelize.col('join.createdAt')), 'createdAt']
-			],
-			where: {
-				guildId: guild.id
-			},
-			group: [sequelize.col('memberId')],
-			order: [sequelize.literal('MAX(join.createdAt) DESC')],
-			include: [
-				{
-					attributes: [],
-					model: inviteCodes,
-					as: 'exactMatch',
-					where: {
-						inviterId: user.id
-					},
-					include: [
-						{
-							attributes: [],
-							model: members,
-							as: 'inviter'
-						}
-					]
-				}
-			],
-			raw: true
-		});
+		const js2 = await this.repo.joins
+			.createQueryBuilder('j')
+			.select('j.memberId')
+			.addSelect('MAX(j.createdAt)', 'createdAt')
+			.leftJoinAndSelect('j.exactMatch', 'ic')
+			.leftJoinAndSelect('ic.invier', 'm')
+			.where('j.guildId = :guildId', { guildId: guild.id })
+			.andWhere('j.inviterId = :invId', { invId: user.id })
+			.groupBy('j.memberId')
+			.orderBy('MAX(j.createdAt)', 'DESC')
+			.getRawMany();
 
 		if (js2.length > 0) {
 			let inviteText = '';

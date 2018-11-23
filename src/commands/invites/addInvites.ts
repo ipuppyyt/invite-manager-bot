@@ -4,7 +4,7 @@ import { IMClient } from '../../client';
 import { LogAction } from '../../models/Log';
 import { NumberResolver, StringResolver, UserResolver } from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
-import { getInviteCounts, promoteIfQualified } from '../../util';
+import { promoteIfQualified } from '../../util';
 import { Command, Context } from '../Command';
 
 export default class extends Command {
@@ -44,7 +44,7 @@ export default class extends Command {
 			return this.sendReply(message, t('cmd.addInvites.zero'));
 		}
 
-		const invites = await getInviteCounts(guild.id, user.id);
+		const invites = await this.client.getInviteCounts(guild.id, user.id);
 		const totalInvites = invites.total + amount;
 
 		await this.repo.members.save({

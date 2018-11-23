@@ -1,5 +1,8 @@
 import { Guild } from 'eris';
 import moment from 'moment';
+import { getRepository } from 'typeorm';
+import { InviteCode } from '../models/InviteCode';
+import { Join } from '../models/Join';
 
 // Extra query stuff we need in multiple places
 const sumClearRegular =
@@ -57,34 +60,43 @@ export async function generateLeaderboard(
 ) {
 	const guildId = guild.id;
 
-	const codeInvs = await inviteCodes.findAll({
-		attributes: [
-			'inviterId',
-			[
-				sequelize.literal(
-					'SUM(inviteCode.uses) - MAX((SELECT COUNT(joins.id) FROM joins WHERE ' +
-						`exactMatchCode = code AND deletedAt IS NULL AND ` +
-						`createdAt >= '${from.utc().format('YYYY/MM/DD HH:mm:ss')}'))`
-				),
-				'totalJoins'
-			]
-		],
-		where: {
-			guildId
-		},
-		group: 'inviteCode.inviterId',
-		include: [
-			{
-				attributes: ['name'],
-				model: members,
-				as: 'inviter',
-				required: true
-			}
-		],
-		order: [sequelize.literal('totalJoins DESC'), 'inviterId'],
-		limit,
-		raw: true
-	});
+	getRepository(Join)
+		.createQueryBuilder('j')
+		.select('');
+
+	const codeInvs = await getRepository(InviteCode)
+		.createQueryBuilder('ic')
+		.select('ic.inviterId')
+		.addSelect('SUM(ic.uses) - MAX(SELECT COUNT(j.id) FROM joins')
+
+		.findAll({
+			attributes: [
+				'inviterId',
+				[
+					sequelize.literal(
+						'SUM(inviteCode.uses) - MAX((SELECT COUNT(joins.id) FROM joins WHERE ' +
+							`exactMatchCode = code AND deletedAt IS NULL AND ` +
+							`createdAt >= '${from.utc().format('YYYY/MM/DD HH:mm:ss')}'))`
+					),
+					'totalJoins'
+				]
+			],
+			where: {
+				guildId
+			},
+			group: 'inviteCode.inviterId',
+			include: [
+				{
+					attributes: ['name'],
+					model: members,
+					as: 'inviter',
+					required: true
+				}
+			],
+			order: [sequelize.literal('totalJoins DESC'), 'inviterId'],
+			limit,
+			raw: true
+		});
 	const customInvs = await customInvites.findAll({
 		attributes: attrs,
 		where: {

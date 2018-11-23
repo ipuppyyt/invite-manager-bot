@@ -15,8 +15,7 @@ import { getRepository } from 'typeorm';
 
 import { IMClient } from '../client';
 import { Join } from '../models/Join';
-import { PromptResult, RabbitMqMember } from '../types';
-import { getInviteCounts, InviteCounts } from '../util';
+import { InviteCounts, PromptResult, RabbitMqMember } from '../types';
 
 const upSymbol = '🔺';
 const downSymbol = '🔻';
@@ -242,7 +241,7 @@ export class Messaging {
 			template.indexOf('{numFakeInvites}') >= 0 ||
 			template.indexOf('{numLeaveInvites}') >= 0
 		) {
-			invites = await getInviteCounts(guild.id, inviterId);
+			invites = await this.client.getInviteCounts(guild.id, inviterId);
 		}
 
 		let numJoins = 0;

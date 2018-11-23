@@ -57,46 +57,40 @@ export default class extends Command {
 			}
 		);
 
-		const invs = await inviteCodes.findAll({
-			attributes: [
-				'inviterId',
-				[sequelize.fn('SUM', sequelize.col('inviteCode.uses')), 'totalUses']
-			],
-			where: {
-				guildId: guild.id,
-				inviterId: {
-					[Op.ne]: null,
-					...(memberId && { [Op.eq]: memberId })
-				}
-			},
-			group: 'inviteCode.inviterId',
-			raw: true
-		});
+		const invsQuery = this.repo.invCodes
+			.createQueryBuilder('ic')
+			.select('ic.inviterId')
+			.addSelect('SUM(ic.uses)', 'totalUses')
+			.where('ic.guildId = :guildId', { guildId: guild.id })
+			.andWhere('ic.inviterId IS NOT NULL')
+			.groupBy('ic.inviterId');
+		if (memberId) {
+			invsQuery.andWhere('ic.inviterId = :invId', { invId: memberId });
+		}
+
+		const invs = await invsQuery.getRawMany();
+
+		const customInvsQuery = this.repo.customInvs
+			.createQueryBuilder('ci')
+			.select(['ci.memberId', 'ci.generatedReason'])
+			.addSelect('SUM(ci.amount)', 'totalAmount')
+			.where('ci.guildId = :guildId', { guildId: guild.id })
+			.andWhere('ci.memberId IS NOT NULL')
+			.groupBy('ci.memberId')
+			.addGroupBy('ci.generatedReason');
+		if (memberId) {
+			customInvsQuery.andWhere('ci.memberId = :mId', { mId: memberId });
+		}
 
 		// Get all custom generated invites (all clear_invites were removed before)
-		const customInvs = await customInvites.findAll({
-			attributes: [
-				'memberId',
-				'generatedReason',
-				[sequelize.fn('SUM', sequelize.col('amount')), 'totalAmount']
-			],
-			where: {
-				guildId: guild.id,
-				memberId: {
-					[Op.ne]: null,
-					...(memberId && { [Op.eq]: memberId })
-				}
-			},
-			group: ['memberId', 'generatedReason'],
-			raw: true
-		});
+		const customInvs = await customInvsQuery.getRawMany();
 
 		const regular: { [x: string]: number } = {};
 		const fake: { [x: string]: number } = {};
 		const leave: { [x: string]: number } = {};
 		const custom: { [x: string]: number } = {};
 
-		invs.forEach((inv: any) => {
+		invs.forEach(inv => {
 			if (!regular[inv.inviterId]) {
 				regular[inv.inviterId] = 0;
 			}
@@ -104,7 +98,7 @@ export default class extends Command {
 		});
 		customInvs
 			.filter(inv => inv.generatedReason === CustomInvitesGeneratedReason.fake)
-			.forEach((inv: any) => {
+			.forEach(inv => {
 				if (!fake[inv.memberId]) {
 					fake[inv.memberId] = 0;
 				}
@@ -112,7 +106,7 @@ export default class extends Command {
 			});
 		customInvs
 			.filter(inv => inv.generatedReason === CustomInvitesGeneratedReason.leave)
-			.forEach((inv: any) => {
+			.forEach(inv => {
 				if (!leave[inv.memberId]) {
 					leave[inv.memberId] = 0;
 				}
@@ -159,7 +153,7 @@ export default class extends Command {
 			// Process any custom invites
 			customInvs
 				.filter(inv => inv.generatedReason === null)
-				.forEach((inv: any) => {
+				.forEach(inv => {
 					if (!custom[inv.memberId]) {
 						custom[inv.memberId] = 0;
 					}

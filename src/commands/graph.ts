@@ -61,75 +61,57 @@ export default class extends Command {
 			title = t('cmd.graph.joins.title');
 			description = t('cmd.graph.joins.text');
 
-			const js = await joins.findAll({
-				attributes: [
-					[sequelize.fn('YEAR', sequelize.col('createdAt')), 'year'],
-					[sequelize.fn('MONTH', sequelize.col('createdAt')), 'month'],
-					[sequelize.fn('DAY', sequelize.col('createdAt')), 'day'],
-					[sequelize.fn('COUNT', 'id'), 'total']
-				],
-				group: [
-					sequelize.fn('YEAR', sequelize.col('createdAt')),
-					sequelize.fn('MONTH', sequelize.col('createdAt')),
-					sequelize.fn('DAY', sequelize.col('createdAt'))
-				],
-				where: {
-					guildId: guild.id
-				},
-				order: [sequelize.literal('MAX(createdAt) DESC')],
-				limit: days,
-				raw: true
-			});
+			const js = await this.repo.joins
+				.createQueryBuilder('j')
+				.select('COUNT(id)', 'total')
+				.addSelect('YEAR(createdAt)', 'year')
+				.addSelect('MONTH(createdAt)', 'month')
+				.addSelect('DAY(createdAt)', 'day')
+				.groupBy('YEAR(createdAt)')
+				.addGroupBy('MONTH(createdAt)')
+				.addGroupBy('DAY(createdAt)')
+				.where('guildId = :guildId', { guildId: guild.id })
+				.orderBy('MAX(createdAt)', 'DESC')
+				.limit(days)
+				.getRawMany();
 
-			js.forEach((j: any) => (vs[`${j.year}-${j.month}-${j.day}`] = j.total));
+			js.forEach(j => (vs[`${j.year}-${j.month}-${j.day}`] = j.total));
 		} else if (type === ChartType.leaves) {
 			title = t('cmd.graph.leaves.title');
 			description = t('cmd.graph.leaves.text');
 
-			const lvs = await leaves.findAll({
-				attributes: [
-					[sequelize.fn('YEAR', sequelize.col('createdAt')), 'year'],
-					[sequelize.fn('MONTH', sequelize.col('createdAt')), 'month'],
-					[sequelize.fn('DAY', sequelize.col('createdAt')), 'day'],
-					[sequelize.fn('COUNT', 'id'), 'total']
-				],
-				group: [
-					sequelize.fn('YEAR', sequelize.col('createdAt')),
-					sequelize.fn('MONTH', sequelize.col('createdAt')),
-					sequelize.fn('DAY', sequelize.col('createdAt'))
-				],
-				where: {
-					guildId: guild.id
-				},
-				order: [sequelize.literal('MAX(createdAt) DESC')],
-				limit: days,
-				raw: true
-			});
+			const lvs = await this.repo.leaves
+				.createQueryBuilder('j')
+				.select('COUNT(id)', 'total')
+				.addSelect('YEAR(createdAt)', 'year')
+				.addSelect('MONTH(createdAt)', 'month')
+				.addSelect('DAY(createdAt)', 'day')
+				.groupBy('YEAR(createdAt)')
+				.addGroupBy('MONTH(createdAt)')
+				.addGroupBy('DAY(createdAt)')
+				.where('guildId = :guildId', { guildId: guild.id })
+				.orderBy('MAX(createdAt)', 'DESC')
+				.limit(days)
+				.getRawMany();
 
 			lvs.forEach((l: any) => (vs[`${l.year}-${l.month}-${l.day}`] = l.total));
 		} else if (type === ChartType.usage) {
 			title = t('cmd.graph.usage.title');
 			description = t('cmd.graph.usage.text');
 
-			const us = await commandUsage.findAll({
-				attributes: [
-					[sequelize.fn('YEAR', sequelize.col('createdAt')), 'year'],
-					[sequelize.fn('MONTH', sequelize.col('createdAt')), 'month'],
-					[sequelize.fn('DAY', sequelize.col('createdAt')), 'day'],
-					[sequelize.fn('COUNT', 'id'), 'total']
-				],
-				group: [
-					sequelize.fn('YEAR', sequelize.col('createdAt')),
-					sequelize.fn('MONTH', sequelize.col('createdAt')),
-					sequelize.fn('DAY', sequelize.col('createdAt'))
-				],
-				where: {
-					guildId: guild.id
-				},
-				order: [sequelize.literal('MAX(createdAt) DESC')],
-				limit: days,
-				raw: true
-			});
+			const us = await this.repo.cmdUsage
+				.createQueryBuilder('j')
+				.select('COUNT(id)', 'total')
+				.addSelect('YEAR(createdAt)', 'year')
+				.addSelect('MONTH(createdAt)', 'month')
+				.addSelect('DAY(createdAt)', 'day')
+				.groupBy('YEAR(createdAt)')
+				.addGroupBy('MONTH(createdAt)')
+				.addGroupBy('DAY(createdAt)')
+				.where('guildId = :guildId', { guildId: guild.id })
+				.orderBy('MAX(createdAt)', 'DESC')
+				.limit(days)
+				.getRawMany();
 
 			us.forEach((u: any) => (vs[`${u.year}-${u.month}-${u.day}`] = u.total));
 		}
@@ -166,7 +148,7 @@ export default class extends Command {
 
 		let chart = new Chart();
 		chart.getChart('line', config).then((buffer: Buffer) => {
-			const embed = this.client.createEmbed({
+			const embed = this.createEmbed({
 				title,
 				description,
 				image: {

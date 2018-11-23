@@ -2,15 +2,15 @@ import { Channel, Role } from 'eris';
 
 import {
 	defaultInviteCodeSettings,
-	defaultMemberSettings,
-	defaultSettings,
 	InviteCodeSettingsKey,
-	inviteCodeSettingsTypes,
+	inviteCodeSettingsTypes
+} from './models/InviteCodeSetting';
+import {
+	defaultMemberSettings,
 	MemberSettingsKey,
-	memberSettingsTypes,
-	SettingsKey,
-	settingsTypes
-} from './sequelize';
+	memberSettingsTypes
+} from './models/MemberSetting';
+import { defaultSettings, SettingsKey, settingsTypes } from './models/Setting';
 
 type AllKeys = SettingsKey | MemberSettingsKey | InviteCodeSettingsKey;
 const allSettingsTypes = {

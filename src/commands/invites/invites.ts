@@ -3,7 +3,7 @@ import { Message, User } from 'eris';
 import { IMClient } from '../../client';
 import { UserResolver } from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
-import { getInviteCounts, promoteIfQualified } from '../../util';
+import { promoteIfQualified } from '../../util';
 import { Command, Context } from '../Command';
 
 export default class extends Command {
@@ -28,7 +28,7 @@ export default class extends Command {
 		{ guild, t, me }: Context
 	): Promise<any> {
 		let target = user ? user : message.author;
-		const invites = await getInviteCounts(guild.id, target.id);
+		const invites = await this.client.getInviteCounts(guild.id, target.id);
 
 		let textMessage = '';
 		if (target.id === message.author.id) {

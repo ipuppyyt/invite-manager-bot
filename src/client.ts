@@ -20,8 +20,12 @@ import { Moderation } from './services/Moderation';
 import { RabbitMq } from './services/RabbitMq';
 import { Scheduler } from './services/Scheduler';
 
-import { CustomInvitesGeneratedReason } from './models/CustomInvite';
+import {
+	CustomInvite,
+	CustomInvitesGeneratedReason
+} from './models/CustomInvite';
 import { Guild as DBGuild } from './models/Guild';
+import { InviteCode } from './models/InviteCode';
 import { LogAction } from './models/Log';
 import { Member } from './models/Member';
 import { InviteCounts } from './types';
@@ -274,24 +278,23 @@ export class IMClient extends Client {
 		guildId: string,
 		memberId: string
 	): Promise<InviteCounts> {
-		const regularPromise = inviteCodes.sum('uses', {
-			where: {
-				guildId: guildId,
-				inviterId: memberId
-			}
-		});
-		const customPromise = customInvites.findAll({
-			attributes: [
-				'generatedReason',
-				[sequelize.fn('SUM', sequelize.col('amount')), 'total']
-			],
-			where: {
-				guildId: guildId,
-				memberId: memberId
-			},
-			group: ['generatedReason'],
-			raw: true
-		});
+		const regularPromise = await getRepository(InviteCode)
+			.createQueryBuilder('ic')
+			.select('SUM(ic.uses)', 'total')
+			.where('ci.guildId = :guildId', { guildId: guildId })
+			.andWhere('ci.inviterId = :inviterId', { inviterId: memberId })
+			.getRawOne()
+			.then(val => val.total);
+
+		const customPromise = await getRepository(CustomInvite)
+			.createQueryBuilder('ci')
+			.select('ci.generatedReason')
+			.addSelect('SUM(ci.amount)', 'total')
+			.where('ci.guildId = :guildId', { guildId: guildId })
+			.andWhere('ci.inviterId = :inviterId', { inviterId: memberId })
+			.groupBy('ci.generatedReason')
+			.getRawMany();
+
 		const values = await Promise.all([regularPromise, customPromise]);
 
 		const reg = values[0] || 0;

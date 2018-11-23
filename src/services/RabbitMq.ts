@@ -2,17 +2,17 @@ import * as amqplib from 'amqplib';
 import { Message, TextChannel } from 'eris';
 import i18n from 'i18n';
 import moment from 'moment';
+import { getRepository } from 'typeorm';
 
 import { IMClient } from '../client';
+import {
+	CustomInvite,
+	CustomInvitesGeneratedReason
+} from '../models/CustomInvite';
 import { Join } from '../models/Join';
 import { Leave } from '../models/Leave';
 import { RabbitMqMember, ShardCommand } from '../types';
-import {
-	FakeChannel,
-	getInviteCounts,
-	getShardIdForGuild,
-	promoteIfQualified
-} from '../util';
+import { FakeChannel, getShardIdForGuild, promoteIfQualified } from '../util';
 
 interface ShardMessageOptions {
 	id: string;
@@ -181,13 +181,16 @@ export class RabbitMq {
 		// Auto remove leaves if enabled
 		if (settings.autoSubtractLeaves) {
 			// Delete removals for this member because the member rejoined
-			await customInvites.destroy({
-				where: {
+			await getRepository(CustomInvite).update(
+				{
 					guildId: guild.id,
 					reason: member.id,
 					generatedReason: CustomInvitesGeneratedReason.leave
+				},
+				{
+					deletedAt: new Date()
 				}
-			});
+			);
 		}
 
 		// Exit if we can't find the join
@@ -207,28 +210,8 @@ export class RabbitMq {
 			return;
 		}
 
-		const jn: any = await joins.findById(join.id, {
-			include: [
-				{
-					model: inviteCodes,
-					attributes: ['code', 'inviterId', 'channelId'],
-					as: 'exactMatch',
-					required: true,
-					include: [
-						{
-							model: members,
-							attributes: ['name', 'discriminator'],
-							as: 'inviter',
-							required: true
-						},
-						{
-							model: channels,
-							attributes: ['name']
-						}
-					]
-				}
-			],
-			raw: true
+		const jn = await getRepository(Join).findOne(join.id, {
+			relations: ['exactMatch', 'exactMatch.inviter', 'exactMatch.channel']
 		});
 
 		// Exit if we can't find the join
@@ -247,7 +230,7 @@ export class RabbitMq {
 			return;
 		}
 
-		const inviterId = jn['exactMatch.inviterId'];
+		const inviterId = jn.exactMatch.inviterId;
 
 		// Auto remove fakes if enabled
 		if (settings.autoSubtractFakes) {
@@ -269,18 +252,20 @@ export class RabbitMq {
 			});
 
 			// Remove old custom invites
-			await customInvites.destroy({
-				where: {
+			await getRepository(CustomInvite).update(
+				{
 					guildId: guild.id,
 					memberId: inviterId,
 					reason: member.id
+				},
+				{
+					deletedAt: new Date()
 				}
-			});
+			);
 
 			// Add removals for duplicate invites
-			await customInvites.insertOrUpdate({
-				id: null,
-				creatorId: null,
+			// TODO: Previously this was with INSERT OR UPDATE
+			await getRepository(CustomInvite).save({
 				guildId: guild.id,
 				memberId: inviterId,
 				amount: -(numJoins - 1),
@@ -293,7 +278,7 @@ export class RabbitMq {
 		if (!inviter) {
 			inviter = await guild.getRESTMember(inviterId).catch(() => null);
 		}
-		const invites = await getInviteCounts(guild.id, inviterId);
+		const invites = await this.client.getInviteCounts(guild.id, inviterId);
 
 		// Add any roles for this invite code
 		let mem = guild.members.get(member.id);
@@ -318,10 +303,10 @@ export class RabbitMq {
 			await promoteIfQualified(this.client, guild, inviter, me, invites.total);
 		}
 
-		const channelName = jn['exactMatch.channel.name'];
-		const channelId = jn['exactMatch.channelId'];
-		const inviterName = jn['exactMatch.inviter.name'];
-		const inviterDiscriminator = jn['exactMatch.inviter.discriminator'];
+		const channelName = jn.exactMatch.channel.name;
+		const channelId = jn.exactMatch.channelId;
+		const inviterName = jn.exactMatch.inviter.name;
+		const inviterDiscriminator = jn.exactMatch.inviter.discriminator;
 
 		const joinMessageFormat = settings.joinMessage;
 		if (joinChannel && joinMessageFormat) {
@@ -413,13 +398,16 @@ export class RabbitMq {
 		// Auto remove leaves if enabled (and if we know the inviter)
 		if (inviterId && settings.autoSubtractLeaves) {
 			// Delete any old entries for the leaving of this member
-			await customInvites.destroy({
-				where: {
+			getRepository(CustomInvite).update(
+				{
 					guildId: guild.id,
 					reason: member.id,
 					generatedReason: CustomInvitesGeneratedReason.leave
+				},
+				{
+					deletedAt: new Date()
 				}
-			});
+			);
 
 			const threshold = Number(settings.autoSubtractLeaveThreshold);
 			const timeDiff = moment
@@ -427,8 +415,7 @@ export class RabbitMq {
 				.diff(moment.utc(leave.createdAt), 's');
 			if (timeDiff < threshold) {
 				// Add removals for leaves
-				await customInvites.create({
-					id: null,
+				await getRepository(CustomInvite).save({
 					creatorId: null,
 					guildId: guild.id,
 					memberId: inviterId,
@@ -608,7 +595,7 @@ export class RabbitMq {
 				const dmChannel = guild.channels.get(content.channelId) as TextChannel;
 				const sender = content.user;
 
-				const embed = this.client.createEmbed({
+				const embed = this.client.msg.createEmbed({
 					author: {
 						name: `${sender.username}#${sender.discriminator}`,
 						url: sender.avatarURL

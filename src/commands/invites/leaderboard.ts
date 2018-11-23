@@ -45,7 +45,7 @@ export default class extends Command {
 		if (_date) {
 			const res = chrono.parse(_date);
 			if (!res[0]) {
-				return this.client.sendReply(message, t('cmd.leaderboard.invalidDate'));
+				return this.sendReply(message, t('cmd.leaderboard.invalidDate'));
 			}
 			if (res[0].start) {
 				from = moment(res[0].start.date());
@@ -72,11 +72,11 @@ export default class extends Command {
 		);
 
 		if (keys.length === 0) {
-			const embed = this.client.createEmbed({
+			const embed = this.createEmbed({
 				title: t('cmd.leaderboard.title'),
 				description: t('cmd.leaderboard.noInvites')
 			});
-			return this.client.sendReply(message, embed);
+			return this.sendReply(message, embed);
 		}
 
 		const maxPage = Math.ceil(keys.length / usersPerPage);
@@ -85,7 +85,7 @@ export default class extends Command {
 		const style: LeaderboardStyle = settings.leaderboardStyle;
 
 		// Show the leaderboard as a paginated list
-		this.client.showPaginated(message, p, maxPage, page => {
+		this.showPaginated(message, p, maxPage, page => {
 			const fromText = from.format('YYYY/MM/DD - HH:mm:ss - z');
 			const toText = to.format('YYYY/MM/DD - HH:mm:ss - z');
 
@@ -188,7 +188,7 @@ export default class extends Command {
 				str += '\n```\n' + t('cmd.leaderboard.legend');
 			}
 
-			return this.client.createEmbed({
+			return this.createEmbed({
 				title: t('cmd.leaderboard.title'),
 				description: str
 			});
