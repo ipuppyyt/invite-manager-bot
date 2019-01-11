@@ -42,7 +42,7 @@
 		"mysql2": "1.6.4",
 		"reflect-metadata": "0.1.12",
 		"typeorm": "0.2.11",
-		"uws": "99.0.0",
+		"uws": "10.148.1",
 		"zlib-sync": "0.1.4"
 	},
 	"devDependencies": {
