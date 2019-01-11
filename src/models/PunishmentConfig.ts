@@ -29,7 +29,7 @@ export class PunishmentConfig extends BaseEntity {
 	public deletedAt: Date;
 
 	@Column()
-	public punishmentType: PunishmentType;
+	public type: PunishmentType;
 
 	@Column()
 	public amount: number;

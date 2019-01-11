@@ -1,10 +1,10 @@
-import { Member, Message } from 'eris';
+import { Message, User } from 'eris';
 
 import { IMClient } from '../../../client';
 import {
-	MemberResolver,
 	NumberResolver,
-	StringResolver
+	StringResolver,
+	UserResolver
 } from '../../../resolvers';
 import {
 	CommandGroup,
@@ -23,13 +23,21 @@ export default class extends Command {
 			args: [
 				{
 					name: 'user',
-					resolver: MemberResolver,
+					resolver: UserResolver,
 					required: true
 				},
 				{
 					name: 'reason',
 					resolver: StringResolver,
 					rest: true
+				}
+			],
+			flags: [
+				{
+					name: 'deleteMessageDays',
+					resolver: NumberResolver,
+					short: 'd',
+					valueRequired: true
 				}
 			],
 			group: CommandGroup.Moderation,
@@ -40,7 +48,8 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[targetMember, reason]: [Member, string],
+		[targetUser, reason]: [User, string],
+		{ deleteMessageDays }: { deleteMessageDays: number },
 		{ guild, me, settings, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -48,47 +57,63 @@ export default class extends Command {
 		}
 
 		const embed = this.client.mod.createPunishmentEmbed(
-			targetMember.username,
-			targetMember.avatarURL
+			targetUser.username,
+			targetUser.avatarURL
 		);
+
+		const targetMember = guild.members.get(targetUser.id);
 
 		if (!me.permission.has(Permissions.BAN_MEMBERS)) {
 			embed.description = t('cmd.ban.missingPermissions');
-		} else if (isPunishable(guild, targetMember, message.member, me)) {
-			let [error] = await to(targetMember.ban(0, reason));
+		} else if (
+			!targetMember ||
+			isPunishable(guild, targetMember, message.member, me)
+		) {
+			if (targetMember) {
+				await this.client.mod.informAboutPunishment(
+					targetMember,
+					PunishmentType.ban,
+					settings,
+					{ reason }
+				);
+			}
+
+			const days = deleteMessageDays ? deleteMessageDays : 0;
+			const [error] = await to(
+				this.client.banGuildMember(guild.id, targetUser.id, days, reason)
+			);
+
 			if (error) {
-				embed.description = t('cmd.ban.error');
+				embed.description = t('cmd.ban.error', { error });
 			} else {
-				embed.description = t('cmd.ban.done');
-				let punishment = this.repo.punishs.create({
+				const punishment = await this.repo.punishs.save({
 					guildId: guild.id,
-					memberId: targetMember.id,
-					punishmentType: PunishmentType.ban,
+					memberId: targetUser.id,
+					type: PunishmentType.ban,
 					amount: 0,
 					args: '',
 					reason: reason,
 					creatorId: message.author.id
 				});
-				await this.repo.punishs.save(punishment);
-				const logEmbed = this.client.mod.createPunishmentEmbed(
-					targetMember.username,
-					targetMember.avatarURL
+
+				this.client.mod.logPunishmentModAction(
+					guild,
+					targetUser,
+					punishment.type,
+					punishment.amount,
+					[
+						{ name: 'Mod', value: `<@${message.author.id}>` },
+						{ name: 'Reason', value: reason }
+					]
 				);
-				logEmbed.description = `**Punishment ID**: ${punishment.id}\n`;
-				logEmbed.description += `**Target**: ${targetMember}\n`;
-				logEmbed.description += `**Target**: ${targetMember.username}#${
-					targetMember.discriminator
-				} (ID: ${targetMember.id})\n`;
-				logEmbed.description += `**Action**: ${punishment.punishmentType}\n`;
-				logEmbed.description += `**Mod**: ${message.author.username}\n`;
-				logEmbed.description += `**Reason**: ${reason}\n`;
-				this.client.logModAction(guild, logEmbed);
+
+				embed.description = t('cmd.ban.done');
 			}
 		} else {
 			embed.description = t('cmd.ban.canNotBan');
 		}
 
-		let response = await this.sendReply(message, embed);
+		const response = await this.sendReply(message, embed);
 
 		if (settings.modPunishmentBanDeleteMessage) {
 			const func = () => {

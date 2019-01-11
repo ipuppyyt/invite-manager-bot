@@ -28,7 +28,7 @@ export class Strike extends BaseEntity {
 	public deletedAt: Date;
 
 	@Column()
-	public violationType: ViolationType;
+	public type: ViolationType;
 
 	@Column()
 	public amount: number;

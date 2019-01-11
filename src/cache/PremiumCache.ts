@@ -1,17 +1,17 @@
 import { getRepository, In, MoreThan, Repository } from 'typeorm';
 
 import { IMClient } from '../client';
-import { PremiumSubscription } from '../models/PremiumSubscription';
+import { PremiumSubscriptionGuild } from '../models/PremiumSubscriptionGuild';
 
 import { GuildCache } from './GuildCache';
 
 export class PremiumCache extends GuildCache<boolean> {
-	private premiumSubsRepo: Repository<PremiumSubscription>;
+	private premiumSubsGuildRepo: Repository<PremiumSubscriptionGuild>;
 
 	public constructor(client: IMClient) {
 		super(client);
 
-		this.premiumSubsRepo = getRepository(PremiumSubscription);
+		this.premiumSubsGuildRepo = getRepository(PremiumSubscriptionGuild);
 	}
 
 	protected initOne(guildId: string): boolean {
@@ -20,10 +20,12 @@ export class PremiumCache extends GuildCache<boolean> {
 
 	protected async getAll(guildIds: string[]): Promise<void> {
 		// Load valid premium subs
-		const subs = await this.premiumSubsRepo.find({
+		const subs = await this.premiumSubsGuildRepo.find({
 			where: {
 				guildId: In(guildIds),
-				validUntil: MoreThan(new Date())
+				premiumSubscription: {
+					validUntil: MoreThan(new Date())
+				}
 			}
 		});
 
@@ -32,14 +34,16 @@ export class PremiumCache extends GuildCache<boolean> {
 		});
 	}
 
-	protected async getOne(guildId: string): Promise<boolean> {
-		const sub = await this.premiumSubsRepo.count({
+	protected async _get(guildId: string): Promise<boolean> {
+		const sub = await this.premiumSubsGuildRepo.count({
 			where: {
 				guildId,
-				validUntil: MoreThan(new Date())
+				premiumSubscription: {
+					validUntil: MoreThan(new Date())
+				}
 			}
 		});
 
-		return sub > 0;
+		return !!sub;
 	}
 }

@@ -3,19 +3,16 @@ import {
 	Column,
 	CreateDateColumn,
 	Entity,
-	Index,
 	ManyToOne,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn
 } from 'typeorm';
 
-import { ViolationType } from '../types';
-
 import { Guild } from './Guild';
+import { PremiumSubscription } from './PremiumSubscription';
 
 @Entity()
-@Index(['guild', 'violationType'], { unique: true })
-export class StrikeConfig extends BaseEntity {
+export class PremiumSubscriptionGuild extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
@@ -28,15 +25,15 @@ export class StrikeConfig extends BaseEntity {
 	@Column({ nullable: true })
 	public deletedAt: Date;
 
-	@Column()
-	public type: ViolationType;
-
-	@Column()
-	public amount: number;
-
 	@Column({ nullable: true })
 	public guildId: string;
 
-	@ManyToOne(type => Guild, g => g.strikeConfigs)
+	@ManyToOne(type => Guild, g => g.premiumSubscriptionGuilds)
 	public guild: Guild;
+
+	@Column({ nullable: true })
+	public premiumSubscriptionId: number;
+
+	@ManyToOne(type => PremiumSubscription, ps => ps.premiumSubscriptionGuilds)
+	public premiumSubscription: PremiumSubscription;
 }

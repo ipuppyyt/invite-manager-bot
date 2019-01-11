@@ -2,11 +2,11 @@ import { getRepository, In, Repository } from 'typeorm';
 
 import { IMClient } from '../client';
 import { RolePermission } from '../models/RolePermission';
-import { BotCommand, ModerationCommand, OwnerCommand } from '../types';
+import { BotCommand, ModerationCommand } from '../types';
 
 import { GuildCache } from './GuildCache';
 
-type AnyCommand = BotCommand | ModerationCommand | OwnerCommand;
+type AnyCommand = BotCommand | ModerationCommand;
 
 type PermissionsObject = { [key in AnyCommand]?: string[] };
 
@@ -41,7 +41,7 @@ export class PermissionsCache extends GuildCache<PermissionsObject> {
 		});
 	}
 
-	protected async getOne(guildId: string): Promise<PermissionsObject> {
+	protected async _get(guildId: string): Promise<PermissionsObject> {
 		const perms = await this.rolePermsRepo.find({
 			relations: ['role'],
 			where: { guildId }

@@ -1,18 +1,19 @@
-import { Message, User } from 'eris';
+import { Embed, Message, User } from 'eris';
 
 import { IMClient } from '../../client';
 import { LogAction } from '../../models/Log';
-import {
-	defaultMemberSettings,
-	MemberSettingsKey,
-	memberSettingsTypes
-} from '../../models/MemberSetting';
+import { MemberSettingsKey } from '../../models/MemberSetting';
 import {
 	EnumResolver,
 	SettingsValueResolver,
 	UserResolver
 } from '../../resolvers';
-import { fromDbValue, toDbValue } from '../../settings';
+import {
+	beautify,
+	canClear,
+	fromDbValue,
+	memberSettingsInfo
+} from '../../settings';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -32,11 +33,7 @@ export default class extends Command {
 				},
 				{
 					name: 'value',
-					resolver: new SettingsValueResolver(
-						client,
-						memberSettingsTypes,
-						defaultMemberSettings
-					),
+					resolver: new SettingsValueResolver(client, memberSettingsInfo),
 					rest: true
 				}
 			],
@@ -48,7 +45,8 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[key, user, rawValue]: [MemberSettingsKey, User, any],
+		[key, user, value]: [MemberSettingsKey, User, any],
+		flags: {},
 		context: Context
 	): Promise<any> {
 		const { guild, t, settings } = context;
@@ -69,15 +67,9 @@ export default class extends Command {
 		}
 
 		if (!user) {
-			const allSets = await this.repo.memberSettings.find({
-				where: {
-					guildId: guild.id,
-					key
-				},
-				relations: ['member']
-			});
-			if (allSets.length > 0) {
-				allSets.forEach(set =>
+			const allSets = await this.client.cache.members.get(guild.id);
+			if (allSets.size > 0) {
+				allSets.forEach((set: any) =>
 					embed.fields.push({
 						name: set.member.name,
 						value: fromDbValue(set.key, set.value)
@@ -89,125 +81,120 @@ export default class extends Command {
 			return this.sendReply(message, embed);
 		}
 
-		const username = user.username;
-		const oldSet = await this.repo.memberSettings.findOne({
-			where: {
-				guildId: guild.id,
-				memberId: user.id,
-				key
-			}
-		});
+		const memSettings = await this.client.cache.members.getOne(
+			guild.id,
+			user.id
+		);
+		const oldVal = memSettings[key];
+		embed.title = `${user.username}#${user.discriminator} - ${key}`;
 
-		let oldVal = oldSet ? oldSet.value : undefined;
-		let oldRawVal = fromDbValue(key, oldVal);
-		if (oldRawVal && oldRawVal.length > 1000) {
-			oldRawVal = oldRawVal.substr(0, 1000) + '...';
-		}
-
-		embed.title = key;
-
-		if (typeof rawValue === typeof undefined) {
+		if (typeof value === typeof undefined) {
 			// If we have no new value, just print the old one
 			// Check if the old one is set
 			if (oldVal) {
-				const clear = defaultMemberSettings[key] === null ? 't' : undefined;
-				embed.description = t('cmd.memberConfig.current.text', {
+				embed.description = t('cmd.inviteCodeConfig.current.text', {
 					prefix,
-					key,
-					username,
-					clear
+					key
 				});
+
+				if (canClear(key)) {
+					embed.description +=
+						'\n' +
+						t('cmd.inviteCodeConfig.current.clear', {
+							prefix,
+							key
+						});
+				}
+
 				embed.fields.push({
-					name: t('cmd.memberConfig.current.title'),
-					value: oldRawVal
+					name: t('cmd.inviteCodeConfig.current.title'),
+					value: beautify(key, oldVal)
 				});
 			} else {
 				embed.description = t('cmd.memberConfig.current.notSet', {
-					prefix
+					prefix,
+					key
 				});
 			}
 			return this.sendReply(message, embed);
 		}
 
-		if (rawValue === 'none' || rawValue === 'empty' || rawValue === 'null') {
-			if (defaultMemberSettings[key] !== null) {
+		if (value === null) {
+			if (!canClear(key)) {
 				this.sendReply(
 					message,
 					t('cmd.memberConfig.canNotClear', { prefix, key })
 				);
-				return;
+			}
+		} else {
+			// Only validate the config setting if we're not resetting or clearing it
+			const error = this.validate(key, value, context);
+			if (error) {
+				return this.sendReply(message, error);
 			}
 		}
 
-		const value = toDbValue(key, rawValue);
-		if (rawValue.length > 1000) {
-			rawValue = `${rawValue.substr(0, 1000)}...`;
-		}
+		// Set new value (we override the local value, because the formatting probably changed)
+		// If the value didn't change, then it will now be equal to oldVal (and also have the same formatting)
+		value = await this.client.cache.members.setOne(guild.id, user, key, value);
 
 		if (value === oldVal) {
 			embed.description = t('cmd.memberConfig.sameValue');
 			embed.fields.push({
 				name: t('cmd.memberConfig.current.title'),
-				value: rawValue
+				value: beautify(key, oldVal)
 			});
 			return this.sendReply(message, embed);
 		}
 
-		const error = this.validate(message, key, value);
-		if (error) {
-			return this.sendReply(message, error);
-		}
-
-		// TODO: Use insert or update
-		await this.repo.memberSettings.save({
-			guildId: guild.id,
-			memberId: user.id,
-			key,
-			value
-		});
-
-		embed.description = t('cmd.memberConfig.changed.text', {
-			prefix,
-			key,
-			username
-		});
+		embed.description = t('cmd.memberConfig.changed.text', { prefix, key });
 
 		// Log the settings change
-		this.client.logAction(guild, message, LogAction.memberConfig, {
+		this.client.logAction(guild, message, LogAction.config, {
 			key,
-			userId: user.id,
 			oldValue: oldVal,
 			newValue: value
 		});
 
-		if (oldVal) {
+		if (oldVal !== null) {
 			embed.fields.push({
 				name: t('cmd.memberConfig.previous.title'),
-				value: oldRawVal
+				value: beautify(key, oldVal)
 			});
 		}
 
 		embed.fields.push({
 			name: t('cmd.memberConfig.new.title'),
-			value: value ? rawValue : t('cmd.memberConfig.none')
+			value: value !== null ? beautify(key, value) : t('cmd.memberConfig.none')
 		});
-		oldVal = value; // Update value for future use
 
-		return this.sendReply(message, embed);
+		// Do any post processing, such as example messages
+		const cb = await this.after(message, embed, key, value, context);
+
+		await this.sendReply(message, embed);
+
+		if (typeof cb === typeof Function) {
+			await cb();
+		}
 	}
 
 	// Validate a new config value to see if it's ok (no parsing, already done beforehand)
 	private validate(
-		message: Message,
 		key: MemberSettingsKey,
-		value: any
+		value: any,
+		{ t, me }: Context
 	): string | null {
-		if (value === null || value === undefined) {
-			return null;
-		}
+		return null;
+	}
 
-		/*const type = getMemberSettingsType(key);*/
-
+	// Attach additional information for a config value, such as examples
+	private async after(
+		message: Message,
+		embed: Embed,
+		key: MemberSettingsKey,
+		value: any,
+		context: Context
+	): Promise<Function> {
 		return null;
 	}
 }

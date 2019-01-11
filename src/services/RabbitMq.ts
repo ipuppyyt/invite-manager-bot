@@ -11,42 +11,43 @@ import {
 } from '../models/CustomInvite';
 import { Join } from '../models/Join';
 import { Leave } from '../models/Leave';
+import { SettingsKey } from '../models/Setting';
 import { RabbitMqMember, ShardCommand } from '../types';
-import { FakeChannel, getShardIdForGuild, promoteIfQualified } from '../util';
+import { FakeChannel, promoteIfQualified } from '../util';
 
-interface ShardMessageOptions {
+interface ShardMessage {
 	id: string;
 	cmd: ShardCommand;
-	[x: string]: any;
-}
 
-interface ShardMessage extends ShardMessageOptions {
-	shardId: number;
+	[x: string]: any;
 }
 
 export class RabbitMq {
 	private client: IMClient;
+	private shard: string;
 
 	private qJoinsName: string;
 	private channelJoins: amqplib.Channel;
+
 	private qLeavesName: string;
 	private channelLeaves: amqplib.Channel;
+
 	private qCmdsName: string;
 	private channelCmds: amqplib.Channel;
-	private pendingRabbitMqRequests: Map<string, (response: any) => void>;
 
 	public constructor(client: IMClient, conn: amqplib.Connection) {
 		this.client = client;
-		this.pendingRabbitMqRequests = new Map();
+		this.shard = client.config.rabbitmq.prefix
+			? client.config.rabbitmq.prefix
+			: this.client.shardId;
 
 		// Setup RabbitMQ channels
 		const prefix = client.config.rabbitmq.prefix
 			? `${client.config.rabbitmq.prefix}-`
 			: '';
+		const suffix = `${this.client.shardId}-${this.client.shardCount}`;
 
-		this.qJoinsName = `${prefix}joins-${this.client.shardId}-${
-			this.client.shardCount
-		}`;
+		this.qJoinsName = `${prefix}joins-${suffix}`;
 		conn.createChannel().then(async channel => {
 			this.channelJoins = channel;
 
@@ -55,9 +56,7 @@ export class RabbitMq {
 			});
 		});
 
-		this.qLeavesName = `${prefix}leaves-${this.client.shardId}-${
-			this.client.shardCount
-		}`;
+		this.qLeavesName = `${prefix}leaves-${suffix}`;
 		conn.createChannel().then(async channel => {
 			this.channelLeaves = channel;
 
@@ -66,15 +65,26 @@ export class RabbitMq {
 			});
 		});
 
-		this.qCmdsName = `${prefix}cmds-${this.client.shardId}-${
-			this.client.shardCount
-		}`;
+		this.qCmdsName = `shard-${this.shard}-bot`;
 		conn.createChannel().then(async channel => {
 			this.channelCmds = channel;
 
 			await channel.assertQueue(this.qCmdsName, {
+				durable: false,
+				autoDelete: true
+			});
+
+			await channel.assertExchange('shards', 'fanout', {
 				durable: true
 			});
+
+			await channel.bindQueue(this.qCmdsName, 'shards', '');
+
+			await channel.assertExchange(`shard-${this.shard}`, 'fanout', {
+				durable: true
+			});
+
+			await channel.bindQueue(this.qCmdsName, `shard-${this.shard}`, '');
 		});
 	}
 
@@ -101,50 +111,6 @@ export class RabbitMq {
 		this.channelCmds.consume(this.qCmdsName, msg => this.onShardCommand(msg), {
 			noAck: false
 		});
-	}
-
-	public sendCommandToShard(
-		shardId: number,
-		message: ShardMessageOptions,
-		callback?: (response: any) => void
-	) {
-		// Attach our shard in case of responses
-		message.shardId = this.client.shardId;
-
-		const shardCount = this.client.shardCount;
-		const rabbitMqPrefix = this.client.config.rabbitmq.prefix
-			? `${this.client.config.rabbitmq.prefix}-`
-			: '';
-
-		if (callback) {
-			this.client.rabbitmq.pendingRabbitMqRequests.set(message.id, callback);
-		}
-
-		console.log(
-			`SENDING MESSAGE TO SHARD ${shardId}/${shardCount}: ` +
-				JSON.stringify(message)
-		);
-
-		const queueName = `${rabbitMqPrefix}cmds-${shardId}-${shardCount}`;
-		return {
-			shard: shardId,
-			result: this.channelCmds.sendToQueue(
-				queueName,
-				Buffer.from(JSON.stringify(message))
-			)
-		};
-	}
-
-	public sendCommandToGuild(
-		guildId: any,
-		message: ShardMessageOptions,
-		callback?: (response: any) => void
-	) {
-		return this.sendCommandToShard(
-			getShardIdForGuild(guildId, this.client.shardCount),
-			message,
-			callback
-		);
 	}
 
 	private async onGuildMemberAdd(_msg: amqplib.Message): Promise<void> {
@@ -175,6 +141,12 @@ export class RabbitMq {
 			console.error(
 				`Guild ${guild.id} has invalid ` +
 					`join message channel ${joinChannelId}`
+			);
+			// Reset the channel
+			this.client.cache.settings.setOne(
+				guild.id,
+				SettingsKey.joinMessageChannel,
+				null
 			);
 		}
 
@@ -234,21 +206,14 @@ export class RabbitMq {
 
 		// Auto remove fakes if enabled
 		if (settings.autoSubtractFakes) {
-			const numJoins = await joins.count({
+			const numJoins = await getRepository(Join).count({
 				where: {
 					memberId: member.id,
-					guildId
-				},
-				include: [
-					{
-						model: inviteCodes,
-						as: 'exactMatch',
-						where: {
-							inviterId
-						},
-						required: true
+					guildId,
+					exactMatch: {
+						inviterId
 					}
-				]
+				}
 			});
 
 			// Remove old custom invites
@@ -286,7 +251,8 @@ export class RabbitMq {
 			mem = await guild.getRESTMember(member.id);
 		}
 		if (mem) {
-			const invCodeSettings = await this.client.cache.inviteCodes.get(
+			const invCodeSettings = await this.client.cache.inviteCodes.getOne(
+				guild.id,
 				join.exactMatchCode
 			);
 			if (invCodeSettings && invCodeSettings.roles) {
@@ -314,7 +280,7 @@ export class RabbitMq {
 				joinMessageFormat,
 				guild,
 				member,
-				jn.createdAt,
+				jn.createdAt.getTime(),
 				jn.exactMatchCode,
 				channelId,
 				channelName,
@@ -361,6 +327,12 @@ export class RabbitMq {
 			console.error(
 				`Guild ${guild.id} has invalid leave ` +
 					`message channel ${leaveChannelId}`
+			);
+			// Reset the channel
+			this.client.cache.settings.setOne(
+				guild.id,
+				SettingsKey.leaveMessageChannel,
+				null
 			);
 		}
 
@@ -447,6 +419,19 @@ export class RabbitMq {
 		}
 	}
 
+	public async sendToManager(message: { id: string; [x: string]: any }) {
+		this.channelCmds.sendToQueue(
+			'manager',
+			Buffer.from(
+				JSON.stringify({
+					shard: this.shard,
+					service: 'bot',
+					...message
+				})
+			)
+		);
+	}
+
 	private async onShardCommand(msg: amqplib.Message) {
 		const content = JSON.parse(msg.content.toString()) as ShardMessage;
 		const cmd = content.cmd;
@@ -459,17 +444,62 @@ export class RabbitMq {
 		this.channelCmds.ack(msg, false);
 
 		const sendResponse = (message: { [x: string]: any }) =>
-			this.sendCommandToShard(content.shardId, {
+			this.sendToManager({
 				id: content.id,
-				cmd: ShardCommand.RESPONSE,
+				cmd: content.cmd,
 				...message
 			});
 
 		switch (cmd) {
+			case ShardCommand.STATUS:
+				sendResponse({
+					connected: this.client.gatewayConnected
+				});
+				break;
+
+			case ShardCommand.CUSTOM:
+				const self = await this.client.getSelf();
+
+				sendResponse({
+					self,
+					guilds: this.client.guilds.map(g => ({
+						id: g.id,
+						name: g.name,
+						icon: g.iconURL,
+						memberCount: g.memberCount
+					}))
+				});
+				break;
+
+			case ShardCommand.CACHE:
+				let channelCount =
+					this.client.groupChannels.size + this.client.privateChannels.size;
+				let roleCount = 0;
+
+				this.client.guilds.forEach(g => {
+					channelCount += g.channels.size;
+					roleCount += g.roles.size;
+				});
+
+				sendResponse({
+					guilds: this.client.guilds.size,
+					users: this.client.users.size,
+					channels: channelCount,
+					roles: roleCount,
+					settings: this.client.cache.settings.getSize(),
+					premium: this.client.cache.premium.getSize(),
+					permissions: this.client.cache.permissions.getSize(),
+					strikes: this.client.cache.strikes.getSize(),
+					punishments: this.client.cache.punishments.getSize(),
+					inviteCodes: this.client.cache.inviteCodes.getSize(),
+					members: this.client.cache.members.getSize()
+				});
+				break;
+
 			case ShardCommand.DIAGNOSE:
 				if (!guild) {
 					return sendResponse({
-						error: 'Guild not found'
+						error: `Guild ${guildId} not found`
 					});
 				}
 
@@ -519,8 +549,11 @@ export class RabbitMq {
 					.getRESTUser(guild.ownerID)
 					.catch(() => undefined);
 
+				const premium = await this.client.cache.premium.get(guildId);
+
 				sendResponse({
 					owner,
+					premium,
 					settings: sets,
 					perms,
 					joinChannelPerms,
@@ -585,10 +618,14 @@ export class RabbitMq {
 				break;
 
 			case ShardCommand.OWNER_DM:
-				const user = await this.client.getRESTUser(content.userId);
-				const userChannel = await user.getDMChannel();
-				await userChannel.createMessage(content.message);
-				sendResponse({ ok: true });
+				try {
+					const user = await this.client.getRESTUser(content.userId);
+					const userChannel = await user.getDMChannel();
+					await userChannel.createMessage(content.message);
+					sendResponse({ ok: true });
+				} catch (e) {
+					sendResponse({ ok: false, error: e });
+				}
 				break;
 
 			case ShardCommand.USER_DM:
@@ -616,15 +653,6 @@ export class RabbitMq {
 				dmChannel.createMessage({
 					embed
 				});
-				break;
-
-			case ShardCommand.RESPONSE:
-				const id = content.id;
-				if (this.pendingRabbitMqRequests.has(id)) {
-					this.pendingRabbitMqRequests.get(id)(content);
-				} else {
-					console.error('NOT EXPECTING RESPONSE FOR ' + id);
-				}
 				break;
 
 			default:

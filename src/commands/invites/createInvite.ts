@@ -31,9 +31,10 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[name, _channel]: [string, TextChannel],
+		flags: {},
 		{ guild, t, me }: Context
 	): Promise<any> {
-		let channel = _channel ? _channel : (message.channel as TextChannel);
+		const channel = _channel ? _channel : (message.channel as TextChannel);
 
 		if (!channel.permissionsOf(me.id).has(Permissions.CREATE_INSTANT_INVITE)) {
 			return this.sendReply(message, t('permissions.createInviteCode'));
@@ -67,12 +68,11 @@ export default class extends Command {
 			inviterId: message.author.id
 		});
 
-		this.repo.invCodeSettings.save({
-			guildId: guild.id,
-			inviteCode: inv.code,
-			key: InviteCodeSettingsKey.name,
-			value: name
-		});
+		await this.client.cache.inviteCodes.setOne(
+			inv,
+			InviteCodeSettingsKey.name,
+			name
+		);
 
 		this.sendReply(
 			message,

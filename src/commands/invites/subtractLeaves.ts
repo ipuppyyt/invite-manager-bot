@@ -19,6 +19,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		args: any[],
+		flags: {},
 		{ guild, t, settings }: Context
 	): Promise<any> {
 		const ls = await this.repo.leaves

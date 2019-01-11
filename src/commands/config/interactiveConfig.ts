@@ -2,47 +2,17 @@ import { Emoji, Message, TextChannel } from 'eris';
 
 import { IMClient } from '../../client';
 import {
-	memberSettingsDescription,
-	settingsDescription
-} from '../../descriptions/settings';
-import { InviteCodeSettingsKey } from '../../models/InviteCodeSetting';
-import {
-	MemberSettingsKey,
-	memberSettingsTypes
-} from '../../models/MemberSetting';
-import {
 	Lang,
 	LeaderboardStyle,
 	RankAssignmentStyle,
-	SettingsKey,
-	settingsTypes
+	SettingsKey
 } from '../../models/Setting';
-import {
-	ArrayResolver,
-	BooleanResolver,
-	ChannelResolver,
-	NumberResolver,
-	RoleResolver,
-	StringResolver
-} from '../../resolvers';
+import { SettingsValueResolver } from '../../resolvers';
+import { beautify, fromDbValue, settingsInfo, toDbValue } from '../../settings';
 import { BotCommand, CommandGroup, Permissions } from '../../types';
 import { Command, Context } from '../Command';
 
-type ConfigMenu =
-	| { items: { [x: string]: ConfigMenu } }
-	| SettingsKey
-	| MemberSettingsKey
-	| InviteCodeSettingsKey;
-
-const allSettingsDescription = {
-	...settingsDescription,
-	...memberSettingsDescription
-};
-
-const allSettingsTypes = {
-	...settingsTypes,
-	...memberSettingsTypes
-};
+type ConfigMenu = { items: { [x: string]: ConfigMenu } } | SettingsKey;
 
 export default class extends Command {
 	public constructor(client: IMClient) {
@@ -73,9 +43,10 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		args: any[],
+		flags: {},
 		context: Context
 	): Promise<any> {
-		let embed = this.createEmbed({
+		const embed = this.createEmbed({
 			title: 'InviteManager',
 			description: 'Loading...'
 		});
@@ -90,8 +61,6 @@ export default class extends Command {
 
 		msg.addReaction(this.back);
 		msg.addReaction(this.cancel);
-
-		const t = context.t;
 
 		while (
 			(await this.showConfigMenu(context, message.author.id, msg, [], {
@@ -116,8 +85,24 @@ export default class extends Command {
 									deleteBotMessages: SettingsKey.autoModDeleteBotMessage,
 									deleteBotMessagesTimeout:
 										SettingsKey.autoModDeleteBotMessageTimeoutInSeconds,
+									mutedRole: SettingsKey.mutedRole
+								}
+							},
+							logging: {
+								items: {
+									logChannel: SettingsKey.modLogChannel,
 									autoLogEnabled: SettingsKey.autoModLogEnabled,
-									logChannel: SettingsKey.modLogChannel
+									deleteBotMessage: SettingsKey.autoModDeleteBotMessage,
+									deleteMessageTimeout:
+										SettingsKey.autoModDeleteBotMessageTimeoutInSeconds,
+									deleteBanMessages: SettingsKey.modPunishmentBanDeleteMessage,
+									deleteKickMessages:
+										SettingsKey.modPunishmentKickDeleteMessage,
+									deleteSoftBanMessages:
+										SettingsKey.modPunishmentSoftbanDeleteMessage,
+									deleteWarnMessages:
+										SettingsKey.modPunishmentWarnDeleteMessage,
+									deleteMuteMessages: SettingsKey.modPunishmentMuteDeleteMessage
 								}
 							},
 							invitesAndLinks: {
@@ -216,7 +201,7 @@ export default class extends Command {
 
 	private async showConfigMenu(
 		context: Context,
-		ownerId: string,
+		authorId: string,
 		msg: Message,
 		path: string[],
 		menu: ConfigMenu
@@ -226,39 +211,39 @@ export default class extends Command {
 		}
 
 		const t = context.t;
-		const embed = this.createEmbed();
 		const keys = Object.keys(menu.items);
 		const basePath = this.getTranslationKey(path);
 
-		let choice: number;
 		do {
-			embed.title =
+			const title =
 				'InviteManager - ' +
 				path.map(p => `${p} - `).join('') +
 				t(basePath + 'title');
 
-			embed.description = t('cmd.interactiveConfig.welcome') + '\n\n';
-			embed.fields = keys.map((key, i) => {
-				let val: any;
-				if (typeof menu.items[key] === 'string') {
-					const settingsKey = menu.items[key] as SettingsKey;
-					val = this.beautify(settingsKey, context.settings[settingsKey]);
-				} else {
-					val = t(basePath + key + '.description');
-				}
+			const choice = await this.showMenu(
+				context,
+				msg,
+				authorId,
+				title,
+				'',
+				keys.map((key, i) => {
+					let val: any;
+					if (typeof menu.items[key] === 'string') {
+						const settingsKey = menu.items[key] as SettingsKey;
+						val = beautify(settingsKey, context.settings[settingsKey]);
+					} else {
+						val = t(basePath + key + '.description');
+					}
 
-				if (val === null) {
-					val = t('cmd.interactiveConfig.none');
-				}
-				return {
-					name: `${i + 1}. ${t(basePath + key + '.title')}`,
-					value: `${val}`
-				};
-			});
-
-			await msg.edit({ embed });
-
-			choice = await this.awaitChoice(ownerId, msg);
+					if (val === null || val === '') {
+						val = t('cmd.interactiveConfig.none');
+					}
+					return {
+						title: t(basePath + key + '.title'),
+						description: val
+					};
+				})
+			);
 			if (choice === undefined) {
 				// Quit menu
 				return;
@@ -267,165 +252,236 @@ export default class extends Command {
 				// Move one menu up
 				return -1;
 			}
-			if (choice >= keys.length) {
-				// Restart this menu
-				choice = -1;
-				continue;
-			}
 
 			const subMenu = menu.items[keys[choice]];
 
 			if (typeof subMenu === 'string') {
 				const key = subMenu as SettingsKey;
-				const currentVal = context.settings[key];
-				let newVal = undefined;
-				if (settingsTypes[key] === 'Boolean') {
-					if (currentVal === true) {
-						newVal = false;
-					} else {
-						newVal = true;
-					}
-				} else {
-					newVal = await this.changeConfigSetting(
-						context,
-						ownerId,
-						msg,
-						key,
-						currentVal
-					);
-					if (newVal !== undefined) {
-						const err = this.validate(key, newVal, context);
-						if (err) {
-							embed.description = err;
-							await msg.edit({ embed });
-							newVal = undefined;
-						}
-					}
-				}
-				if (newVal !== undefined) {
+
+				if (settingsInfo[key].type === 'Boolean') {
 					await this.client.cache.settings.setOne(
 						context.guild.id,
 						key,
-						newVal
+						context.settings[key] ? false : true
 					);
+				} else {
+					const subChoice = await this.changeConfigSetting(
+						context,
+						authorId,
+						msg,
+						key
+					);
+					if (subChoice === undefined) {
+						// Quit menu
+						return;
+					}
 				}
-				choice = -1;
 			} else {
-				choice = await this.showConfigMenu(
+				const subChoice = await this.showConfigMenu(
 					context,
-					ownerId,
+					authorId,
 					msg,
 					path.concat([keys[choice]]),
 					subMenu
 				);
-				if (choice === undefined) {
+				if (subChoice === undefined) {
+					// Quit menu
 					return;
 				}
 			}
-		} while (choice === -1);
+		} while (true);
 	}
 
 	private async changeConfigSetting(
 		context: Context,
-		ownerId: string,
+		authorId: string,
 		msg: Message,
-		key: SettingsKey,
-		val: any
-	): Promise<string> {
-		return new Promise<string>(async resolve => {
-			const info = allSettingsDescription[key];
-			const type = allSettingsTypes[key];
+		key: SettingsKey
+	) {
+		const info = settingsInfo[key];
+		const isList = info.type.endsWith('[]');
 
-			const current = this.beautify(key, val);
-			const possible = info.possibleValues
-				? info.possibleValues.map(v => '`' + v + '`').join(', ')
-				: context.t(`cmd.interactiveConfig.values.${type.toLowerCase()}`);
+		const title = key;
+		const possible = info.possibleValues
+			? info.possibleValues.map(v => '`' + v + '`').join(', ')
+			: context.t(`cmd.interactiveConfig.values.${info.type.toLowerCase()}`);
+
+		let error = '';
+		do {
+			const val = context.settings[key];
+			const current = beautify(key, val);
+			const text = context.t('cmd.interactiveConfig.change', {
+				current,
+				possible
+			});
 
 			const description =
-				info.description +
-				'\n\n' +
-				context.t('cmd.interactiveConfig.change', {
-					current,
-					possible
+				context.t(`settings.${key}.description`) +
+				`\n\n${text}\n\n**${error}**`;
+
+			if (isList) {
+				const choice = await this.showMenu(
+					context,
+					msg,
+					authorId,
+					title,
+					description,
+					[
+						{
+							title: context.t('cmd.interactiveConfig.list.add.title'),
+							description: context.t('cmd.interactiveConfig.list.add.text')
+						},
+						{
+							title: context.t('cmd.interactiveConfig.list.remove.title'),
+							description: context.t('cmd.interactiveConfig.list.remove.text')
+						},
+						{
+							title: context.t('cmd.interactiveConfig.list.set.title'),
+							description: context.t('cmd.interactiveConfig.list.set.text')
+						},
+						{
+							title: context.t('cmd.interactiveConfig.list.clear.title'),
+							description: context.t('cmd.interactiveConfig.list.clear.text')
+						}
+					]
+				);
+				if (choice === undefined) {
+					// Quit menu
+					return;
+				}
+				if (choice === -1) {
+					// Move one menu up
+					return -1;
+				}
+
+				let newVal = undefined;
+				if (choice === 0) {
+					// Add item
+					const embed = this.createEmbed({
+						title,
+						description:
+							description + '**' + context.t('cmd.interactiveConfig.add') + '**'
+					});
+					await msg.edit({ embed });
+
+					const rawNewVal = await this.parseInput(context, authorId, msg, key);
+
+					if (typeof rawNewVal !== 'undefined') {
+						newVal = (val as string[])
+							.concat(rawNewVal)
+							.filter((v, i, list) => list.indexOf(v) === i);
+					} else {
+						newVal = val;
+					}
+				} else if (choice === 1) {
+					if ((val as string[]).length === 0) {
+						error = context.t('cmd.interactiveConfig.removeEmpty');
+						continue;
+					}
+
+					// Remove item
+					const embed = this.createEmbed({
+						title,
+						description:
+							description +
+							'**' +
+							context.t('cmd.interactiveConfig.remove') +
+							'**'
+					});
+					await msg.edit({ embed });
+
+					const rawNewVal = await this.parseInput(context, authorId, msg, key);
+
+					if (typeof rawNewVal !== 'undefined') {
+						newVal = (val as string[]).filter(v => rawNewVal.indexOf(v) === -1);
+					} else {
+						newVal = val;
+					}
+				} else if (choice === 2) {
+					// Set list
+					const embed = this.createEmbed({
+						title,
+						description:
+							description + '**' + context.t('cmd.interactiveConfig.set') + '**'
+					});
+					await msg.edit({ embed });
+
+					const rawNewVal = await this.parseInput(context, authorId, msg, key);
+
+					if (typeof rawNewVal !== 'undefined') {
+						newVal = rawNewVal;
+					} else {
+						newVal = val;
+					}
+				} else if (choice === 3) {
+					// Clear list
+					newVal = [];
+				}
+
+				if (typeof newVal !== 'undefined') {
+					const err = this.validate(key, newVal, context);
+					if (err) {
+						error = err;
+					} else {
+						error = '';
+						await this.client.cache.settings.setOne(
+							context.guild.id,
+							key,
+							newVal
+						);
+					}
+				}
+			} else {
+				// Change a non-list setting
+				const embed = this.createEmbed({
+					title,
+					description:
+						description + '**' + context.t('cmd.interactiveConfig.new') + '**'
 				});
+				await msg.edit({ embed });
 
-			const embed = this.createEmbed({
-				title: `${key}`,
-				description
-			});
-			await msg.edit({ embed });
+				let newVal = await this.parseInput(context, authorId, msg, key);
 
+				if (newVal !== undefined) {
+					const err = this.validate(key, newVal, context);
+					if (err) {
+						embed.description = err;
+						await msg.edit({ embed });
+						newVal = undefined;
+					}
+				}
+				await this.client.cache.settings.setOne(context.guild.id, key, newVal);
+				return;
+			}
+		} while (true);
+	}
+
+	private async parseInput(
+		context: Context,
+		authorId: string,
+		msg: Message,
+		key: SettingsKey
+	) {
+		const info = settingsInfo[key];
+
+		return new Promise<any>(async (resolve, reject) => {
 			let timeOut: NodeJS.Timer;
 
 			const func = async (userMsg: Message, emoji: Emoji, userId: string) => {
-				if (userMsg.author.id === ownerId) {
+				if (userMsg.author.id === authorId) {
 					const newRawVal = userMsg.content;
 
 					await userMsg.delete();
 
 					let newVal: any;
+
 					try {
-						switch (type) {
-							case 'Channel':
-								newVal = await new ChannelResolver(this.client).resolve(
-									newRawVal,
-									context
-								);
-								break;
-
-							case 'Channel[]':
-								newVal = await new ArrayResolver(
-									this.client,
-									ChannelResolver
-								).resolve(newRawVal, context, []);
-								break;
-
-							case 'Role':
-								newVal = await new RoleResolver(this.client).resolve(
-									newRawVal,
-									context
-								);
-								break;
-
-							case 'Role[]':
-								newVal = await new ArrayResolver(
-									this.client,
-									RoleResolver
-								).resolve(newRawVal, context, []);
-								break;
-
-							case 'Boolean':
-								newVal = await new BooleanResolver(this.client).resolve(
-									newRawVal,
-									context
-								);
-								break;
-
-							case 'Number':
-								newVal = await new NumberResolver(this.client).resolve(
-									newRawVal,
-									context
-								);
-								break;
-
-							case 'String':
-								newVal = newRawVal;
-								break;
-
-							case 'String[]':
-								newVal = await new ArrayResolver(
-									this.client,
-									StringResolver
-								).resolve(newRawVal, context, []);
-								break;
-
-							default:
-								break;
-						}
+						newVal = await new SettingsValueResolver(
+							this.client,
+							settingsInfo
+						).resolve(newRawVal, context, [key]);
 					} catch (err) {
-						newVal = undefined;
-						embed.description = description + '\n\n' + err.message;
-						await msg.edit({ embed });
+						reject(err.message);
 						return;
 					}
 
@@ -433,8 +489,8 @@ export default class extends Command {
 					this.client.removeListener('messageCreate', func);
 					this.client.removeListener('messageReactionAdd', func);
 
-					resolve(newVal);
-				} else if (emoji && userId === ownerId) {
+					resolve(fromDbValue(key, toDbValue(key, newVal)));
+				} else if (emoji && userId === authorId) {
 					clearTimeout(timeOut);
 					this.client.removeListener('messageCreate', func);
 					this.client.removeListener('messageReactionAdd', func);
@@ -457,6 +513,46 @@ export default class extends Command {
 
 			timeOut = setTimeout(timeOutFunc, 60000);
 		});
+	}
+
+	private async showMenu(
+		context: Context,
+		msg: Message,
+		authorId: string,
+		title: string,
+		description: string,
+		items: { title: string; description: string }[]
+	) {
+		const t = context.t;
+		const embed = this.createEmbed({
+			title,
+			description: t('cmd.interactiveConfig.welcome') + '\n\n' + description,
+			fields: items.map((item, i) => ({
+				name: `${i + 1}. ${item.title}`,
+				value: `${item.description}`
+			}))
+		});
+
+		do {
+			await msg.edit({ embed });
+
+			const choice = await this.awaitChoice(authorId, msg);
+			if (choice === undefined) {
+				// Quit menu
+				return;
+			}
+			if (choice === -1) {
+				// Move one menu up
+				return -1;
+			}
+			if (choice >= items.length) {
+				// Restart this menu
+				continue;
+			}
+
+			// Return the choice the user picked
+			return choice;
+		} while (true);
 	}
 
 	private async awaitChoice(authorId: string, msg: Message): Promise<number> {
@@ -509,9 +605,9 @@ export default class extends Command {
 			return null;
 		}
 
-		const type = settingsTypes[key];
+		const info = settingsInfo[key];
 
-		if (type === 'Channel') {
+		if (info.type === 'Channel') {
 			const channel = value as TextChannel;
 			if (!channel.permissionsOf(me.id).has(Permissions.READ_MESSAGES)) {
 				return t('cmd.config.channel.canNotReadMessages');
@@ -549,30 +645,5 @@ export default class extends Command {
 		}
 
 		return null;
-	}
-
-	private beautify(key: SettingsKey, value: any) {
-		if (typeof value === typeof undefined || value === null) {
-			return null;
-		}
-
-		const type = settingsTypes[key];
-		if (type === 'Channel') {
-			return `<#${value}>`;
-		} else if (type === 'Boolean') {
-			return value ? 'True' : 'False';
-		} else if (type === 'Role') {
-			return `<@&${value}>`;
-		} else if (type === 'Role[]') {
-			return value.map((v: any) => `<@&${v}>`).join(' ');
-		} else if (type === 'Channel[]') {
-			return value.map((v: any) => `<#${v}>`).join(' ');
-		} else if (type === 'String[]') {
-			return value.map((v: any) => '`' + v + '`').join(', ');
-		}
-		if (typeof value === 'string' && value.length > 1000) {
-			return value.substr(0, 1000) + '...';
-		}
-		return value;
 	}
 }

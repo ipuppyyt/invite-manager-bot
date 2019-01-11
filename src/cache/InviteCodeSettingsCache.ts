@@ -1,42 +1,38 @@
+import { Invite } from 'eris';
 import { getRepository, In, Repository } from 'typeorm';
 
 import { IMClient } from '../client';
 import {
-	defaultInviteCodeSettings,
 	InviteCodeSetting,
-	InviteCodeSettingsKey,
-	InviteCodeSettingsObject
+	InviteCodeSettingsKey
 } from '../models/InviteCodeSetting';
-import { fromDbValue, toDbValue } from '../settings';
+import {
+	fromDbValue,
+	inviteCodeDefaultSettings,
+	InviteCodeSettingsObject,
+	toDbValue
+} from '../settings';
 
-import { Cache } from './Cache';
+import { GuildCache } from './GuildCache';
 
-export class InviteCodeSettingsCache extends Cache<InviteCodeSettingsObject> {
-	private inviteSettingsRepo: Repository<InviteCodeSetting>;
-
-	private guildToCodeMap: Map<string, Set<string>> = new Map();
-	private codeToGuildMap: Map<string, string> = new Map();
+export class InviteCodeSettingsCache extends GuildCache<
+	Map<string, InviteCodeSettingsObject>
+> {
+	private settingsRepo: Repository<InviteCodeSetting>;
 
 	public constructor(client: IMClient) {
 		super(client);
 
-		this.inviteSettingsRepo = getRepository(InviteCodeSetting);
+		this.settingsRepo = getRepository(InviteCodeSetting);
 	}
 
-	public async init() {
-		const it = this.client.guilds.keys();
+	public initOne(guilId: string) {
+		return new Map();
+	}
 
-		const guildIds: string[] = [];
-		let result = it.next();
-
-		while (!result.done) {
-			const guildId = result.value as string;
-			guildIds.push(guildId);
-			this.guildToCodeMap.set(guildId, new Set());
-			result = it.next();
-		}
-
-		const sets = await this.inviteSettingsRepo.find({
+	public async getAll(guildIds: string[]) {
+		// Load all settings from DB
+		const sets = await this.settingsRepo.find({
 			where: { guildId: In(guildIds) }
 		});
 
@@ -44,72 +40,74 @@ export class InviteCodeSettingsCache extends Cache<InviteCodeSettingsObject> {
 			if (set.value === null) {
 				return;
 			}
-			this.guildToCodeMap.get(set.guildId).add(set.inviteCode);
-			this.codeToGuildMap.set(set.inviteCode, set.guildId);
 
-			let invCode = this.cache.get(set.inviteCode);
-			if (!invCode) {
-				invCode = {
-					name: null,
-					roles: []
-				};
-				this.cache.set(set.inviteCode, invCode);
+			const guildSets = this.cache.get(set.guildId);
+			let invSets = guildSets.get(set.inviteCode);
+			if (!invSets) {
+				invSets = { ...inviteCodeDefaultSettings };
+				guildSets.set(set.inviteCode, invSets);
 			}
-			invCode[set.key] = fromDbValue(set.key, set.value);
+			invSets[set.key] = fromDbValue(set.key, set.value);
 		});
 	}
 
-	protected async getOne(
-		inviteCode: string
-	): Promise<InviteCodeSettingsObject> {
-		const sets = await this.inviteSettingsRepo.find({
-			where: { inviteCode }
+	protected async _get(
+		guildId: string
+	): Promise<Map<string, InviteCodeSettingsObject>> {
+		const sets = await this.settingsRepo.find({ where: { guildId } });
+
+		const map = new Map();
+		sets.forEach(set => {
+			if (set.value === null) {
+				return;
+			}
+
+			let invSets = map.get(set.inviteCode);
+			if (!invSets) {
+				invSets = { ...inviteCodeDefaultSettings };
+				map.set(set.inviteCode, invSets);
+			}
+			invSets[set.key] = fromDbValue(set.key, set.value);
 		});
 
-		const obj: InviteCodeSettingsObject = { ...defaultInviteCodeSettings };
-		sets.forEach(set => (obj[set.key] = fromDbValue(set.key, set.value)));
-
-		return obj;
+		return map;
 	}
 
-	public async getByGuild(guildId: string) {
-		const allCodes: Map<string, InviteCodeSettingsObject> = new Map();
-		await Promise.all(
-			[...this.guildToCodeMap.get(guildId)].map(code => {
-				return new Promise<void>(resolve => {
-					this.get(code).then(set => {
-						allCodes.set(code, set);
-						resolve();
-					});
-				});
-			})
-		);
-		return allCodes;
+	public async getOne(guildId: string, invCode: string) {
+		const guildSets = await this.get(guildId);
+		const set = guildSets.get(invCode);
+		return set ? set : { ...inviteCodeDefaultSettings };
 	}
 
 	public async setOne<K extends InviteCodeSettingsKey>(
-		inviteCode: string,
+		invite: Invite,
 		key: K,
 		value: InviteCodeSettingsObject[K]
 	) {
-		const cfg = await this.get(inviteCode);
+		const guildSet = await this.get(invite.guild.id);
 		const dbVal = toDbValue(key, value);
 		const val = fromDbValue(key, dbVal);
 
+		let set = guildSet.get(invite.code);
+		if (!set) {
+			set = { ...inviteCodeDefaultSettings };
+		}
+
 		// Check if the value changed
-		if (cfg[key] !== val) {
-			// TODO: Use 'ON DUPLICATE KEY UPDATE' statement
-			this.inviteSettingsRepo.save([
+		if (set[key] !== val) {
+			// Save into DB
+			// TODO: Use 'UPDATE ON DUPLICATE' query
+			this.settingsRepo.save([
 				{
-					inviteCode,
-					guildId: this.codeToGuildMap.get(inviteCode),
+					guildId: invite.guild.id,
+					inviteCode: invite.code,
 					key,
 					value: dbVal
 				}
 			]);
 
-			cfg[key] = val;
-			this.cache.set(inviteCode, cfg);
+			set[key] = val;
+			guildSet.set(invite.code, set);
 		}
 
 		return val;

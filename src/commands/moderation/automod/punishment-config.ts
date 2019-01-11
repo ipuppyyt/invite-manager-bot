@@ -43,6 +43,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[punishment, strikes, args]: [PunishmentType, number, string],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -53,23 +54,22 @@ export default class extends Command {
 			title: t('cmd.punishmentConfig.title')
 		});
 
-		let punishmentQuery = {
+		const punishmentQuery = {
 			guildId: guild.id,
-			punishmentType: punishment
+			type: punishment
 		};
 		if (typeof punishment === typeof undefined) {
-			let allPunishments: PunishmentType[] = Object.values(PunishmentType);
-			let punishmentConfigList = await this.repo.punishConfigs.find({
-				where: { guildId: guild.id },
-				order: { amount: 'DESC' }
-			});
-			let unusedPunishment = allPunishments.filter(
-				p => punishmentConfigList.map(pcl => pcl.punishmentType).indexOf(p) < 0
+			const allPunishments: PunishmentType[] = Object.values(PunishmentType);
+			const punishmentConfigList = await this.client.cache.punishments.get(
+				guild.id
+			);
+			const unusedPunishment = allPunishments.filter(
+				p => punishmentConfigList.map(pcl => pcl.type).indexOf(p) < 0
 			);
 			embed.description = punishmentConfigList
 				.map(pcl =>
 					t('cmd.punishmentConfig.text', {
-						punishment: `**${pcl.punishmentType}**`,
+						punishment: `**${pcl.type}**`,
 						strikes: `**${pcl.amount}**`
 					})
 				)
@@ -83,8 +83,8 @@ export default class extends Command {
 				where: punishmentQuery
 			});
 			embed.description = t('cmd.punishmentConfig.text', {
-				punishment: `**${pc.punishmentType}**`,
-				strikes: `**${pc.amount}**`
+				punishment: `**${pc ? pc.type : punishment}**`,
+				strikes: `**${pc ? pc.amount : 0}**`
 			});
 		} else if (strikes === 0) {
 			await this.repo.punishConfigs.update(punishmentQuery, {

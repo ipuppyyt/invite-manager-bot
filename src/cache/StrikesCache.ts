@@ -28,9 +28,10 @@ export class StrikesCache extends GuildCache<StrikeConfig[]> {
 		});
 	}
 
-	protected async getOne(guildId: string): Promise<StrikeConfig[]> {
+	protected async _get(guildId: string): Promise<StrikeConfig[]> {
 		return await this.strikeConfigRepo.find({
-			where: { guildId }
+			where: { guildId },
+			order: { amount: 'DESC' }
 		});
 	}
 }

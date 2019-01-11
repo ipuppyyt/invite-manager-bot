@@ -15,7 +15,7 @@ import { InviteCodeSetting } from './InviteCodeSetting';
 import { Join } from './Join';
 import { Log } from './Log';
 import { MemberSetting } from './MemberSetting';
-import { PremiumSubscription } from './PremiumSubscription';
+import { PremiumSubscriptionGuild } from './PremiumSubscriptionGuild';
 import { Punishment } from './Punishment';
 import { PunishmentConfig } from './PunishmentConfig';
 import { Rank } from './Rank';
@@ -48,6 +48,9 @@ export class Guild extends BaseEntity {
 	@Column()
 	public memberCount: number;
 
+	@Column()
+	public banReason: string;
+
 	@OneToMany(type => Channel, c => c.guild)
 	public channels: Channel[];
 
@@ -72,8 +75,8 @@ export class Guild extends BaseEntity {
 	@OneToMany(type => MemberSetting, m => m.guild)
 	public memberSettings: MemberSetting[];
 
-	@OneToMany(type => PremiumSubscription, p => p.guild)
-	public premiumSubscriptions: PremiumSubscription[];
+	@OneToMany(type => PremiumSubscriptionGuild, psg => psg.guild)
+	public premiumSubscriptionGuilds: PremiumSubscriptionGuild[];
 
 	@OneToMany(type => Punishment, p => p.guild)
 	public punishments: Punishment[];

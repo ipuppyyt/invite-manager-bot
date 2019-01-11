@@ -230,34 +230,21 @@ export class InvitesService {
 		});
 
 		if (to) {
-			const oldCodeInvs = await inviteCodes.findAll({
-				attributes: [
-					'inviterId',
-					[
-						sequelize.literal(
-							'SUM(inviteCode.uses) - MAX((SELECT COUNT(joins.id) FROM joins WHERE ' +
-								`exactMatchCode = code AND deletedAt IS NULL AND ` +
-								`createdAt >= '${to.utc().format('YYYY/MM/DD HH:mm:ss')}'))`
-						),
-						'totalJoins'
-					]
-				],
-				where: {
-					guildId
-				},
-				group: 'inviteCode.inviterId',
-				include: [
-					{
-						attributes: ['name'],
-						model: members,
-						as: 'inviter',
-						required: true
-					}
-				],
-				order: [sequelize.literal('totalJoins DESC'), 'inviterId'],
-				limit,
-				raw: true
-			});
+			const oldCodeInvs = await this.invs
+				.createQueryBuilder('inv')
+				.leftJoinAndSelect('inv.inviter', 'inviter')
+				.addSelect(
+					'SUM(inv.uses) - MAX((SELECT COUNT(joins.id) FROM joins WHERE ' +
+						`exactMatchCode = code AND deletedAt IS NULL AND ` +
+						`createdAt >= '${to.utc().format('YYYY/MM/DD HH:mm:ss')}'))`,
+					'totalJoins'
+				)
+				.where('inv.guildId = :guildId', { guildId })
+				.groupBy('inv.inviterId')
+				.orderBy('totalJoins DESC')
+				.addOrderBy('inv.inviterId')
+				.getRawMany();
+
 			const oldCustomInvs = await customInvites.findAll({
 				attributes: attrs,
 				where: {
@@ -276,7 +263,7 @@ export class InvitesService {
 				raw: true
 			});
 
-			oldCodeInvs.forEach((inv: any) => {
+			oldCodeInvs.forEach(inv => {
 				const id = inv.inviterId;
 				if (invs[id]) {
 					invs[id].oldTotal = parseInt(inv.totalJoins, 10);

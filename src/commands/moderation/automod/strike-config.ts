@@ -30,6 +30,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[violation, strikes]: [ViolationType, number],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -40,24 +41,21 @@ export default class extends Command {
 			title: t('cmd.strikeConfig.title')
 		});
 
-		let violationQuery = {
+		const violationQuery = {
 			guildId: guild.id,
-			violationType: violation
+			type: violation
 		};
 
 		if (typeof violation === typeof undefined) {
-			let allViolations: ViolationType[] = Object.values(ViolationType);
-			let strikeConfigList = await this.repo.strikeConfigs.find({
-				where: { guildId: guild.id },
-				order: { amount: 'DESC' }
-			});
-			let unusedViolations = allViolations.filter(
-				v => strikeConfigList.map(scl => scl.violationType).indexOf(v) < 0
+			const allViolations: ViolationType[] = Object.values(ViolationType);
+			const strikeConfigList = await this.client.cache.strikes.get(guild.id);
+			const unusedViolations = allViolations.filter(
+				v => strikeConfigList.map(scl => scl.type).indexOf(v) < 0
 			);
 			embed.description = strikeConfigList
 				.map(scl =>
 					t('cmd.strikeConfig.text', {
-						violation: `**${scl.violationType}**`,
+						violation: `**${scl.type}**`,
 						strikes: `**${scl.amount}**`
 					})
 				)
@@ -67,12 +65,12 @@ export default class extends Command {
 				value: `\n${unusedViolations.map(v => `\`${v}\``).join(', ')}`
 			});
 		} else if (typeof strikes === typeof undefined) {
-			let strike = await this.repo.strikeConfigs.findOne({
+			const strike = await this.repo.strikeConfigs.findOne({
 				where: violationQuery
 			});
 			embed.description = t('cmd.strikeConfig.text', {
-				violation: `**${strike.violationType}**`,
-				strikes: `**${strike.amount}**`
+				violation: `**${strike ? strike.type : violation}**`,
+				strikes: `**${strike ? strike.amount : 0}**`
 			});
 		} else if (strikes === 0) {
 			await this.repo.strikeConfigs.update(violationQuery, {

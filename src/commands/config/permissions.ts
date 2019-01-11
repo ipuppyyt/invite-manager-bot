@@ -31,6 +31,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[rawCmd, role]: [Command, Role],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		if (!rawCmd) {
@@ -71,6 +72,10 @@ export default class extends Command {
 			});
 
 			Object.keys(rs).forEach(r => {
+				if (rs[r].length <= 0) {
+					return;
+				}
+
 				embed.fields.push({
 					name: r,
 					value: rs[r].map(c => `\`${c}\``).join(', ')

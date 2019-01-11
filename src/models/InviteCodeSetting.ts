@@ -8,8 +8,6 @@ import {
 	UpdateDateColumn
 } from 'typeorm';
 
-import { InternalSettingsTypes } from '../types';
-
 import { Guild } from './Guild';
 import { InviteCode } from './InviteCode';
 
@@ -17,25 +15,6 @@ export enum InviteCodeSettingsKey {
 	name = 'name',
 	roles = 'roles'
 }
-
-export type InviteCodeSettingsObject = {
-	name: string;
-	roles: string[];
-};
-
-export type InviteCodeSettingsTypesObject = {
-	[k in InviteCodeSettingsKey]: InternalSettingsTypes
-};
-
-export const inviteCodeSettingsTypes: InviteCodeSettingsTypesObject = {
-	name: 'String',
-	roles: 'Role[]'
-};
-
-export const defaultInviteCodeSettings: InviteCodeSettingsObject = {
-	name: null,
-	roles: null
-};
 
 @Entity()
 export class InviteCodeSetting extends BaseEntity {

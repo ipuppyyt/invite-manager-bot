@@ -1,21 +1,25 @@
 import { Message } from 'eris';
-import moment from 'moment';
 
 import { IMClient } from '../../../client';
-import { NumberResolver } from '../../../resolvers';
+import { NumberResolver, StringResolver } from '../../../resolvers';
 import { CommandGroup, ModerationCommand } from '../../../types';
 import { Command, Context } from '../../Command';
 
 export default class extends Command {
 	public constructor(client: IMClient) {
 		super(client, {
-			name: ModerationCommand.caseView,
-			aliases: ['case-view', 'viewCase', 'view-case'],
+			name: ModerationCommand.caseDelete,
+			aliases: ['case-delete', 'deleteCase', 'delete-case'],
 			args: [
 				{
 					name: 'caseNumber',
 					resolver: NumberResolver,
 					required: true
+				},
+				{
+					name: 'reason',
+					resolver: StringResolver,
+					rest: true
 				}
 			],
 			group: CommandGroup.Moderation,
@@ -26,7 +30,8 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[caseNumber]: [number],
-		{ guild, settings, t }: Context
+		flags: {},
+		{ guild, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
 			return;
@@ -36,7 +41,7 @@ export default class extends Command {
 			title: `Case: ${caseNumber}`
 		});
 
-		let strike = await this.repo.strikes.findOne({
+		const strike = await this.repo.strikes.findOne({
 			where: {
 				id: caseNumber,
 				guildId: guild.id
@@ -44,16 +49,12 @@ export default class extends Command {
 		});
 
 		if (strike) {
-			embed.description = t('cmd.check.strikes.entry', {
-				id: `${strike.id}`,
-				amount: `**${strike.amount}**`,
-				violation: `**${strike.violationType}**`,
-				date: moment(strike.createdAt)
-					.locale(settings.lang)
-					.fromNow()
+			await this.repo.strikes.delete(strike);
+			embed.description = t('cmd.caseDelete.done', {
+				id: `${strike.id}`
 			});
 		} else {
-			embed.description = `Could not find a case`;
+			embed.description = t('cmd.caseDelete.notFound');
 		}
 
 		this.sendReply(message, embed);

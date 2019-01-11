@@ -31,6 +31,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[type]: [ExportType],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		const embed = this.createEmbed({

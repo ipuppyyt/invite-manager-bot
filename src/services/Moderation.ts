@@ -1,22 +1,23 @@
 import { Embed, Guild, Member, Message, TextChannel, User } from 'eris';
+import i18n from 'i18n';
 import moment from 'moment';
 import { getRepository, Repository } from 'typeorm';
 
 import { IMClient } from '../client';
 import { Punishment } from '../models/Punishment';
-import { SettingsObject } from '../models/Setting';
 import { Strike } from '../models/Strike';
+import { SettingsObject } from '../settings';
 import { PunishmentType, ViolationType } from '../types';
 import { to } from '../util';
 
 interface Arguments {
-	settings: SettingsObject;
 	guild: Guild;
+	settings: SettingsObject;
 }
 
 interface PunishmentDetails {
 	reason?: string;
-	strikeAmount?: number;
+	amount?: number;
 }
 
 interface MiniMessage {
@@ -26,6 +27,9 @@ interface MiniMessage {
 	roleMentions: number;
 }
 
+export const NAME_DEHOIST_PREFIX = '▼';
+export const NAME_HOIST_REGEX = new RegExp(`^[^\\w${NAME_DEHOIST_PREFIX}]+`);
+
 export class Moderation {
 	private client: IMClient;
 	private strikesRepo: Repository<Strike>;
@@ -33,7 +37,7 @@ export class Moderation {
 
 	private messageCache: Map<string, MiniMessage[]>;
 
-	private strikeConfigFunctions: {
+	private strikeFunctions: {
 		[key in ViolationType]: (
 			message: Message,
 			args: Arguments
@@ -41,8 +45,7 @@ export class Moderation {
 	};
 	private punishmentFunctions: {
 		[key in PunishmentType]: (
-			message: Message,
-			guild: Guild,
+			member: Member,
 			amount: number,
 			args: Arguments
 		) => Promise<boolean>
@@ -55,7 +58,7 @@ export class Moderation {
 
 		this.messageCache = new Map();
 
-		this.strikeConfigFunctions = {
+		this.strikeFunctions = {
 			[ViolationType.invites]: this.invites.bind(this),
 			[ViolationType.links]: this.links.bind(this),
 			[ViolationType.words]: this.words.bind(this),
@@ -64,7 +67,8 @@ export class Moderation {
 			[ViolationType.quickMessages]: this.quickMessages.bind(this),
 			[ViolationType.mentionUsers]: this.mentionUsers.bind(this),
 			[ViolationType.mentionRoles]: this.mentionRoles.bind(this),
-			[ViolationType.emojis]: this.emojis.bind(this)
+			[ViolationType.emojis]: this.emojis.bind(this),
+			[ViolationType.hoist]: null
 		};
 
 		this.punishmentFunctions = {
@@ -75,7 +79,7 @@ export class Moderation {
 			[PunishmentType.mute]: this.mute.bind(this)
 		};
 
-		const func = () => {
+		const scanMessageCache = () => {
 			const now = moment();
 			this.messageCache.forEach((value, key) => {
 				this.messageCache.set(
@@ -84,9 +88,78 @@ export class Moderation {
 				);
 			});
 		};
-		setInterval(func, 60 * 1000);
+		setInterval(scanMessageCache, 60 * 1000);
 
 		client.on('messageCreate', this.onMessage.bind(this));
+		client.on('guildMemberUpdate', this.onGuildMemberUpdate.bind(this));
+	}
+
+	private async onGuildMemberUpdate(guild: Guild, member: Member) {
+		// Ignore when pro bot is active
+		if (this.client.disabledGuilds.has(guild.id)) {
+			return;
+		}
+
+		// Ignore bots
+		if (member.bot) {
+			return;
+		}
+
+		const settings = await this.client.cache.settings.get(guild.id);
+
+		// Ignore if automod is disabled
+		if (!settings.autoModEnabled) {
+			return;
+		}
+
+		// Ignore if hoist rule is disabled
+		if (!settings.autoModHoistEnabled) {
+			return;
+		}
+
+		// If moderated roles are set then only moderate those roles
+		if (
+			settings.autoModModeratedRoles &&
+			settings.autoModModeratedRoles.length > 0
+		) {
+			if (
+				!settings.autoModModeratedRoles.some(r => member.roles.indexOf(r) >= 0)
+			) {
+				return;
+			}
+		}
+
+		// Don't moderate ignored roles
+		if (
+			settings.autoModIgnoredRoles &&
+			settings.autoModIgnoredRoles.some(ir => member.roles.indexOf(ir) >= 0)
+		) {
+			return;
+		}
+
+		const type = ViolationType.hoist;
+		const strikesCache = await this.client.cache.strikes.get(guild.id);
+		const strike = strikesCache.find(s => s.type === type);
+		const amount = strike ? strike.amount : 0;
+
+		const name = member.nick ? member.nick : member.username;
+
+		if (!NAME_HOIST_REGEX.test(name)) {
+			return;
+		}
+
+		const newName = '▼ ' + name;
+		member.edit({ nick: newName }, 'Auto dehoist');
+
+		this.logViolationModAction(guild, member.user, type, amount, [
+			{ name: 'New name', value: newName },
+			{ name: 'Previous name', value: name }
+		]);
+
+		this.addStrikesAndPunish(member, strike.type, strike.amount, {
+			guild,
+			settings
+		});
 	}
 
 	private async onMessage(message: Message) {
@@ -102,6 +175,11 @@ export class Moderation {
 			return;
 		}
 
+		// Ignore when pro bot is active
+		if (this.client.disabledGuilds.has(guild.id)) {
+			return;
+		}
+
 		// TODO Enable for all guilds when ready
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
 			return;
@@ -109,6 +187,7 @@ export class Moderation {
 
 		const settings = await this.client.cache.settings.get(guild.id);
 
+		// Ignore if automod is disabled
 		if (!settings.autoModEnabled) {
 			return;
 		}
@@ -122,7 +201,9 @@ export class Moderation {
 		if (member.permission.has(Permissions.ADMINISTRATOR)) {
 			return;
 		}
-*/
+		*/
+
+		// If moderated roles are set then only moderate those roles
 		if (
 			settings.autoModModeratedRoles &&
 			settings.autoModModeratedRoles.length > 0
@@ -134,6 +215,15 @@ export class Moderation {
 			}
 		}
 
+		// Don't moderate ignored roles
+		if (
+			settings.autoModIgnoredRoles &&
+			settings.autoModIgnoredRoles.some(ir => member.roles.indexOf(ir) >= 0)
+		) {
+			return;
+		}
+
+		// If moderated channels are set only moderate those channels
 		if (
 			settings.autoModModeratedChannels &&
 			settings.autoModModeratedChannels.length > 0
@@ -145,6 +235,7 @@ export class Moderation {
 			}
 		}
 
+		// Don't moderate ignored channels
 		if (
 			settings.autoModIgnoredChannels &&
 			settings.autoModIgnoredChannels.indexOf(message.channel.id) >= 0
@@ -152,16 +243,9 @@ export class Moderation {
 			return;
 		}
 
-		if (
-			settings.autoModIgnoredRoles &&
-			settings.autoModIgnoredRoles.some(ir => member.roles.indexOf(ir) >= 0)
-		) {
-			return;
-		}
-
+		// Check if member is "oldMember"
 		if (settings.autoModDisabledForOldMembers) {
-			// Check if member is "oldMember"
-			let memberAge = moment().diff(member.joinedAt, 'second');
+			const memberAge = moment().diff(member.joinedAt, 'second');
 			if (memberAge > settings.autoModDisabledForOldMembersThreshold) {
 				// This is an old member
 				return;
@@ -169,7 +253,7 @@ export class Moderation {
 		}
 
 		const cacheKey = `${guild.id}-${message.author.id}`;
-		let msgs = this.messageCache.get(cacheKey);
+		const msgs = this.messageCache.get(cacheKey);
 		if (msgs) {
 			msgs.push(this.getMiniMessage(message));
 			this.messageCache.set(cacheKey, msgs);
@@ -177,112 +261,119 @@ export class Moderation {
 			this.messageCache.set(cacheKey, [this.getMiniMessage(message)]);
 		}
 
-		let strikesCache = await this.client.cache.strikes.get(guild.id);
+		const strikesCache = await this.client.cache.strikes.get(guild.id);
 		let allViolations: ViolationType[] = Object.values(ViolationType);
 
-		for (let strike of strikesCache) {
-			allViolations = allViolations.filter(av => av !== strike.violationType);
-			let foundViolation = await this.strikeConfigFunctions[
-				strike.violationType
-			](message, {
-				settings: settings,
-				guild: guild
-			});
+		for (const strike of strikesCache) {
+			allViolations = allViolations.filter(av => av !== strike.type);
+
+			const func = this.strikeFunctions[strike.type];
+			if (!func) {
+				continue;
+			}
+
+			const foundViolation = await func(message, { guild, settings });
 			if (!foundViolation) {
 				continue;
 			}
+
 			message.delete();
 
 			this.logViolationModAction(
 				guild,
-				channel,
-				message,
-				strike.violationType,
-				strike.amount
+				message.author,
+				strike.type,
+				strike.amount,
+				[
+					{ name: 'Channel', value: channel.name },
+					{ name: 'Message', value: message.content }
+				]
 			);
 
 			const embed = this.createPunishmentEmbed('AutoModerator');
-			embed.description = `Message by <@${
-				message.author.id
-			}> was removed because it violated the \`${
-				strike.violationType
-			}\` rule.\n`;
+			const usr = `<@${message.author.id}>`;
+			const viol = `\`${strike.type}\``;
+			embed.description = `Message by ${usr} was removed because it violated the ${viol} rule.\n`;
 			embed.description += `\n\nUser got ${strike.amount} strikes.`;
 
-			this.sendAndDelete(message, embed, settings);
-			this.addStrikesAndCheckIfPunishable(
-				message,
-				strike.amount,
-				strike.violationType,
-				{ settings: settings, guild: guild }
-			);
+			this.sendReplyAndDelete(message, embed, settings);
+			this.addStrikesAndPunish(member, strike.type, strike.amount, {
+				guild,
+				settings
+			});
 			return;
 		}
 
-		for (let violation of allViolations) {
-			let foundViolation = await this.strikeConfigFunctions[violation](
-				message,
-				{
-					settings: settings,
-					guild: guild
-				}
-			);
+		for (const violation of allViolations) {
+			const func = this.strikeFunctions[violation];
+			if (!func) {
+				continue;
+			}
+
+			const foundViolation = await func(message, { guild, settings });
 			if (!foundViolation) {
 				continue;
 			}
+
 			message.delete();
 
-			this.logViolationModAction(guild, channel, message, violation);
+			this.logViolationModAction(guild, message.author, violation, 0, [
+				{ name: 'Channel', value: channel.name },
+				{ name: 'Message', value: message.content }
+			]);
 
 			const embed = this.createPunishmentEmbed('AutoModerator');
-			embed.description = `Message by <@${
-				message.author.id
-			}> was removed because it violated the \`${violation}\` rule.\n`;
-			this.sendAndDelete(message, embed, settings);
+			const usr = `<@${message.author.id}>`;
+			embed.description = `Message by ${usr} was removed because it violated the \`${violation}\` rule.\n`;
+
+			this.sendReplyAndDelete(message, embed, settings);
 			return;
 		}
 	}
 
-	private logViolationModAction(
+	public logViolationModAction(
 		guild: Guild,
-		channel: TextChannel,
-		message: Message,
-		violationType: ViolationType,
-		amount?: number
+		user: User,
+		type: ViolationType,
+		amount: number,
+		extra?: { name: string; value: string }[]
 	) {
 		const logEmbed = this.createPunishmentEmbed('AutoModerator');
-		logEmbed.description = `**Channel** <#${channel.id}>\n`;
-		logEmbed.description += `**User**: ${message.author.username}#${
-			message.author.discriminator
-		} (ID: ${message.author.id})\n`;
-		logEmbed.description += `**Violation**: ${violationType}\n`;
-		if (amount) {
+		const usr = `${user.username}#${user.discriminator}`;
+		logEmbed.description += `**User**: ${usr} (ID: ${user.id})\n`;
+
+		logEmbed.description += `**Violation**: ${type}\n`;
+		if (amount > 0) {
 			logEmbed.description += `**Strikes given**: ${amount}\n`;
 		} else {
 			logEmbed.description += `No strikes given.\n`;
 		}
-		logEmbed.fields.push({
-			name: 'Message content',
-			value: message.content
-		});
+
+		if (extra) {
+			extra.forEach(e => logEmbed.fields.push(e));
+		}
 		this.client.logModAction(guild, logEmbed);
 	}
 
-	private logPunishmentModAction(
+	public logPunishmentModAction(
 		guild: Guild,
 		user: User,
+		type: PunishmentType,
 		amount: number,
-		punishmentType: PunishmentType
+		extra?: { name: string; value: string }[]
 	) {
 		const logEmbed = this.client.msg.createEmbed({
 			author: { name: 'AutoModerator' },
 			color: 16711680 // red
 		});
-		logEmbed.description = `**User**: ${user.username}#${
-			user.discriminator
-		} (ID: ${user.id})\n`;
+		const usr = `${user.username}#${user.discriminator}`;
+		logEmbed.description = `**User**: ${usr} (ID: ${user.id})\n`;
 		logEmbed.description += `**Strikes**: ${amount}\n`;
-		logEmbed.description += `**Punishment**: ${punishmentType}\n`;
+		logEmbed.description += `**Punishment**: ${type}\n`;
+
+		if (extra) {
+			extra.forEach(e => logEmbed.fields.push(e));
+		}
 		this.client.logModAction(guild, logEmbed);
 	}
 
@@ -295,55 +386,73 @@ export class Moderation {
 		};
 	}
 
-	private async addStrikesAndCheckIfPunishable(
-		message: Message,
+	public async addStrikesAndPunish(
+		member: Member,
+		type: ViolationType,
 		amount: number,
-		violationType: ViolationType,
 		args: Arguments
 	) {
+		await this.informAboutStrike(member, type, amount, args.settings);
+
 		const strikesBefore = (await this.strikesRepo
 			.createQueryBuilder('s')
 			.select('SUM(s.amount) AS total')
 			.where('guildId = :guildId', { guildId: args.guild.id })
-			.andWhere('memberId = :memberId', { memberId: message.author.id })
+			.andWhere('memberId = :memberId', { memberId: member.id })
 			.getRawOne()).total;
 
 		await this.strikesRepo.save({
 			guildId: args.guild.id,
-			memberId: message.author.id,
-			violationType: violationType,
-			amount: amount
+			memberId: member.id,
+			type,
+			amount
 		});
 
 		const strikesAfter = strikesBefore + amount;
 
-		const punishCfgs = await this.client.cache.punishments.get(args.guild.id);
-		const appliedCfg = punishCfgs
-			.filter(pc => pc.amount > strikesBefore && pc.amount <= strikesAfter)
-			.sort((a, b) => a.amount - b.amount)[0];
+		const punishmentConfig = (await this.client.cache.punishments.get(
+			args.guild.id
+		)).find(c => c.amount > strikesBefore && c.amount < strikesAfter);
 
-		if (appliedCfg) {
-			const punishmentResult = await this.punishmentFunctions[
-				appliedCfg.punishmentType
-			](message, args.guild, appliedCfg.amount, args);
-
-			if (punishmentResult) {
-				await this.punishRepo.save({
-					guildId: args.guild.id,
-					memberId: message.author.id,
-					punishmentType: appliedCfg.punishmentType,
-					amount: appliedCfg.amount,
-					args: appliedCfg.args,
-					reason: 'automod',
-					creatorId: null
-				});
-				this.logPunishmentModAction(
-					args.guild,
-					message.author,
-					amount,
-					appliedCfg.punishmentType
-				);
+		if (punishmentConfig) {
+			const func = this.punishmentFunctions[punishmentConfig.type];
+			if (!func) {
+				return;
 			}
+
+			// Inform beforehand because we might be kicking/banning the user
+			await this.informAboutPunishment(
+				member,
+				punishmentConfig.type,
+				args.settings,
+				{ amount }
+			);
+
+			const punishmentResult = await func(
+				member,
+				punishmentConfig.amount,
+				args
+			);
+			if (!punishmentResult) {
+				return;
+			}
+
+			await this.punishRepo.save({
+				guildId: args.guild.id,
+				memberId: member.id,
+				type: punishmentConfig.type,
+				amount: punishmentConfig.amount,
+				args: punishmentConfig.args,
+				reason: 'automod',
+				creatorId: null
+			});
+
+			this.logPunishmentModAction(
+				args.guild,
+				member.user,
+				punishmentConfig.type,
+				strikesAfter
+			);
 		}
 	}
 
@@ -359,10 +468,10 @@ export class Moderation {
 			return true;
 		}
 
-		let regex = new RegExp(
+		const regex = new RegExp(
 			/(https?:\/\/)?(www\.)?(discord\.(gg|io|me|li)|discordapp\.com\/invite)\/.+[a-zA-Z0-9]/
 		);
-		let matches = message.content.match(regex);
+		const matches = message.content.match(regex);
 		hasInviteLink = matches && matches.length > 0;
 		return hasInviteLink;
 	}
@@ -372,23 +481,23 @@ export class Moderation {
 			return false;
 		}
 
-		let matches = this.getLinks(message);
-		let hasLink = matches && matches.length > 0;
+		const matches = this.getLinks(message);
+		const hasLink = matches && matches.length > 0;
 		if (!hasLink) {
 			return false;
 		}
 
-		let whitelist = args.settings.autoModLinksWhitelist;
-		let blacklist = args.settings.autoModLinksBlacklist;
+		const whitelist = args.settings.autoModLinksWhitelist;
+		const blacklist = args.settings.autoModLinksBlacklist;
 
 		if (whitelist) {
 			// If both are enabled, it should also be this case
 			// All links will be rejected, except the ones on the whitelist
-			let links = whitelist.map(link => link.trim());
+			const links = whitelist.map(link => link.trim());
 			return matches.every(match => links.indexOf(match) > -1);
 		} else if (blacklist) {
 			// All links will be accepted, except the ones on the blacklist
-			let links = blacklist.map(link => link.trim());
+			const links = blacklist.map(link => link.trim());
 			return matches.some(match => links.indexOf(match) > -1);
 		} else {
 			// All links will be rejected
@@ -397,7 +506,7 @@ export class Moderation {
 	}
 
 	public getLinks(message: Message): RegExpMatchArray {
-		let regex = new RegExp(
+		const regex = new RegExp(
 			/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.\w{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g
 		);
 		return message.content.match(regex);
@@ -407,7 +516,7 @@ export class Moderation {
 		if (!args.settings.autoModWordsEnabled) {
 			return false;
 		}
-		let blacklist = args.settings.autoModWordsBlacklist;
+		const blacklist = args.settings.autoModWordsBlacklist;
 		if (!blacklist) {
 			return false;
 		}
@@ -415,10 +524,10 @@ export class Moderation {
 			return false;
 		}
 
-		let words = blacklist;
-		let content = message.content.toLowerCase();
+		const words = blacklist;
+		const content = message.content.toLowerCase();
 
-		let hasBlacklistedWords = words.some(word => content.includes(word));
+		const hasBlacklistedWords = words.some(word => content.includes(word));
 
 		return hasBlacklistedWords;
 	}
@@ -428,12 +537,12 @@ export class Moderation {
 			return false;
 		}
 
-		let minCharacters = Number(args.settings.autoModAllCapsMinCharacters);
+		const minCharacters = Number(args.settings.autoModAllCapsMinCharacters);
 		if (isNaN(minCharacters)) {
 			return false;
 		}
 
-		let percentageCaps = Number(args.settings.autoModAllCapsPercentageCaps);
+		const percentageCaps = Number(args.settings.autoModAllCapsPercentageCaps);
 		if (isNaN(percentageCaps)) {
 			return false;
 		}
@@ -442,7 +551,7 @@ export class Moderation {
 			return false;
 		}
 
-		let numUppercase =
+		const numUppercase =
 			message.content.length - message.content.replace(/[A-Z]/g, '').length;
 		return numUppercase / message.content.length > percentageCaps / 100;
 	}
@@ -455,7 +564,7 @@ export class Moderation {
 			return false;
 		}
 
-		let timeframe = args.settings.autoModDuplicateTextTimeframeInSeconds;
+		const timeframe = args.settings.autoModDuplicateTextTimeframeInSeconds;
 
 		let cachedMessages = this.messageCache.get(
 			`${args.guild.id}-${message.author.id}`
@@ -472,7 +581,7 @@ export class Moderation {
 				m =>
 					!(m.createdAt === message.createdAt && m.content === message.content)
 			);
-			let lastMessages = cachedMessages.map(m => m.content.toLowerCase());
+			const lastMessages = cachedMessages.map(m => m.content.toLowerCase());
 			return lastMessages.indexOf(message.content.toLowerCase()) >= 0;
 		}
 	}
@@ -485,8 +594,8 @@ export class Moderation {
 			return false;
 		}
 
-		let numberOfMessages = args.settings.autoModQuickMessagesNumberOfMessages;
-		let timeframe = args.settings.autoModQuickMessagesTimeframeInSeconds;
+		const numberOfMessages = args.settings.autoModQuickMessagesNumberOfMessages;
+		const timeframe = args.settings.autoModQuickMessagesTimeframeInSeconds;
 
 		let cachedMessages = this.messageCache.get(
 			`${args.guild.id}-${message.author.id}`
@@ -508,7 +617,7 @@ export class Moderation {
 		if (!args.settings.autoModMentionUsersEnabled) {
 			return false;
 		}
-		let maxMentions = Number(
+		const maxMentions = Number(
 			args.settings.autoModMentionUsersMaxNumberOfMentions
 		);
 		if (isNaN(maxMentions)) {
@@ -525,7 +634,7 @@ export class Moderation {
 		if (!args.settings.autoModMentionRolesEnabled) {
 			return false;
 		}
-		let maxMentions = Number(
+		const maxMentions = Number(
 			args.settings.autoModMentionRolesMaxNumberOfMentions
 		);
 		if (isNaN(maxMentions)) {
@@ -539,7 +648,7 @@ export class Moderation {
 		if (!args.settings.autoModEmojisEnabled) {
 			return false;
 		}
-		let maxEmojis = Number(args.settings.autoModEmojisMaxNumberOfEmojis);
+		const maxEmojis = Number(args.settings.autoModEmojisMaxNumberOfEmojis);
 		if (isNaN(maxEmojis)) {
 			return;
 		}
@@ -552,13 +661,13 @@ export class Moderation {
 
 		/* tslint:disable-next-line:max-line-length */
 		const regex = /\u{1F3F4}(?:\u{E0067}\u{E0062}(?:\u{E0065}\u{E006E}\u{E0067}|\u{E0077}\u{E006C}\u{E0073}|\u{E0073}\u{E0063}\u{E0074})\u{E007F}|\u200D\u2620\uFE0F)|\u{1F469}\u200D\u{1F469}\u200D(?:\u{1F466}\u200D\u{1F466}|\u{1F467}\u200D[\u{1F466}\u{1F467}])|\u{1F468}(?:\u200D(?:\u2764\uFE0F\u200D(?:\u{1F48B}\u200D)?\u{1F468}|[\u{1F468}\u{1F469}]\u200D(?:\u{1F466}\u200D\u{1F466}|\u{1F467}\u200D[\u{1F466}\u{1F467}])|\u{1F466}\u200D\u{1F466}|\u{1F467}\u200D[\u{1F466}\u{1F467}]|[\u{1F33E}\u{1F373}\u{1F393}\u{1F3A4}\u{1F3A8}\u{1F3EB}\u{1F3ED}\u{1F4BB}\u{1F4BC}\u{1F527}\u{1F52C}\u{1F680}\u{1F692}\u{1F9B0}-\u{1F9B3}])|[\u{1F3FB}-\u{1F3FF}]\u200D[\u{1F33E}\u{1F373}\u{1F393}\u{1F3A4}\u{1F3A8}\u{1F3EB}\u{1F3ED}\u{1F4BB}\u{1F4BC}\u{1F527}\u{1F52C}\u{1F680}\u{1F692}\u{1F9B0}-\u{1F9B3}])|\u{1F469}\u200D(?:\u2764\uFE0F\u200D(?:\u{1F48B}\u200D[\u{1F468}\u{1F469}]|[\u{1F468}\u{1F469}])|[\u{1F33E}\u{1F373}\u{1F393}\u{1F3A4}\u{1F3A8}\u{1F3EB}\u{1F3ED}\u{1F4BB}\u{1F4BC}\u{1F527}\u{1F52C}\u{1F680}\u{1F692}\u{1F9B0}-\u{1F9B3}])|\u{1F469}\u200D\u{1F466}\u200D\u{1F466}|(?:\u{1F441}\uFE0F\u200D\u{1F5E8}|\u{1F469}[\u{1F3FB}-\u{1F3FF}]\u200D[\u2695\u2696\u2708]|\u{1F468}(?:[\u{1F3FB}-\u{1F3FF}]\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:[\u26F9\u{1F3CB}\u{1F3CC}\u{1F575}]\uFE0F|[\u{1F46F}\u{1F93C}\u{1F9DE}\u{1F9DF}])\u200D[\u2640\u2642]|[\u26F9\u{1F3CB}\u{1F3CC}\u{1F575}][\u{1F3FB}-\u{1F3FF}]\u200D[\u2640\u2642]|[\u{1F3C3}\u{1F3C4}\u{1F3CA}\u{1F46E}\u{1F471}\u{1F473}\u{1F477}\u{1F481}\u{1F482}\u{1F486}\u{1F487}\u{1F645}-\u{1F647}\u{1F64B}\u{1F64D}\u{1F64E}\u{1F6A3}\u{1F6B4}-\u{1F6B6}\u{1F926}\u{1F937}-\u{1F939}\u{1F93D}\u{1F93E}\u{1F9B8}\u{1F9B9}\u{1F9D6}-\u{1F9DD}](?:[\u{1F3FB}-\u{1F3FF}]\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\u{1F469}\u200D[\u2695\u2696\u2708])\uFE0F|\u{1F469}\u200D\u{1F467}\u200D[\u{1F466}\u{1F467}]|\u{1F469}\u200D\u{1F469}\u200D[\u{1F466}\u{1F467}]|\u{1F468}(?:\u200D(?:[\u{1F468}\u{1F469}]\u200D[\u{1F466}\u{1F467}]|[\u{1F466}\u{1F467}])|[\u{1F3FB}-\u{1F3FF}])|\u{1F3F3}\uFE0F\u200D\u{1F308}|\u{1F469}\u200D\u{1F467}|\u{1F469}[\u{1F3FB}-\u{1F3FF}]\u200D[\u{1F33E}\u{1F373}\u{1F393}\u{1F3A4}\u{1F3A8}\u{1F3EB}\u{1F3ED}\u{1F4BB}\u{1F4BC}\u{1F527}\u{1F52C}\u{1F680}\u{1F692}\u{1F9B0}-\u{1F9B3}]|\u{1F469}\u200D\u{1F466}|\u{1F1F6}\u{1F1E6}|\u{1F1FD}\u{1F1F0}|\u{1F1F4}\u{1F1F2}|\u{1F469}[\u{1F3FB}-\u{1F3FF}]|\u{1F1ED}[\u{1F1F0}\u{1F1F2}\u{1F1F3}\u{1F1F7}\u{1F1F9}\u{1F1FA}]|\u{1F1EC}[\u{1F1E6}\u{1F1E7}\u{1F1E9}-\u{1F1EE}\u{1F1F1}-\u{1F1F3}\u{1F1F5}-\u{1F1FA}\u{1F1FC}\u{1F1FE}]|\u{1F1EA}[\u{1F1E6}\u{1F1E8}\u{1F1EA}\u{1F1EC}\u{1F1ED}\u{1F1F7}-\u{1F1FA}]|\u{1F1E8}[\u{1F1E6}\u{1F1E8}\u{1F1E9}\u{1F1EB}-\u{1F1EE}\u{1F1F0}-\u{1F1F5}\u{1F1F7}\u{1F1FA}-\u{1F1FF}]|\u{1F1F2}[\u{1F1E6}\u{1F1E8}-\u{1F1ED}\u{1F1F0}-\u{1F1FF}]|\u{1F1F3}[\u{1F1E6}\u{1F1E8}\u{1F1EA}-\u{1F1EC}\u{1F1EE}\u{1F1F1}\u{1F1F4}\u{1F1F5}\u{1F1F7}\u{1F1FA}\u{1F1FF}]|\u{1F1FC}[\u{1F1EB}\u{1F1F8}]|\u{1F1FA}[\u{1F1E6}\u{1F1EC}\u{1F1F2}\u{1F1F3}\u{1F1F8}\u{1F1FE}\u{1F1FF}]|\u{1F1F0}[\u{1F1EA}\u{1F1EC}-\u{1F1EE}\u{1F1F2}\u{1F1F3}\u{1F1F5}\u{1F1F7}\u{1F1FC}\u{1F1FE}\u{1F1FF}]|\u{1F1EF}[\u{1F1EA}\u{1F1F2}\u{1F1F4}\u{1F1F5}]|\u{1F1F8}[\u{1F1E6}-\u{1F1EA}\u{1F1EC}-\u{1F1F4}\u{1F1F7}-\u{1F1F9}\u{1F1FB}\u{1F1FD}-\u{1F1FF}]|\u{1F1EE}[\u{1F1E8}-\u{1F1EA}\u{1F1F1}-\u{1F1F4}\u{1F1F6}-\u{1F1F9}]|\u{1F1FF}[\u{1F1E6}\u{1F1F2}\u{1F1FC}]|\u{1F1EB}[\u{1F1EE}-\u{1F1F0}\u{1F1F2}\u{1F1F4}\u{1F1F7}]|\u{1F1F5}[\u{1F1E6}\u{1F1EA}-\u{1F1ED}\u{1F1F0}-\u{1F1F3}\u{1F1F7}-\u{1F1F9}\u{1F1FC}\u{1F1FE}]|\u{1F1E9}[\u{1F1EA}\u{1F1EC}\u{1F1EF}\u{1F1F0}\u{1F1F2}\u{1F1F4}\u{1F1FF}]|\u{1F1F9}[\u{1F1E6}\u{1F1E8}\u{1F1E9}\u{1F1EB}-\u{1F1ED}\u{1F1EF}-\u{1F1F4}\u{1F1F7}\u{1F1F9}\u{1F1FB}\u{1F1FC}\u{1F1FF}]|\u{1F1E7}[\u{1F1E6}\u{1F1E7}\u{1F1E9}-\u{1F1EF}\u{1F1F1}-\u{1F1F4}\u{1F1F6}-\u{1F1F9}\u{1F1FB}\u{1F1FC}\u{1F1FE}\u{1F1FF}]|[#\*0-9]\uFE0F\u20E3|\u{1F1F1}[\u{1F1E6}-\u{1F1E8}\u{1F1EE}\u{1F1F0}\u{1F1F7}-\u{1F1FB}\u{1F1FE}]|\u{1F1E6}[\u{1F1E8}-\u{1F1EC}\u{1F1EE}\u{1F1F1}\u{1F1F2}\u{1F1F4}\u{1F1F6}-\u{1F1FA}\u{1F1FC}\u{1F1FD}\u{1F1FF}]|\u{1F1F7}[\u{1F1EA}\u{1F1F4}\u{1F1F8}\u{1F1FA}\u{1F1FC}]|\u{1F1FB}[\u{1F1E6}\u{1F1E8}\u{1F1EA}\u{1F1EC}\u{1F1EE}\u{1F1F3}\u{1F1FA}]|\u{1F1FE}[\u{1F1EA}\u{1F1F9}]|[\u{1F3C3}\u{1F3C4}\u{1F3CA}\u{1F46E}\u{1F471}\u{1F473}\u{1F477}\u{1F481}\u{1F482}\u{1F486}\u{1F487}\u{1F645}-\u{1F647}\u{1F64B}\u{1F64D}\u{1F64E}\u{1F6A3}\u{1F6B4}-\u{1F6B6}\u{1F926}\u{1F937}-\u{1F939}\u{1F93D}\u{1F93E}\u{1F9B8}\u{1F9B9}\u{1F9D6}-\u{1F9DD}][\u{1F3FB}-\u{1F3FF}]|[\u26F9\u{1F3CB}\u{1F3CC}\u{1F575}][\u{1F3FB}-\u{1F3FF}]|[\u261D\u270A-\u270D\u{1F385}\u{1F3C2}\u{1F3C7}\u{1F442}\u{1F443}\u{1F446}-\u{1F450}\u{1F466}\u{1F467}\u{1F470}\u{1F472}\u{1F474}-\u{1F476}\u{1F478}\u{1F47C}\u{1F483}\u{1F485}\u{1F4AA}\u{1F574}\u{1F57A}\u{1F590}\u{1F595}\u{1F596}\u{1F64C}\u{1F64F}\u{1F6C0}\u{1F6CC}\u{1F918}-\u{1F91C}\u{1F91E}\u{1F91F}\u{1F930}-\u{1F936}\u{1F9B5}\u{1F9B6}\u{1F9D1}-\u{1F9D5}][\u{1F3FB}-\u{1F3FF}]|[\u261D\u26F9\u270A-\u270D\u{1F385}\u{1F3C2}-\u{1F3C4}\u{1F3C7}\u{1F3CA}-\u{1F3CC}\u{1F442}\u{1F443}\u{1F446}-\u{1F450}\u{1F466}-\u{1F469}\u{1F46E}\u{1F470}-\u{1F478}\u{1F47C}\u{1F481}-\u{1F483}\u{1F485}-\u{1F487}\u{1F4AA}\u{1F574}\u{1F575}\u{1F57A}\u{1F590}\u{1F595}\u{1F596}\u{1F645}-\u{1F647}\u{1F64B}-\u{1F64F}\u{1F6A3}\u{1F6B4}-\u{1F6B6}\u{1F6C0}\u{1F6CC}\u{1F918}-\u{1F91C}\u{1F91E}\u{1F91F}\u{1F926}\u{1F930}-\u{1F939}\u{1F93D}\u{1F93E}\u{1F9B5}\u{1F9B6}\u{1F9B8}\u{1F9B9}\u{1F9D1}-\u{1F9DD}][\u{1F3FB}-\u{1F3FF}]?|[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55\u{1F004}\u{1F0CF}\u{1F18E}\u{1F191}-\u{1F19A}\u{1F1E6}-\u{1F1FF}\u{1F201}\u{1F21A}\u{1F22F}\u{1F232}-\u{1F236}\u{1F238}-\u{1F23A}\u{1F250}\u{1F251}\u{1F300}-\u{1F320}\u{1F32D}-\u{1F335}\u{1F337}-\u{1F37C}\u{1F37E}-\u{1F393}\u{1F3A0}-\u{1F3CA}\u{1F3CF}-\u{1F3D3}\u{1F3E0}-\u{1F3F0}\u{1F3F4}\u{1F3F8}-\u{1F43E}\u{1F440}\u{1F442}-\u{1F4FC}\u{1F4FF}-\u{1F53D}\u{1F54B}-\u{1F54E}\u{1F550}-\u{1F567}\u{1F57A}\u{1F595}\u{1F596}\u{1F5A4}\u{1F5FB}-\u{1F64F}\u{1F680}-\u{1F6C5}\u{1F6CC}\u{1F6D0}-\u{1F6D2}\u{1F6EB}\u{1F6EC}\u{1F6F4}-\u{1F6F9}\u{1F910}-\u{1F93A}\u{1F93C}-\u{1F93E}\u{1F940}-\u{1F945}\u{1F947}-\u{1F970}\u{1F973}-\u{1F976}\u{1F97A}\u{1F97C}-\u{1F9A2}\u{1F9B0}-\u{1F9B9}\u{1F9C0}-\u{1F9C2}\u{1F9D0}-\u{1F9FF}]|[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299\u{1F004}\u{1F0CF}\u{1F170}\u{1F171}\u{1F17E}\u{1F17F}\u{1F18E}\u{1F191}-\u{1F19A}\u{1F1E6}-\u{1F1FF}\u{1F201}\u{1F202}\u{1F21A}\u{1F22F}\u{1F232}-\u{1F23A}\u{1F250}\u{1F251}\u{1F300}-\u{1F321}\u{1F324}-\u{1F393}\u{1F396}\u{1F397}\u{1F399}-\u{1F39B}\u{1F39E}-\u{1F3F0}\u{1F3F3}-\u{1F3F5}\u{1F3F7}-\u{1F4FD}\u{1F4FF}-\u{1F53D}\u{1F549}-\u{1F54E}\u{1F550}-\u{1F567}\u{1F56F}\u{1F570}\u{1F573}-\u{1F57A}\u{1F587}\u{1F58A}-\u{1F58D}\u{1F590}\u{1F595}\u{1F596}\u{1F5A4}\u{1F5A5}\u{1F5A8}\u{1F5B1}\u{1F5B2}\u{1F5BC}\u{1F5C2}-\u{1F5C4}\u{1F5D1}-\u{1F5D3}\u{1F5DC}-\u{1F5DE}\u{1F5E1}\u{1F5E3}\u{1F5E8}\u{1F5EF}\u{1F5F3}\u{1F5FA}-\u{1F64F}\u{1F680}-\u{1F6C5}\u{1F6CB}-\u{1F6D2}\u{1F6E0}-\u{1F6E5}\u{1F6E9}\u{1F6EB}\u{1F6EC}\u{1F6F0}\u{1F6F3}-\u{1F6F9}\u{1F910}-\u{1F93A}\u{1F93C}-\u{1F93E}\u{1F940}-\u{1F945}\u{1F947}-\u{1F970}\u{1F973}-\u{1F976}\u{1F97A}\u{1F97C}-\u{1F9A2}\u{1F9B0}-\u{1F9B9}\u{1F9C0}-\u{1F9C2}\u{1F9D0}-\u{1F9FF}]\uFE0F/gu;
-		let matches = message.content.match(regex);
+		const matches = message.content.match(regex);
 		if (matches) {
 			nofEmojis = matches.length;
 		}
 
 		const discordEmojiRegex = /<a?:.+?:\d+>/g;
-		let discordEmojiMatches = message.content.match(discordEmojiRegex);
+		const discordEmojiMatches = message.content.match(discordEmojiRegex);
 		if (discordEmojiMatches) {
 			nofEmojis += discordEmojiMatches.length;
 		}
@@ -571,166 +680,59 @@ export class Moderation {
 	//////////////////////////////
 
 	private async ban(
-		message: Message,
-		guild: Guild,
+		member: Member,
 		amount: number,
-		args: Arguments
+		{ guild, settings }: Arguments
 	) {
-		let success = false;
-		const embed = this.createPunishmentEmbed('AutoModerator');
-		embed.thumbnail = { url: message.member.avatarURL };
-
-		let [error] = await to(
-			this.dmMember(guild, message.member, PunishmentType.ban, {
-				strikeAmount: amount
-			})
-		);
-
-		if (error) {
-			embed.description = `Tried to auto-mod ${
-				message.member
-			}, but couldn't send them a DM.`;
-			this.logToModChannel(message, embed);
-		}
-
-		[error] = await to(message.member.ban(7, 'automod'));
-
-		if (error) {
-			embed.description = `${
-				message.member.username
-			} could not be banned.\n${error}`;
-		} else {
-			embed.description = `${
-				message.member.username
-			} has been banned because he surpassed ${amount} strikes.`;
-			success = true;
-		}
-		this.sendAndDelete(message, embed, args.settings);
-		return success;
+		const [error] = await to(member.ban(7, 'automod'));
+		return !error;
 	}
 
 	private async kick(
-		message: Message,
-		guild: Guild,
+		member: Member,
 		amount: number,
-		args: Arguments
+		{ guild, settings }: Arguments
 	) {
-		let success = false;
-		await this.dmMember(guild, message.member, PunishmentType.kick, {
-			strikeAmount: amount
-		});
-
-		const embed = this.createPunishmentEmbed('AutoModerator');
-		embed.thumbnail = { url: message.member.avatarURL };
-
-		let [error] = await to(message.member.kick('automod'));
-
-		if (error) {
-			embed.description = `${
-				message.member.username
-			} could not be kicked.\n${error}`;
-		} else {
-			embed.description = `${
-				message.member.username
-			} has been kicked because he surpassed ${amount} strikes.`;
-			success = true;
-		}
-
-		this.sendAndDelete(message, embed, args.settings);
-		return success;
+		const [error] = await to(member.kick('automod'));
+		return !error;
 	}
 
 	private async softban(
-		message: Message,
-		guild: Guild,
+		member: Member,
 		amount: number,
-		args: Arguments
+		{ guild, settings }: Arguments
 	) {
-		let success = false;
-		await this.dmMember(guild, message.member, PunishmentType.softban, {
-			strikeAmount: amount
-		});
-
-		const embed = this.createPunishmentEmbed('AutoModerator');
-		embed.thumbnail = { url: message.member.avatarURL };
-
-		let [error] = await to(message.member.ban(7, 'automod'));
+		let [error] = await to(member.ban(7, 'automod'));
 		if (!error) {
-			[error] = await to(message.member.unban('softban'));
+			[error] = await to(member.unban('softban'));
 		}
 
-		if (error) {
-			embed.description = `${
-				message.member.username
-			} could not be softbanned.\n${error}`;
-		} else {
-			embed.description = `${
-				message.member.username
-			} has been softbanned because he surpassed ${amount} strikes.`;
-			success = true;
-		}
-
-		this.sendAndDelete(message, embed, args.settings);
-		return success;
+		return !error;
 	}
 
 	private async warn(
-		message: Message,
-		guild: Guild,
+		member: Member,
 		amount: number,
-		args: Arguments
+		{ guild, settings }: Arguments
 	) {
-		let success = false;
-		await this.dmMember(guild, message.member, PunishmentType.warn, {
-			strikeAmount: amount
-		});
-
-		const embed = this.createPunishmentEmbed('AutoModerator');
-		embed.thumbnail = { url: message.member.avatarURL };
-		embed.description = `${
-			message.member.username
-		} has been warned because he surpassed ${amount} strikes.`;
-
-		this.sendAndDelete(message, embed, args.settings);
-		return success;
+		return true;
 	}
 
 	private async mute(
-		message: Message,
-		guild: Guild,
+		member: Member,
 		amount: number,
-		args: Arguments
+		{ guild, settings }: Arguments
 	) {
-		let success = false;
-		await this.dmMember(guild, message.member, PunishmentType.mute, {
-			strikeAmount: amount
-		});
-
-		let mutedRole = args.settings.mutedRole;
-
-		const embed = this.createPunishmentEmbed('AutoModerator');
-		embed.thumbnail = { url: message.member.avatarURL };
-
+		const mutedRole = settings.mutedRole;
 		if (!mutedRole || !guild.roles.has(mutedRole)) {
-			embed.description = `Muted role is not set.`;
-		} else {
-			let [error] = await to(
-				message.member.addRole(mutedRole, 'AutoMod muted')
-			);
-			if (error) {
-				embed.description = `Could not mute member. ${error}`;
-			} else {
-				embed.description = `${
-					message.member.username
-				} has been muted because he surpassed ${amount} strikes.`;
-			}
+			return false;
 		}
 
-		this.sendAndDelete(message, embed, args.settings);
-		return success;
+		const [error] = await to(member.addRole(mutedRole, 'AutoMod muted'));
+		return !error;
 	}
 
-	private async sendAndDelete(
+	private async sendReplyAndDelete(
 		message: Message,
 		embed: Embed,
 		settings: SettingsObject
@@ -741,7 +743,7 @@ export class Moderation {
 		) {
 			return;
 		}
-		let reply = await this.client.msg.sendReply(message, embed);
+		const reply = await this.client.msg.sendReply(message, embed);
 		if (settings.autoModDeleteBotMessage) {
 			setTimeout(
 				() => reply.delete(),
@@ -751,43 +753,102 @@ export class Moderation {
 	}
 
 	public createPunishmentEmbed(name: string, icon?: string) {
-		let object = icon ? { name: name, icon_url: icon } : { name: name };
 		const embed = this.client.msg.createEmbed({
-			author: object
+			author: icon ? { name: name, icon_url: icon } : { name: name },
+			description: ''
 		});
 		return embed;
 	}
 
-	public async dmMember(
-		guild: Guild,
+	public async informAboutStrike(
 		member: Member,
-		action: PunishmentType,
-		args: PunishmentDetails
+		type: ViolationType,
+		amount: number,
+		settings: SettingsObject
 	) {
-		let dmChannel = await member.user.getDMChannel();
-		let message = '';
-		if (action === PunishmentType.ban) {
-			message = `You have been banned from the server ${guild.name}`;
-		} else if (action === PunishmentType.kick) {
-			message = `You have been kicked from the server ${guild.name}`;
-		} else if (action === PunishmentType.softban) {
-			message = `You have been softbanned on the server ${guild.name}`;
-		} else if (action === PunishmentType.mute) {
-			message = `You have been muted on the server ${guild.name}`;
-		} else if (action === PunishmentType.warn) {
-			message = `You have been warned on the server ${guild.name}`;
-		}
-		if (args.reason) {
-			message += `\n\n**Reason**: ${args.reason}`;
-		} else if (args.strikeAmount) {
-			message += `\n\n**Reason**: You reached **${
-				args.strikeAmount
-			}** strikes.`;
-		}
-		return await dmChannel.createMessage(message);
+		const dmChannel = await member.user.getDMChannel();
+
+		const message = i18n.__(
+			{ locale: settings.lang, phrase: 'moderation.strikes.dm' },
+			{
+				amount: `${amount}`,
+				type,
+				guild: member.guild.name
+			}
+		);
+
+		return dmChannel.createMessage(message).catch(() => {
+			if (settings.modLogChannel) {
+				const channel = member.guild.channels.get(settings.modLogChannel);
+				if (channel && channel instanceof TextChannel) {
+					const embed = this.client.msg.createEmbed({
+						title: `Couldn't send DM to user`,
+						fields: [
+							{
+								name: 'User',
+								value:
+									`${member.username}#${member.discriminator} ` +
+									`(ID: ${member.id})`
+							},
+							{
+								name: 'Message',
+								value: message
+							}
+						]
+					});
+					channel.createMessage({ embed });
+				}
+			}
+		});
 	}
 
-	private async logToModChannel(message: Message, embed: Embed) {
-		await this.client.msg.sendReply(message, embed);
+	public async informAboutPunishment(
+		member: Member,
+		type: PunishmentType,
+		settings: SettingsObject,
+		{ reason, amount }: PunishmentDetails
+	) {
+		const dmChannel = await member.user.getDMChannel();
+
+		let message =
+			i18n.__(
+				{ locale: settings.lang, phrase: `moderation.punishments.dm.${type}` },
+				{ type, guild: member.guild.name }
+			) + '\n';
+		if (reason) {
+			message += i18n.__(
+				{ locale: settings.lang, phrase: 'moderation.punishments.dm.reason' },
+				{ reason }
+			);
+		} else {
+			message += i18n.__(
+				{ locale: settings.lang, phrase: 'moderation.punishments.dm.amount' },
+				{ amount: `${amount}` }
+			);
+		}
+
+		return dmChannel.createMessage(message).catch(() => {
+			if (settings.modLogChannel) {
+				const channel = member.guild.channels.get(settings.modLogChannel);
+				if (channel && channel instanceof TextChannel) {
+					const embed = this.client.msg.createEmbed({
+						title: `Couldn't send DM to user`,
+						fields: [
+							{
+								name: 'User',
+								value:
+									`${member.username}#${member.discriminator} ` +
+									`(ID: ${member.id})`
+							},
+							{
+								name: 'Message',
+								value: message
+							}
+						]
+					});
+					channel.createMessage({ embed });
+				}
+			}
+		});
 	}
 }

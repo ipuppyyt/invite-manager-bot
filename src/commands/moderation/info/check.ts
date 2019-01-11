@@ -27,6 +27,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[user]: [Member],
+		flags: {},
 		{ guild, settings, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -37,26 +38,40 @@ export default class extends Command {
 			title: user.username
 		});
 
-		let punishmentList = await this.repo.punishs.find({
+		const punishmentList = await this.repo.punishs.find({
 			where: {
 				guildId: guild.id,
 				memberId: user.id
 			}
 		});
 
-		let strikeList = await this.repo.strikes.find({
+		const strikeList = await this.repo.strikes.find({
 			where: {
 				guildId: guild.id,
 				memberId: user.id
 			}
 		});
 
-		let strikeText = strikeList
+		const strikeTotal = strikeList.reduce((acc, s) => acc + s.amount, 0);
+
+		embed.fields.push({
+			name: t('cmd.check.strikes.total'),
+			value: `${strikeList.length} violations worth ${strikeTotal} strikes`,
+			inline: true
+		});
+
+		embed.fields.push({
+			name: t('cmd.check.punishments.total'),
+			value: `${punishmentList.length} punishments`,
+			inline: true
+		});
+
+		const strikeText = strikeList
 			.map(s =>
 				t('cmd.check.strikes.entry', {
-					id: `${s.id}`,
+					id: `**${s.id}**`,
 					amount: `**${s.amount}**`,
-					violation: `**${s.violationType}**`,
+					violation: `**${s.type}**`,
 					date: moment(s.createdAt)
 						.locale(settings.lang)
 						.fromNow()
@@ -67,14 +82,14 @@ export default class extends Command {
 		if (strikeText) {
 			embed.fields.push({
 				name: t('cmd.check.strikes.title'),
-				value: strikeText
+				value: strikeText.substr(0, 1020)
 			});
 		}
 
-		let punishmentText = punishmentList
+		const punishmentText = punishmentList
 			.map(p =>
 				t('cmd.check.punishments.entry', {
-					punishment: `**${p.punishmentType}**`,
+					punishment: `**${p.type}**`,
 					amount: `**${p.amount}**`,
 					date: moment(p.createdAt)
 						.locale(settings.lang)
@@ -86,7 +101,7 @@ export default class extends Command {
 		if (punishmentText) {
 			embed.fields.push({
 				name: t('cmd.check.punishments.title'),
-				value: punishmentText
+				value: punishmentText.substr(0, 1020)
 			});
 		}
 

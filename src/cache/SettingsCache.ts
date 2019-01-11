@@ -1,13 +1,13 @@
 import { getRepository, In, Repository } from 'typeorm';
 
 import { IMClient } from '../client';
+import { Setting, SettingsKey } from '../models/Setting';
 import {
 	defaultSettings,
-	Setting,
-	SettingsKey,
-	SettingsObject
-} from '../models/Setting';
-import { fromDbValue, toDbValue } from '../settings';
+	fromDbValue,
+	SettingsObject,
+	toDbValue
+} from '../settings';
 
 import { GuildCache } from './GuildCache';
 
@@ -42,7 +42,7 @@ export class SettingsCache extends GuildCache<SettingsObject> {
 		});
 	}
 
-	protected async getOne(guildId: string): Promise<SettingsObject> {
+	protected async _get(guildId: string): Promise<SettingsObject> {
 		const sets = await this.settingsRepo.find({ where: { guildId } });
 
 		const obj: SettingsObject = { ...defaultSettings };
@@ -62,6 +62,7 @@ export class SettingsCache extends GuildCache<SettingsObject> {
 
 		// Check if the value changed
 		if (cfg[key] !== val) {
+			// Save into DB
 			// TODO: Use 'UPDATE ON DUPLICATE' query
 			this.settingsRepo.save([
 				{

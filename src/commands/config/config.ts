@@ -1,15 +1,11 @@
 import { Embed, Message, TextChannel } from 'eris';
 
 import { IMClient } from '../../client';
-import { settingsDescription } from '../../descriptions/settings';
 import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
 import { LogAction } from '../../models/Log';
-import {
-	defaultSettings,
-	SettingsKey,
-	settingsTypes
-} from '../../models/Setting';
+import { SettingsKey } from '../../models/Setting';
 import { EnumResolver, SettingsValueResolver } from '../../resolvers';
+import { beautify, canClear, settingsInfo } from '../../settings';
 import { BotCommand, CommandGroup, Permissions } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -25,11 +21,7 @@ export default class extends Command {
 				},
 				{
 					name: 'value',
-					resolver: new SettingsValueResolver(
-						client,
-						settingsTypes,
-						defaultSettings
-					),
+					resolver: new SettingsValueResolver(client, settingsInfo),
 					rest: true
 				}
 			],
@@ -42,6 +34,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[key, value]: [SettingsKey, any],
+		flags: {},
 		context: Context
 	): Promise<any> {
 		const { guild, settings, t } = context;
@@ -53,12 +46,12 @@ export default class extends Command {
 			embed.description = t('cmd.config.text', { prefix }) + '\n\n';
 
 			const configs: { [x: string]: string[] } = {};
-			Object.keys(settingsDescription).forEach((k: SettingsKey) => {
-				const descr = settingsDescription[k];
-				if (!configs[descr.group]) {
-					configs[descr.group] = [];
+			Object.keys(settingsInfo).forEach((k: SettingsKey) => {
+				const info = settingsInfo[k];
+				if (!configs[info.grouping[0]]) {
+					configs[info.grouping[0]] = [];
 				}
-				configs[descr.group].push('`' + k + '`');
+				configs[info.grouping[0]].push('`' + k + '`');
 			});
 
 			Object.keys(configs).forEach(group => {
@@ -69,7 +62,7 @@ export default class extends Command {
 			return this.sendReply(message, embed);
 		}
 
-		let oldVal = settings[key];
+		const oldVal = settings[key];
 		embed.title = key;
 
 		if (typeof value === typeof undefined) {
@@ -81,7 +74,7 @@ export default class extends Command {
 					key
 				});
 
-				if (defaultSettings[key] === null ? 't' : undefined) {
+				if (canClear(key)) {
 					embed.description +=
 						'\n' +
 						t('cmd.config.current.clear', {
@@ -92,7 +85,7 @@ export default class extends Command {
 
 				embed.fields.push({
 					name: t('cmd.config.current.title'),
-					value: this.beautify(key, oldVal)
+					value: beautify(key, oldVal)
 				});
 			} else {
 				embed.description = t('cmd.config.current.notSet', {
@@ -105,8 +98,8 @@ export default class extends Command {
 
 		// If the value is null we want to clear it. Check if that's allowed.
 		if (value === null) {
-			if (defaultSettings[key] !== null) {
-				return this.sendReply(
+			if (!canClear(key)) {
+				return this.client.msg.sendReply(
 					message,
 					t('cmd.config.canNotClear', { prefix, key })
 				);
@@ -127,7 +120,7 @@ export default class extends Command {
 			embed.description = t('cmd.config.sameValue');
 			embed.fields.push({
 				name: t('cmd.config.current.title'),
-				value: this.beautify(key, oldVal)
+				value: beautify(key, oldVal)
 			});
 			return this.sendReply(message, embed);
 		}
@@ -144,13 +137,13 @@ export default class extends Command {
 		if (oldVal !== null) {
 			embed.fields.push({
 				name: t('cmd.config.previous.title'),
-				value: this.beautify(key, oldVal)
+				value: beautify(key, oldVal)
 			});
 		}
 
 		embed.fields.push({
 			name: t('cmd.config.new.title'),
-			value: value !== null ? this.beautify(key, value) : t('cmd.config.none')
+			value: value !== null ? beautify(key, value) : t('cmd.config.none')
 		});
 
 		// Do any post processing, such as example messages
@@ -173,9 +166,9 @@ export default class extends Command {
 			return null;
 		}
 
-		const type = settingsTypes[key];
+		const info = settingsInfo[key];
 
-		if (type === 'Channel') {
+		if (info.type === 'Channel') {
 			const channel = value as TextChannel;
 			if (!channel.permissionsOf(me.id).has(Permissions.READ_MESSAGES)) {
 				return t('cmd.config.channel.canNotReadMessages');
@@ -281,10 +274,10 @@ export default class extends Command {
 		if (key === SettingsKey.autoSubtractFakes) {
 			if (value) {
 				// Subtract fake invites from all members
-				let cmd = this.client.cmds.commands.find(
+				const cmd = this.client.cmds.commands.find(
 					c => c.name === BotCommand.subtractFakes
 				);
-				return async () => await cmd.action(message, [], context);
+				return async () => await cmd.action(message, [], {}, context);
 			} else {
 				// Delete old duplicate removals
 				return async () =>
@@ -303,10 +296,10 @@ export default class extends Command {
 		if (key === SettingsKey.autoSubtractLeaves) {
 			if (value) {
 				// Subtract leaves from all members
-				let cmd = this.client.cmds.commands.find(
+				const cmd = this.client.cmds.commands.find(
 					c => c.name === BotCommand.subtractLeaves
 				);
-				return async () => await cmd.action(message, [], context);
+				return async () => await cmd.action(message, [], {}, context);
 			} else {
 				// Delete old leave removals
 				return async () =>
@@ -324,31 +317,10 @@ export default class extends Command {
 
 		if (key === SettingsKey.autoSubtractLeaveThreshold) {
 			// Subtract leaves from all members to recompute threshold time
-			let cmd = this.client.cmds.commands.find(
+			const cmd = this.client.cmds.commands.find(
 				c => c.name === BotCommand.subtractLeaves
 			);
-			return async () => await cmd.action(message, [], context);
+			return async () => await cmd.action(message, [], {}, context);
 		}
-	}
-
-	private beautify(key: SettingsKey, value: any) {
-		const type = settingsTypes[key];
-		if (type === 'Channel') {
-			return `<#${value}>`;
-		} else if (type === 'Boolean') {
-			return value ? 'True' : 'False';
-		} else if (type === 'Role') {
-			return `<@&${value}>`;
-		} else if (type === 'Role[]') {
-			return value.map((v: any) => `<@&${v}>`).join(' ');
-		} else if (type === 'Channel[]') {
-			return value.map((v: any) => `<#${v}>`).join(' ');
-		} else if (type === 'String[]') {
-			return value.map((v: any) => '`' + v + '`').join(', ');
-		}
-		if (typeof value === 'string' && value.length > 1000) {
-			return value.substr(0, 1000) + '...';
-		}
-		return value;
 	}
 }

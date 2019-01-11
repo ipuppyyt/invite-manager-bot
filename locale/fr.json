@@ -48,6 +48,7 @@
 		}
 	},
 	"cmd": {
+		"error": "There was an error executing the command.",
 		"addInvites": {
 			"zero": "Ajouter \"0\" invitations n'a aucun intérêt.",
 			"amount": {
@@ -101,16 +102,23 @@
 			},
 			"self": {
 				"description": "Obtenez des informations sur le bot."
+			},
+			"premium": {
+				"title": "Premium",
+				"active": "This server has an **active premium** subscription.",
+				"none": "This server currently **does not** have premium."
 			}
 		},
 		"check": {
 			"strikes": {
 				"title": "Strikes ",
-				"entry": "{{ id }}: {{ amount }} pour {{ violation }} {{ date }}"
+				"entry": "#{{ id }} - Received {{ amount }} strikes for {{ violation }} {{ date }}",
+				"total": "Strikes Total"
 			},
 			"punishments": {
 				"title": "Les sanctions",
-				"entry": "{{ punition }} car il avait {{ amount }} strikes {{ date }}"
+				"entry": "{{ punition }} car il avait {{ amount }} strikes {{ date }}",
+				"total": "Punishments Total"
 			},
 			"noHistory": "L'utilisateur n'a pas d'historique.",
 			"self": {
@@ -269,16 +277,20 @@
 				"entry": "{{ amount }} from {{{ creator }}} - {{ date }}, reason: {{ reason }}",
 				"more": "Plus another {{ amount }} more bonus invites",
 				"none": "Ce membre n'a reçu aucun bonus jusqu'à présent",
-				"noReason": "No reason"
+				"noReason": "No reason",
+				"details": "Use {{{ cmd }}} for details."
 			},
 			"invitedMembers": {
 				"title": "Membres invités",
-				"more": "Plus another {{ amount }} more bonus invites",
-				"none": "Ce membre n'a invité personne d'autre jusqu'à présent"
+				"more": "Plus another {{ amount }} more invited members",
+				"none": "Ce membre n'a invité personne d'autre jusqu'à présent",
+				"details": "Use {{{ cmd }}} for details."
 			},
 			"self": {
 				"args": {
-					"user": "L'utilisateur pour lequel vous souhaitez voir des informations supplémentaires."
+					"user": "L'utilisateur pour lequel vous souhaitez voir des informations supplémentaires.",
+					"details": "Request only specific details about a member.",
+					"page": "What page of the details to show. You can also use the reactions to navigate."
 				},
 				"description": "Afficher des informations sur un membre spécifique."
 			}
@@ -493,11 +505,11 @@
 			},
 			"help": {
 				"title": "Aide",
-				"text": "Si vous avez besoin d'aide ou si vous avez des commentaires, vous pouvez nous contactez soit utiliser la commande `!feedback` ou rejoindre notre serveur de support discord: {{ link }}"
+				"text": "If you need help or have feedback, you can either use the `!feedback` command or join our discord support server: {{{ link }}}"
 			},
 			"premium": {
 				"title": "Premium",
-				"text": "Si vous souhaitez soutenir le développement de ce bot, vous pouvez le faire en nous aidant sur Patreon: {{ link }}\n\nSelon le montant de votre don, vous obtiendrez des fonctionnalités supplémentaires."
+				"text": "If you would like to support the development of this bot, you can do so by supporting us on Patreon: {{{ link }}}\n\nDepending on the tier, you will get some additional features."
 			},
 			"manageGuild": {
 				"title": "Autorisation manquante: Gérer le serveur",
@@ -576,7 +588,8 @@
 					"user": "L'utilisateur ou vous souhaitez afficher des invitations détaillées."
 				},
 				"description": "Affiche des détails sur l'origine de vos invitations."
-			}
+			},
+			"noInviteCodes": "You don't have any invite codes yet."
 		},
 		"getBot": {
 			"title": "Ajouter InviteManager à votre serveur.",
@@ -598,10 +611,14 @@
 		},
 		"premium": {
 			"noPremium": {
-				"title": "Ce serveur n'a actuellement pas d'abonnement premium.",
+				"title": "You currently do not have a premium subscription",
 				"text": "En prenant l'abonnement premium, vous contribuez au développement du bot et vous obtenez également des fonctionnalités supplémentaires."
 			},
 			"feature": {
+				"servers": {
+					"title": "Premium Feature: Up to 5 servers",
+					"text": "Once you have premium you may activate it on up to 5 servers of your choosing, and you can change these 5 servers anytime."
+				},
 				"embeds": {
 					"title": "Fonction Premium: Rajouter des messages de bienvenue",
 					"text": "You can use an embed in your join and leave messages which look a lot better.\n[See some examples here]({{{ link }}})"
@@ -609,14 +626,42 @@
 				"export": {
 					"title": "Fonction Premium: Exportation de l'historique",
 					"text": "Vous pouvez exporter toutes les arrivées et les départs qui se sont produits sur votre serveur depuis que vous avez invité notre bot."
+				},
+				"patreon": {
+					"title": "If you purchsed premium on Patreon",
+					"text": "Run {{{ cmd }}} to validate and activate your Patreon plegde."
 				}
 			},
 			"premium": {
 				"title": "InviteManager Premium",
-				"text": "This servers subscription is valid for another {{ date }}.\n\n[What can I do with premium?]({{{ link }}})"
+				"text": "Your premium subscription is valid for another {{ date }}.\n\nYou have activated premium on {{{ limit }}} servers.\n{{{ guildList }}}\n\n[What can I do with premium?]({{{ link }}})",
+				"deactivate": "Use {{{ cmd }}} to deactivate it on this server",
+				"activate": "Use {{{ cmd }}} to activate it on this server"
 			},
 			"self": {
-				"description": "Informations sur la version premium d'InviteManager."
+				"description": "Informations sur la version premium d'InviteManager.",
+				"args": {
+					"action": "cmd.premium.self.args.action"
+				}
+			},
+			"activate": {
+				"title": "Activate premium on this server",
+				"currentlyActive": "There is already a premium subscription active on this server.",
+				"done": "Premium has been successfully activated for this server.",
+				"noSubscription": "You do not have an active premium subscription.\n\nUse {{{ cmd }}} for more info.",
+				"noGuild": "You must run this command inside a server."
+			},
+			"deactivate": {
+				"title": "Deactivate premium on this server",
+				"done": "Premium has been successfully deactivated for this server.",
+				"noSubscription": "You do not have an active premium subscription.\n\nUse {{{ cmd }}} for more info.",
+				"noGuild": "You must run this command inside a server."
+			},
+			"check": {
+				"title": "Check for a Premium Subscription",
+				"notFound": "Your account does not have a premium subscription associated.\n\nIf you aquired premium using Patreon, please make sure to link your Discord account to Patreon to collect your rewards, then run this command again.",
+				"declined": "Your payment for premium has been declined, plesae check your Patreon.",
+				"done": "You have an active premium subscription valid until {{{ valid }}}.\n\nUse {{{ cmd }}} for more info."
 			}
 		},
 		"tryPremium": {
@@ -677,7 +722,8 @@
 				"args": {
 					"key": "Les paramètres de configurations que vous souhaitez afficher / modifier.",
 					"code": "The invite code that the setting is changed for.",
-					"value": "La nouvelle valeur du paramètre."
+					"value": "La nouvelle valeur du paramètre.",
+					"inviteCode": "The invite code for which you want to change the settings."
 				},
 				"description": "Affiche et modifie la configuration des codes d'invitation du serveur."
 			},
@@ -749,7 +795,8 @@
 					"user": "The user that should be unbanned.",
 					"reason": "The reason why this user is unbanned."
 				}
-			}
+			},
+			"done": "cmd.unban.done"
 		},
 		"mute": {
 			"missingRole": "Rôle muet non défini ou inexistant!",
@@ -770,7 +817,9 @@
 				"args": {
 					"user": "The user that should be unmuted."
 				}
-			}
+			},
+			"canNotUnmute": "cmd.unmute.canNotUnmute",
+			"done": "cmd.unmute.done"
 		},
 		"cleanShort": {
 			"self": {
@@ -790,9 +839,10 @@
 			}
 		},
 		"interactiveConfig": {
-			"welcome": "Bienvenue dans le menu des paramètres de InviteManager.\nUtilisez les réactions pour choisir l'une des options disponibles.",
+			"welcome": "Use the reactions to pick one of the available options.",
 			"none": "<None>",
-			"change": "Current value: {{{value}}}\nPossible values: {{{possible}}}\nEnter a new value:",
+			"change": "**Current value**\n{{{ current }}}\n\n**Possible values**\n{{{ possible }}}",
+			"new": "Enter a new value:",
 			"values": {
 				"boolean": "`Oui` ou `Non`",
 				"string": "N'importe quel texte",
@@ -1025,7 +1075,47 @@
 						"title": "Role"
 					}
 				}
-			}
+			},
+			"list": {
+				"add": {
+					"title": "Add",
+					"text": "Add a new value to the list."
+				},
+				"remove": {
+					"title": "Remove",
+					"text": "Remove an existing value from the list."
+				},
+				"set": {
+					"title": "Set",
+					"text": "Set the whole list using space separated values."
+				},
+				"clear": {
+					"title": "Clear",
+					"text": "Clear the whole list of all values."
+				}
+			},
+			"current": {
+				"title": "Current value"
+			},
+			"possible": {
+				"title": "Possible values"
+			},
+			"remove": "Enter a value or a list of values to remove.",
+			"add": "Enter a value or list of values to add.",
+			"set": "Enter the new values for the list.",
+			"removeEmpty": "The list is already empty."
+		},
+		"credits": {
+			"developers": "Developers",
+			"moderators": "Moderators",
+			"staff": "Staff",
+			"translators": "Translators"
+		},
+		"unhoist": {
+			"title": "Unhoist users",
+			"starting": "Starting unhoist process...",
+			"processing": "Processing batches... {{ current }}/{{ total }}",
+			"done": "**Completed!**\n\n**Changed: {{ changed }}**\nIgnored: {{ ignored }}\n"
 		}
 	},
 	"permissions": {
@@ -1041,9 +1131,6 @@
 	"prompt": {
 		"canceled": "Canceled"
 	},
-	"command": {
-		"error": "Une erreur s'est produite lors de l'exécution de la commande."
-	},
 	"messages": {
 		"unknownInviter": "Unknown",
 		"joinUnknownInviter": "<@{{ id }}> joined the server using a temporary or vanity invite, so I can't figure out who invited them.",
@@ -1052,5 +1139,19 @@
 	"captcha": {
 		"invalid": "Captcha didn't match, please try again."
 	},
-	"JOIN_LEAVE_EMBEDS_IS_PREMIUM": "JOIN_LEAVE_EMBEDS_IS_PREMIUM"
+	"JOIN_LEAVE_EMBEDS_IS_PREMIUM": "JOIN_LEAVE_EMBEDS_IS_PREMIUM",
+	"moderation": {
+		"strikes": {
+			"dm": "You have received **{{ amount }}** strikes for violating the **{{ type }}** rule in **{{ guild }}**"
+		},
+		"punishments": {
+			"dm": {
+				"warn": "moderation.punishments.dm.warn",
+				"amount": "moderation.punishments.dm.amount",
+				"mute": "moderation.punishments.dm.mute",
+				"kick": "moderation.punishments.dm.kick",
+				"ban": "moderation.punishments.dm.ban"
+			}
+		}
+	}
 }

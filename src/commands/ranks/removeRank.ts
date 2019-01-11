@@ -32,6 +32,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[role]: [Role],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		const rank = await this.ranksRepo.findOne({

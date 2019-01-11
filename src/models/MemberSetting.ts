@@ -8,30 +8,12 @@ import {
 	UpdateDateColumn
 } from 'typeorm';
 
-import { InternalSettingsTypes } from '../types';
-
 import { Guild } from './Guild';
 import { Member } from './Member';
 
 export enum MemberSettingsKey {
 	hideFromLeaderboard = 'hideFromLeaderboard'
 }
-
-export type MemberSettingsObject = {
-	hideFromLeaderboard: boolean;
-};
-
-export type MemberSettingsTypesObject = {
-	[k in MemberSettingsKey]: InternalSettingsTypes
-};
-
-export const memberSettingsTypes: MemberSettingsTypesObject = {
-	hideFromLeaderboard: 'Boolean'
-};
-
-export const defaultMemberSettings: MemberSettingsObject = {
-	hideFromLeaderboard: false
-};
 
 @Entity()
 export class MemberSetting extends BaseEntity {
@@ -53,8 +35,14 @@ export class MemberSetting extends BaseEntity {
 	@Column({ type: 'text' })
 	public value: string;
 
+	@Column({ nullable: true })
+	public guildId: string;
+
 	@ManyToOne(type => Guild, g => g.memberSettings)
 	public guild: Guild;
+
+	@Column({ nullable: true })
+	public memberId: string;
 
 	@ManyToOne(type => Member, m => m.memberSettings)
 	public member: Member;

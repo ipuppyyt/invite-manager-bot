@@ -46,6 +46,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[role, invites, description]: [Role, number, string],
+		flags: {},
 		{ guild, t, me }: Context
 	): Promise<any> {
 		await this.rolesRepo.save({

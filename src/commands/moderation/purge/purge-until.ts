@@ -27,6 +27,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[untilMessageID]: [string],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -37,7 +38,7 @@ export default class extends Command {
 			title: t('cmd.purgeUntil.title')
 		});
 
-		let messages: Message[] = await message.channel.getMessages(
+		const messages: Message[] = await message.channel.getMessages(
 			100,
 			undefined,
 			untilMessageID
@@ -50,7 +51,7 @@ export default class extends Command {
 			embed.description = t('cmd.purgeUntil.msgNotFound');
 			return this.sendReply(message, embed);
 		} else {
-			let [error] = await to(
+			const [error] = await to(
 				this.client.deleteMessages(message.channel.id, messages.map(m => m.id))
 			);
 			if (error) {
@@ -62,7 +63,8 @@ export default class extends Command {
 				});
 			}
 
-			let response = await this.sendReply(message, embed);
+			const response = await this.sendReply(message, embed);
+
 			const func = () => {
 				response.delete();
 			};

@@ -19,6 +19,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		args: any[],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		const js = await this.repo.joins

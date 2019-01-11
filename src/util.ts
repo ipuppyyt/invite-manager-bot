@@ -11,7 +11,7 @@ import { getRepository } from 'typeorm';
 
 import { IMClient } from './client';
 import { Rank } from './models/Rank';
-import { RankAssignmentStyle } from './models/Setting';
+import { RankAssignmentStyle, SettingsKey } from './models/Setting';
 import { Permissions } from './types';
 
 export async function promoteIfQualified(
@@ -43,7 +43,7 @@ export async function promoteIfQualified(
 	const notReached: Role[] = [];
 
 	allRanks.forEach(r => {
-		let role = guild.roles.get(r.roleId);
+		const role = guild.roles.get(r.roleId);
 		if (role) {
 			if (r.numInvites <= totalInvites) {
 				reached.push(role);
@@ -83,7 +83,7 @@ export async function promoteIfQualified(
 	// we always want to remove any roles that we don't have
 	notReached
 		.filter(r => !tooHighRoles.includes(r) && member.roles.includes(r.id))
-		.forEach(r => member.removeRole(r.id));
+		.forEach(r => member.removeRole(r.id, 'Not have enough invites for rank'));
 
 	if (highest && !member.roles.includes(highest.id)) {
 		const rankChannelId = settings.rankAnnouncementChannel;
@@ -114,6 +114,11 @@ export async function promoteIfQualified(
 					`Guild ${guild.id} has invalid ` +
 						`rank announcement channel ${rankChannelId}`
 				);
+				client.cache.settings.setOne(
+					guild.id,
+					SettingsKey.rankAnnouncementChannel,
+					null
+				);
 			}
 		}
 	}
@@ -129,13 +134,13 @@ export async function promoteIfQualified(
 
 		if (style === RankAssignmentStyle.all) {
 			// Add all roles that we've reached to the member
-			let newRoles = reached.filter(r => !member.roles.includes(r.id));
+			const newRoles = reached.filter(r => !member.roles.includes(r.id));
 			// Roles that the member should have but we can't assign
 			shouldHave = newRoles.filter(r => tooHighRoles.includes(r));
 			// Assign only the roles that we can assign
 			newRoles
 				.filter(r => !tooHighRoles.includes(r))
-				.forEach(r => member.addRole(r.id));
+				.forEach(r => member.addRole(r.id, 'Reached a new rank by invites'));
 		} else if (style === RankAssignmentStyle.highest) {
 			// Only add the highest role we've reached to the member
 			// Remove roles that we've reached but aren't the highest
@@ -149,11 +154,11 @@ export async function promoteIfQualified(
 			// Remove the old ones from the member
 			oldRoles
 				.filter(r => !tooHighRoles.includes(r))
-				.forEach(r => member.removeRole(r.id));
+				.forEach(r => member.removeRole(r.id, 'Only keeping highest rank'));
 			// Add the highest one if we don't have it yet
 			if (highest && !member.roles.includes(highest.id)) {
 				if (!tooHighRoles.includes(highest)) {
-					member.addRole(highest.id);
+					member.addRole(highest.id, 'Reached a new rank by invites');
 				} else {
 					shouldHave = [highest];
 				}
@@ -239,9 +244,9 @@ export function isPunishable(
 	authorMember: Member,
 	me: Member
 ) {
-	let highestBotRole = getHighestRole(guild, me.roles);
-	let highestMemberRole = getHighestRole(guild, targetMember.roles);
-	let highestAuthorRole = getHighestRole(guild, authorMember.roles);
+	const highestBotRole = getHighestRole(guild, me.roles);
+	const highestMemberRole = getHighestRole(guild, targetMember.roles);
+	const highestAuthorRole = getHighestRole(guild, authorMember.roles);
 
 	return (
 		targetMember.id !== guild.ownerID &&

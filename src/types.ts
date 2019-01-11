@@ -24,17 +24,20 @@ export enum CommandGroup {
 	Info = 'Info',
 	Premium = 'Premium',
 	Moderation = 'Moderation',
+	Report = 'Report',
 	Other = 'Other'
 }
 
 export enum ShardCommand {
+	CACHE = 'CACHE',
+	CUSTOM = 'CUSTOM',
 	DIAGNOSE = 'DIAGNOSE',
 	FLUSH_CACHE = 'FLUSH_CACHE',
 	SUDO = 'SUDO',
-	RESPONSE = 'RESPONSE',
 	OWNER_DM = 'OWNER_DM',
 	USER_DM = 'USER_DM',
-	LEAVE_GUILD = 'LEAVE_GUILD'
+	LEAVE_GUILD = 'LEAVE_GUILD',
+	STATUS = 'STATUS'
 }
 
 export enum ChartType {
@@ -85,28 +88,28 @@ export enum BotCommand {
 	makeMentionable = 'makeMentionable',
 	mentionRole = 'mentionRole',
 
+	/*report = 'report',*/
+
 	graph = 'graph'
 }
 
 export enum ModerationCommand {
-	autoMod = 'autoMod',
-	punishment = 'punishment',
 	punishmentConfig = 'punishmentConfig',
-	strikeAdd = 'strikeAdd',
 	strikeConfig = 'strikeConfig',
-	strikeRemove = 'strikeRemove',
-
-	ban = 'ban',
-	unban = 'unban',
-	kick = 'kick',
-	softBan = 'softBan',
-	warn = 'warn',
-	mute = 'mute',
-	unmute = 'unmute',
 
 	check = 'check',
 	caseDelete = 'caseDelete',
 	caseView = 'caseView',
+
+	ban = 'ban',
+	mute = 'mute',
+	kick = 'kick',
+	softBan = 'softBan',
+	strike = 'strike',
+	unban = 'unban',
+	unhoist = 'unhoist',
+	unmute = 'unmute',
+	warn = 'warn',
 
 	clean = 'clean',
 	cleanText = 'cleanText',
@@ -114,25 +117,6 @@ export enum ModerationCommand {
 	purgeSafe = 'purgeSafe',
 	purgeUntil = 'purgeUntil',
 	purge = 'purge'
-}
-
-export enum OwnerCommand {
-	cache = 'ownerCache',
-	diagnose = 'ownerDiagnose',
-	dm = 'ownerDm',
-	flush = 'ownerFlush',
-	givePremium = 'ownerGivePremium',
-	help = 'ownerHelp',
-	leave = 'ownerLeave',
-	sudo = 'ownerSudo'
-}
-
-export interface InviteCounts {
-	regular: number;
-	custom: number;
-	fake: number;
-	leave: number;
-	total: number;
 }
 
 export interface RabbitMqMember {
@@ -170,7 +154,8 @@ export enum ViolationType {
 	quickMessages = 'quickMessages',
 	mentionUsers = 'mentionUsers',
 	mentionRoles = 'mentionRoles',
-	emojis = 'emojis'
+	emojis = 'emojis',
+	hoist = 'hoist'
 }
 
 export enum PunishmentType {
@@ -179,4 +164,12 @@ export enum PunishmentType {
 	softban = 'softban',
 	warn = 'warn',
 	mute = 'mute'
+}
+
+export interface InviteCounts {
+	regular: number;
+	custom: number;
+	fake: number;
+	leave: number;
+	total: number;
 }

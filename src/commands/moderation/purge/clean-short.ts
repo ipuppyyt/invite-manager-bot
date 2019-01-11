@@ -32,6 +32,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[maxTextLength, numberOfMessages]: [number, number],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -47,12 +48,12 @@ export default class extends Command {
 			numberOfMessages = 5;
 		}
 
-		let messages = await message.channel.getMessages(
+		const messages = await message.channel.getMessages(
 			Math.min(numberOfMessages, 100),
 			message.id
 		);
 
-		let messagesToBeDeleted = messages.filter(msg => {
+		const messagesToBeDeleted = messages.filter(msg => {
 			return (
 				msg.content.length < maxTextLength &&
 				msg.attachments.length === 0 &&
@@ -61,7 +62,7 @@ export default class extends Command {
 		});
 
 		messagesToBeDeleted.push(message);
-		let [error] = await to(
+		const [error] = await to(
 			this.client.deleteMessages(
 				message.channel.id,
 				messagesToBeDeleted.map(m => m.id)
@@ -78,7 +79,7 @@ export default class extends Command {
 			});
 		}
 
-		let response = await this.sendReply(message, embed);
+		const response = await this.sendReply(message, embed);
 
 		const func = () => {
 			response.delete();

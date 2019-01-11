@@ -19,6 +19,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		args: any[],
+		flags: {},
 		{ guild, settings, t, isPremium }: Context
 	): Promise<any> {
 		const prefix = settings.prefix;
@@ -55,12 +56,19 @@ export default class extends Command {
 				return this.sendReply(message, t('prompt.canceled'));
 			}
 
-			await this.repo.premium.save({
+			const sub = await this.repo.premium.save({
 				amount: 0.0,
+				maxGuilds: 1,
+				isFreeTier: true,
 				validUntil: validUntil.toDate(),
-				guildId: guild.id,
-				memberId: message.author.id
+				memberId: message.author.id,
+				reason: null
 			});
+			await this.repo.premiumGuilds.save({
+				guildId: guild.id,
+				premiumSubscriptionId: sub.id
+			});
+
 			this.client.cache.premium.flush(guild.id);
 
 			embed.description = t('cmd.tryPremium.started', {
@@ -72,10 +80,12 @@ export default class extends Command {
 	}
 
 	private async guildHadTrial(guildID: string): Promise<boolean> {
-		const subs = await this.repo.premium.count({
+		const subs = await this.repo.premiumGuilds.count({
 			where: {
-				amount: 0,
-				guildId: guildID
+				guildId: guildID,
+				premiumSubscription: {
+					isFreeTier: true
+				}
 			}
 		});
 		return subs > 0;

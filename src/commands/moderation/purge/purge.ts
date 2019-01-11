@@ -30,6 +30,7 @@ export default class extends Command {
 	public async action(
 		message: Message,
 		[quantity, member]: [number, Member],
+		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		if (this.client.config.ownerGuildIds.indexOf(guild.id) === -1) {
@@ -55,7 +56,7 @@ export default class extends Command {
 			);
 		}
 		messages.push(message);
-		let [error] = await to(
+		const [error] = await to(
 			this.client.deleteMessages(message.channel.id, messages.map(m => m.id))
 		);
 		if (error) {
@@ -68,7 +69,7 @@ export default class extends Command {
 			});
 		}
 
-		let response = await this.sendReply(message, embed);
+		const response = await this.sendReply(message, embed);
 
 		const func = () => {
 			response.delete();
