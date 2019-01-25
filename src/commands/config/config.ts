@@ -1,7 +1,7 @@
 import { Embed, Message, TextChannel } from 'eris';
 
 import { IMClient } from '../../client';
-import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
+import { JoinInvalidatedReason } from '../../models/Join';
 import { LogAction } from '../../models/Log';
 import { SettingsKey } from '../../models/Setting';
 import { EnumResolver, SettingsValueResolver } from '../../resolvers';
@@ -277,17 +277,17 @@ export default class extends Command {
 				const cmd = this.client.cmds.commands.find(
 					c => c.name === BotCommand.subtractFakes
 				);
-				return async () => await cmd.action(message, [], {}, context);
+				return () => cmd.action(message, [], {}, context);
 			} else {
-				// Delete old duplicate removals
-				return async () =>
-					await this.repo.customInvs.update(
+				// Delete all fake invalidations
+				return () =>
+					this.repo.joins.update(
 						{
 							guildId: guild.id,
-							generatedReason: CustomInvitesGeneratedReason.fake
+							invalidatedReason: JoinInvalidatedReason.fake
 						},
 						{
-							deletedAt: new Date()
+							invalidatedReason: null
 						}
 					);
 			}
@@ -301,15 +301,15 @@ export default class extends Command {
 				);
 				return async () => await cmd.action(message, [], {}, context);
 			} else {
-				// Delete old leave removals
-				return async () =>
-					await this.repo.customInvs.update(
+				// Delete all leave invalidations
+				return () =>
+					this.repo.joins.update(
 						{
 							guildId: guild.id,
-							generatedReason: CustomInvitesGeneratedReason.leave
+							invalidatedReason: JoinInvalidatedReason.leave
 						},
 						{
-							deletedAt: new Date()
+							invalidatedReason: null
 						}
 					);
 			}

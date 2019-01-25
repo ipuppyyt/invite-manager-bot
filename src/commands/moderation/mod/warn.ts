@@ -7,7 +7,7 @@ import {
 	ModerationCommand,
 	PunishmentType
 } from '../../../types';
-import { isPunishable, to } from '../../../util';
+import { isPunishable } from '../../../util';
 import { Command, Context } from '../../Command';
 
 export default class extends Command {

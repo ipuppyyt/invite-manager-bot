@@ -36,8 +36,7 @@ export default class extends Command {
 				{
 					name: 'deleteMessageDays',
 					resolver: NumberResolver,
-					short: 'd',
-					valueRequired: true
+					short: 'd'
 				}
 			],
 			group: CommandGroup.Moderation,

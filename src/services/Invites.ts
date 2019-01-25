@@ -3,39 +3,12 @@ import moment from 'moment';
 import { getRepository, In, Repository } from 'typeorm';
 
 import { IMClient } from '../client';
-import {
-	CustomInvite,
-	CustomInvitesGeneratedReason
-} from '../models/CustomInvite';
+import { CustomInvite } from '../models/CustomInvite';
 import { InviteCode } from '../models/InviteCode';
 import { Join } from '../models/Join';
 import { Member } from '../models/Member';
 import { MemberSettingsKey } from '../models/MemberSetting';
 import { InviteCounts } from '../types';
-
-// Extra query stuff we need in multiple places
-const sumClearRegular = [
-	`SUM(IF(ci.generatedReason='clear_regular',ci.amount,0))`,
-	'totalClearRegular'
-];
-
-const sumTotalCustom = [
-	`SUM(IF(ci.generatedReason IS NULL OR ` +
-		`ci.generatedReason='clear_custom',ci.amount,0))`,
-	'totalCustom'
-];
-
-const sumTotalFake = [
-	`SUM(IF(ci.generatedReason = 'fake' OR ` +
-		`ci.generatedReason='clear_fake',ci.amount,0))`,
-	'totalFake'
-];
-
-const sumTotalLeaves = [
-	`SUM(IF(ci.generatedReason = 'leave' OR ` +
-		`ci.generatedReason='clear_leave',ci.amount,0))`,
-	'totalLeaves'
-];
 
 type InvCacheType = {
 	[x: string]: {
@@ -69,6 +42,84 @@ export class InvitesService {
 		this.invs = getRepository(InviteCode);
 		this.joins = getRepository(Join);
 		this.members = getRepository(Member);
+	}
+
+	public async getInviteCounts(
+		guildId: string,
+		memberId: string
+	): Promise<InviteCounts> {
+		const inviteCodePromise = inviteCodes.findOne({
+			attributes: [
+				[
+					sequelize.fn('SUM', sequelize.literal('uses - clearedAmount')),
+					'total'
+				]
+			],
+			where: {
+				guildId: guildId,
+				inviterId: memberId,
+				uses: { [Op.gt]: sequelize.col('inviteCode.clearedAmount') }
+			},
+			raw: true
+		});
+		const joinsPromise = joins.findAll({
+			attributes: [
+				'invalidatedReason',
+				[sequelize.fn('COUNT', sequelize.col('id')), 'total']
+			],
+			where: {
+				guildId,
+				invalidatedReason: { [Op.ne]: null },
+				cleared: false
+			},
+			include: [
+				{
+					attributes: [],
+					model: inviteCodes,
+					as: 'exactMatch',
+					required: true,
+					where: { inviterId: memberId }
+				}
+			],
+			group: ['invalidatedReason'],
+			raw: true
+		});
+		const customInvitesPromise = customInvites.findOne({
+			attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
+			where: {
+				guildId: guildId,
+				memberId: memberId,
+				cleared: false
+			},
+			raw: true
+		});
+
+		const [invCode, js, customInvs] = await Promise.all([
+			inviteCodePromise,
+			joinsPromise,
+			customInvitesPromise
+		]);
+
+		const regular = Number((invCode as any).total);
+		const custom = Number((customInvs as any).total);
+
+		let fake = 0;
+		let leave = 0;
+		js.forEach((j: any) => {
+			if (j.invalidatedReason === JoinInvalidatedReason.fake) {
+				fake -= Number(j.total);
+			} else if (j.invalidatedReason === JoinInvalidatedReason.leave) {
+				leave -= Number(j.total);
+			}
+		});
+
+		return {
+			regular,
+			custom,
+			fake,
+			leave,
+			total: regular + custom + fake + leave
+		};
 	}
 
 	public async getInviteCounts(

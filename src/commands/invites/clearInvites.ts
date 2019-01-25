@@ -1,13 +1,15 @@
-import { Message, User } from 'eris';
-import { In } from 'typeorm';
+import { Message } from 'eris';
+import { Moment } from 'moment';
+import { In, Not } from 'typeorm';
 
 import { IMClient } from '../../client';
-import {
-	CustomInvite,
-	CustomInvitesGeneratedReason
-} from '../../models/CustomInvite';
 import { LogAction } from '../../models/Log';
-import { BooleanResolver, UserResolver } from '../../resolvers';
+import {
+	BasicUser,
+	BooleanResolver,
+	DateResolver,
+	UserResolver
+} from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -18,15 +20,22 @@ export default class extends Command {
 			aliases: ['clear-invites'],
 			args: [
 				{
-					name: 'clearBonus',
-					resolver: BooleanResolver
-				},
-				{
 					name: 'user',
 					resolver: UserResolver
 				}
 			],
-			// clientPermissions: ['MANAGE_GUILD'],
+			flags: [
+				{
+					name: 'date',
+					resolver: DateResolver,
+					short: 'd'
+				},
+				{
+					name: 'clearBonus',
+					resolver: BooleanResolver,
+					short: 'cb'
+				}
+			],
 			group: CommandGroup.Invites,
 			guildOnly: true,
 			strict: true
@@ -35,158 +44,66 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[clearBonus, user]: [boolean, User],
-		flags: {},
+		[user]: [BasicUser],
+		{ date, clearBonus }: { date: Moment; clearBonus: boolean },
 		{ guild, t }: Context
 	): Promise<any> {
 		const memberId = user ? user.id : undefined;
 
-		// First clear any previous clearinvites we might have
+		await this.repo.invCodes
+			.createQueryBuilder('i')
+			.update()
+			.set({ clearedAmount: () => 'i.uses' })
+			.where('guildId = :guildId AND inviterId :memberId', {
+				guildId: guild.id,
+				inviterId: memberId ? memberId : Not(null)
+			})
+			.execute();
+
+		await this.repo.joins.update(
+			{
+				guildId: guild.id,
+				...(memberId && {
+					exactMatchCode: In(
+						(await this.repo.invCodes.find({
+							where: { guildId: guild.id, inviterId: memberId }
+						})).map(ic => ic.code)
+					)
+				})
+			},
+			{
+				cleared: true
+			}
+		);
+
 		await this.repo.customInvs.update(
 			{
 				guildId: guild.id,
-				generatedReason: In([
-					CustomInvitesGeneratedReason.clear_regular,
-					CustomInvitesGeneratedReason.clear_custom,
-					CustomInvitesGeneratedReason.clear_fake,
-					CustomInvitesGeneratedReason.clear_leave
-				]),
 				...(memberId && { memberId })
 			},
 			{
-				deletedAt: new Date()
+				cleared: false
 			}
 		);
 
-		const invsQuery = this.repo.invCodes
-			.createQueryBuilder('ic')
-			.select('ic.inviterId')
-			.addSelect('SUM(ic.uses)', 'totalUses')
-			.where('ic.guildId = :guildId', { guildId: guild.id })
-			.andWhere('ic.inviterId IS NOT NULL')
-			.groupBy('ic.inviterId');
-		if (memberId) {
-			invsQuery.andWhere('ic.inviterId = :invId', { invId: memberId });
-		}
-
-		const invs = await invsQuery.getRawMany();
-
-		const customInvsQuery = this.repo.customInvs
-			.createQueryBuilder('ci')
-			.select(['ci.memberId', 'ci.generatedReason'])
-			.addSelect('SUM(ci.amount)', 'totalAmount')
-			.where('ci.guildId = :guildId', { guildId: guild.id })
-			.andWhere('ci.memberId IS NOT NULL')
-			.groupBy('ci.memberId')
-			.addGroupBy('ci.generatedReason');
-		if (memberId) {
-			customInvsQuery.andWhere('ci.memberId = :mId', { mId: memberId });
-		}
-
-		// Get all custom generated invites (all clear_invites were removed before)
-		const customInvs = await customInvsQuery.getRawMany();
-
-		const regular: { [x: string]: number } = {};
-		const fake: { [x: string]: number } = {};
-		const leave: { [x: string]: number } = {};
-		const custom: { [x: string]: number } = {};
-
-		invs.forEach(inv => {
-			if (!regular[inv.inviterId]) {
-				regular[inv.inviterId] = 0;
-			}
-			regular[inv.inviterId] += parseInt(inv.totalUses, 10);
-		});
-		customInvs
-			.filter(inv => inv.generatedReason === CustomInvitesGeneratedReason.fake)
-			.forEach(inv => {
-				if (!fake[inv.memberId]) {
-					fake[inv.memberId] = 0;
-				}
-				fake[inv.memberId] += parseInt(inv.totalAmount, 10);
-			});
-		customInvs
-			.filter(inv => inv.generatedReason === CustomInvitesGeneratedReason.leave)
-			.forEach(inv => {
-				if (!leave[inv.memberId]) {
-					leave[inv.memberId] = 0;
-				}
-				leave[inv.memberId] += parseInt(inv.totalAmount, 10);
-			});
-
-		const cleared: { [x: string]: boolean } = {};
-		const newInvs: Partial<CustomInvite>[] = [];
-		Object.keys(regular).forEach(memId => {
-			newInvs.push({
-				guildId: guild.id,
-				memberId: memId,
-				creatorId: null,
-				amount: -regular[memId],
-				reason: null,
-				generatedReason: CustomInvitesGeneratedReason.clear_regular
-			});
-			cleared[memId] = true;
-		});
-		Object.keys(fake).forEach(memId => {
-			newInvs.push({
-				guildId: guild.id,
-				memberId: memId,
-				creatorId: null,
-				amount: -fake[memId],
-				reason: null,
-				generatedReason: CustomInvitesGeneratedReason.clear_fake
-			});
-			cleared[memId] = true;
-		});
-		Object.keys(leave).forEach(memId => {
-			newInvs.push({
-				guildId: guild.id,
-				memberId: memId,
-				creatorId: null,
-				amount: -leave[memId],
-				reason: null,
-				generatedReason: CustomInvitesGeneratedReason.clear_leave
-			});
-			cleared[memId] = true;
-		});
-
 		if (clearBonus) {
-			// Process any custom invites
-			customInvs
-				.filter(inv => inv.generatedReason === null)
-				.forEach(inv => {
-					if (!custom[inv.memberId]) {
-						custom[inv.memberId] = 0;
-					}
-					custom[inv.memberId] += parseInt(inv.totalAmount, 10);
-				});
-
-			Object.keys(custom).forEach(memId => {
-				newInvs.push({
-					id: null,
+			// Clear invites
+			await this.repo.customInvs.update(
+				{
 					guildId: guild.id,
-					memberId: memId,
-					creatorId: null,
-					amount: -custom[memId],
-					reason: null,
-					generatedReason: CustomInvitesGeneratedReason.clear_custom
-				});
-				cleared[memId] = true;
-			});
+					...(memberId && { memberId })
+				},
+				{
+					cleared: true
+				}
+			);
 		}
-
-		const createdInvs = await this.repo.customInvs.save(newInvs);
 
 		this.client.logAction(guild, message, LogAction.clearInvites, {
-			customInviteIds: createdInvs.map(inv => inv.id),
+			clearBonus,
 			...(memberId && { targetId: memberId })
 		});
 
-		return this.sendReply(
-			message,
-			t('cmd.clearInvites.done', {
-				amount: Object.keys(cleared).length
-			})
-		);
+		return this.sendReply(message, t('cmd.clearInvites.done'));
 	}
 }

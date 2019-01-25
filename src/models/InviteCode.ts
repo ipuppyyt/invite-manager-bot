@@ -33,17 +33,20 @@ export class InviteCode extends BaseEntity {
 	@Column({ nullable: true })
 	public deletedAt: Date;
 
-	@Column()
+	@Column({ type: 'int' })
 	public maxAge: number;
 
-	@Column()
+	@Column({ type: 'int' })
 	public maxUses: number;
 
-	@Column()
+	@Column({ type: 'int' })
 	public uses: number;
 
 	@Column()
 	public temporary: boolean;
+
+	@Column({ type: 'int', default: 0 })
+	public clearedAmount: number;
 
 	@Column({ nullable: true })
 	public channelId: string;

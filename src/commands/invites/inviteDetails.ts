@@ -1,9 +1,9 @@
-import { Message, User } from 'eris';
+import { Message } from 'eris';
 import moment from 'moment';
 
 import { IMClient } from '../../client';
 import { InviteCodeSettingsKey } from '../../models/InviteCodeSetting';
-import { UserResolver } from '../../resolvers';
+import { BasicUser, UserResolver } from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -25,7 +25,7 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[user]: [User],
+		[user]: [BasicUser],
 		flags: {},
 		{ guild, t, settings }: Context
 	): Promise<any> {

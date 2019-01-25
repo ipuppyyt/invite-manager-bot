@@ -1,8 +1,13 @@
-import { Message, User } from 'eris';
+import { Message } from 'eris';
 
 import { IMClient } from '../../client';
 import { LogAction } from '../../models/Log';
-import { NumberResolver, StringResolver, UserResolver } from '../../resolvers';
+import {
+	BasicUser,
+	NumberResolver,
+	StringResolver,
+	UserResolver
+} from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
 import { promoteIfQualified } from '../../util';
 import { Command, Context } from '../Command';
@@ -37,7 +42,7 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[user, amount, reason]: [User, number, string],
+		[user, amount, reason]: [BasicUser, number, string],
 		flags: {},
 		{ guild, t, me }: Context
 	): Promise<any> {
@@ -60,7 +65,7 @@ export default class extends Command {
 			creatorId: message.author.id,
 			amount,
 			reason,
-			generatedReason: null
+			cleared: false
 		});
 		await this.repo.customInvs.save(createdInv);
 
@@ -90,47 +95,44 @@ export default class extends Command {
 			});
 		}
 
+		let member = guild.members.get(user.id);
+		if (!member) {
+			member = await guild.getRESTMember(user.id).catch(() => undefined);
+		}
 		// Promote the member if it's not a bot
-		if (!user.bot) {
-			let member = guild.members.get(user.id);
-			if (!member) {
-				member = await guild.getRESTMember(user.id);
-			}
+		// and if the member is still in the guild
+		if (member && !member.bot) {
+			const promoteInfo = await promoteIfQualified(
+				this.client,
+				guild,
+				member,
+				me,
+				totalInvites
+			);
 
-			// Only if the member is still in the guild try and promote them
-			if (member) {
-				const promoteInfo = await promoteIfQualified(
-					this.client,
-					guild,
-					member,
-					me,
-					totalInvites
-				);
+			if (promoteInfo) {
+				const { shouldHave, shouldNotHave, dangerous } = promoteInfo;
 
-				if (promoteInfo) {
-					const { shouldHave, shouldNotHave, dangerous } = promoteInfo;
-
-					if (shouldHave.length > 0) {
-						descr +=
-							'\n\n' +
-							t('roles.shouldHave', {
-								shouldHave: shouldHave.map(r => `<@&${r.id}>`).join(', ')
-							});
-					}
-					if (shouldNotHave.length > 0) {
-						descr +=
-							'\n\n' +
-							t('roles.shouldNotHave', {
-								shouldNotHave: shouldNotHave.map(r => `<@&${r.id}>`).join(', ')
-							});
-					}
-					if (dangerous.length > 0) {
-						descr +=
-							'\n\n' +
-							t('roles.dangerous', {
-								dangerous: dangerous.map(r => `<@&${r.id}>`).join(', ')
-							});
-					}
+				if (shouldHave.length > 0) {
+					descr +=
+						'\n\n' +
+						t('roles.shouldHave', {
+							shouldHave: shouldHave.map(r => `<@&${r.id}>`).join(', ')
+						});
+				}
+				if (shouldNotHave.length > 0) {
+					descr +=
+						'\n\n' +
+						t('roles.shouldNotHave', {
+							shouldNotHave: shouldNotHave.map(r => `<@&${r.id}>`).join(', ')
+						});
+				}
+				if (dangerous.length > 0) {
+					descr +=
+						'\n\n' +
+						t('roles.dangerous', {
+							dangerous: dangerous.map(r => `<@&${r.id}>`).join(', ')
+						});
 				}
 			}
 		}

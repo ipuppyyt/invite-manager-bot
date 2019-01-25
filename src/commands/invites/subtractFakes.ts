@@ -1,7 +1,6 @@
 import { Message } from 'eris';
 
 import { IMClient } from '../../client';
-import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -22,46 +21,32 @@ export default class extends Command {
 		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
-		const js = await this.repo.joins
-			.createQueryBuilder('j')
-			.select(['j.memberId', 'ic.code', 'ic.inviterId'])
-			.addSelect('COUNT(ic.code)', 'numJoins')
-			.addSelect('MAX(j.createdAt)', 'newestJoin')
-			.innerJoin('j.exactMatch', 'ic')
-			.where({ guildId: guild.id })
-			.groupBy('j.memberId')
-			.addGroupBy('ic.code')
-			.getRawMany();
+		const maxJoins = await joins.findAll({
+			attributes: [
+				[sequelize.fn('MAX', sequelize.col('id')), 'id'],
+				'exactMatchCode'
+			],
+			group: ['exactMatchCode', 'memberId'],
+			where: { guildId: guild.id },
+			raw: true
+		});
 
-		if (js.length === 0) {
+		if (maxJoins.length === 0) {
 			return this.sendReply(message, t('cmd.subtractFakes.none'));
 		}
 
-		// Delete old duplicate removals
-		await this.repo.customInvs.update(
+		const jIds = maxJoins.map(j => j.id).join(', ');
+		await this.repo.joins.update(
 			{
-				guildId: guild.id,
-				generatedReason: CustomInvitesGeneratedReason.fake
+				guildId: guild.id
 			},
-			{ deletedAt: new Date() }
+			{
+				invalidatedReason: sequelize.literal(
+					`CASE WHEN id IN (${jIds}) THEN invalidatedReason ELSE 'fake' END`
+				) as any
+			}
 		);
 
-		// Add subtracts for duplicate invites
-		const customInvs = js
-			.filter((j: any) => parseInt(j.numJoins, 10) > 1)
-			.map((j: any) => ({
-				id: null,
-				guildId: guild.id,
-				memberId: j['exactMatch.inviterId'],
-				creatorId: null,
-				amount: -(parseInt(j.numJoins, 10) - 1),
-				reason: j.memberId,
-				generatedReason: CustomInvitesGeneratedReason.fake
-			}));
-		// TODO: updateOnDuplicate: ['amount', 'updatedAt']
-		await this.repo.customInvs.save(customInvs);
-
-		const total = -customInvs.reduce((acc, inv) => acc + inv.amount, 0);
-		return this.sendReply(message, t('cmd.subtractFakes.done', { total }));
+		return this.sendReply(message, t('cmd.subtractFakes.done'));
 	}
 }

@@ -1,4 +1,5 @@
 import { Channel, Role } from 'eris';
+import { Moment } from 'moment';
 
 import { InviteCodeSettingsKey } from './models/InviteCodeSetting';
 import { MemberSettingsKey } from './models/MemberSetting';
@@ -12,6 +13,7 @@ import {
 export type InternalSettingsTypes =
 	| 'Boolean'
 	| 'Number'
+	| 'Date'
 	| 'String'
 	| 'String[]'
 	| 'Channel'

@@ -1,10 +1,9 @@
-import { Message, User } from 'eris';
-import { In } from 'typeorm';
+import { Message } from 'eris';
+import { In, Not } from 'typeorm';
 
 import { IMClient } from '../../client';
-import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
 import { LogAction } from '../../models/Log';
-import { UserResolver } from '../../resolvers';
+import { BasicUser, UserResolver } from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -27,34 +26,52 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[user]: [User],
+		[user]: [BasicUser],
 		flags: {},
 		{ guild, t }: Context
 	): Promise<any> {
 		const memberId = user ? user.id : null;
 
-		const num = await this.repo.customInvs.update(
+		await this.repo.invCodes.update(
 			{
 				guildId: guild.id,
-				generatedReason: In([
-					CustomInvitesGeneratedReason.clear_regular,
-					CustomInvitesGeneratedReason.clear_custom,
-					CustomInvitesGeneratedReason.clear_fake,
-					CustomInvitesGeneratedReason.clear_leave
-				]),
+				inviterId: memberId ? memberId : Not(null)
+			},
+			{
+				clearedAmount: 0
+			}
+		);
+
+		await this.repo.joins.update(
+			{
+				guildId: guild.id,
+				...(memberId && {
+					exactMatchCode: In(
+						(await this.repo.invCodes.find({
+							where: { guildId: guild.id, inviterId: memberId }
+						})).map(ic => ic.code)
+					)
+				})
+			},
+			{
+				cleared: false
+			}
+		);
+
+		await this.repo.customInvs.update(
+			{
+				guildId: guild.id,
 				...(memberId && { memberId })
 			},
-			{ deletedAt: new Date() }
+			{
+				cleared: false
+			}
 		);
 
 		this.client.logAction(guild, message, LogAction.restoreInvites, {
-			...(memberId && { targetId: memberId }),
-			num
+			...(memberId && { targetId: memberId })
 		});
 
-		return this.sendReply(
-			message,
-			t('cmd.restoreInvites.done', { user: user ? user.id : undefined })
-		);
+		return this.sendReply(message, t('cmd.restoreInvites.done'));
 	}
 }

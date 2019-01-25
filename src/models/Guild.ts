@@ -45,7 +45,7 @@ export class Guild extends BaseEntity {
 	@Column()
 	public icon: string;
 
-	@Column()
+	@Column({ type: 'int' })
 	public memberCount: number;
 
 	@Column()

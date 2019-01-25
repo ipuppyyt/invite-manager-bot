@@ -8,6 +8,7 @@ import {
 	ArrayResolver,
 	BooleanResolver,
 	ChannelResolver,
+	DateResolver,
 	EnumResolver,
 	NumberResolver,
 	Resolver,
@@ -28,6 +29,7 @@ export class SettingsValueResolver extends Resolver {
 			'Channel[]': new ArrayResolver(client, ChannelResolver),
 			Boolean: new BooleanResolver(client),
 			Number: new NumberResolver(client),
+			Date: new DateResolver(client),
 			Role: new RoleResolver(client),
 			'Role[]': new ArrayResolver(client, RoleResolver),
 			String: new StringResolver(client),
@@ -59,8 +61,9 @@ export class SettingsValueResolver extends Resolver {
 		return resolver.resolve(value, context, [key]);
 	}
 
-	public getHelp(context: Context, [key]: [string]): string {
-		if (key) {
+	public getHelp(context: Context, args?: [string]): string {
+		if (args && args.length > 0) {
+			const key = args[0];
 			return this.resolvers[this.infos[key].type].getHelp(context, [key]);
 		}
 		return super.getHelp(context);

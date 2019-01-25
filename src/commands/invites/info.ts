@@ -1,9 +1,14 @@
-import { Message, User } from 'eris';
+import { Message } from 'eris';
 import moment from 'moment';
 
 import { IMClient } from '../../client';
-import { CustomInvitesGeneratedReason } from '../../models/CustomInvite';
-import { EnumResolver, NumberResolver, UserResolver } from '../../resolvers';
+import { JoinInvalidatedReason } from '../../models/Join';
+import {
+	BasicUser,
+	EnumResolver,
+	NumberResolver,
+	UserResolver
+} from '../../resolvers';
 import { BotCommand, CommandGroup } from '../../types';
 import { Command, Context } from '../Command';
 
@@ -41,7 +46,7 @@ export default class extends Command {
 
 	public async action(
 		message: Message,
-		[user, details, _page]: [User, InfoDetails, number],
+		[user, details, _page]: [BasicUser, InfoDetails, number],
 		flags: {},
 		{ guild, t, settings, me }: Context
 	): Promise<any> {
@@ -71,7 +76,7 @@ export default class extends Command {
 			order: { createdAt: 'DESC' }
 		});
 
-		const bonusInvs = customInvs.filter(inv => inv.generatedReason === null);
+		const bonusInvs = customInvs.filter(ci => !ci.cleared);
 
 		if (details === InfoDetails.bonus) {
 			// Exit if we have no bonus invites
@@ -81,7 +86,7 @@ export default class extends Command {
 					value: t('cmd.info.bonusInvites.more')
 				});
 			}
-			const maxPage = Math.ceil(invitedMembers.length / ENTRIES_PER_PAGE);
+			const maxPage = Math.ceil(bonusInvs.length / ENTRIES_PER_PAGE);
 			const p = Math.max(Math.min(_page ? _page - 1 : 0, maxPage - 1), 0);
 
 			return this.showPaginated(message, p, maxPage, page => {
@@ -151,58 +156,59 @@ export default class extends Command {
 			order: { uses: 'DESC' }
 		});
 
-		let regular = invCodes.reduce((acc, inv) => acc + inv.uses, 0);
-		let custom = 0;
+		const js = await this.repo.joins
+			.createQueryBuilder('j')
+			.select(['invalidatedReason', 'cleared'])
+			.addSelect('COUNT(j.id)', 'total')
+			.where(
+				'guildId = :guildId AND exactMatchCode IN(:codes) AND invalidatedReason IS NOT NULL',
+				{
+					guildId: guild.id,
+					codes: invCodes.map(i => `'${i.code}'`).join(',')
+				}
+			)
+			.groupBy('invalidatedReason')
+			.addGroupBy('cleared')
+			.getRawMany();
+
 		let fake = 0;
 		let leave = 0;
+		js.forEach(j => {
+			if (j.invalidatedReason === JoinInvalidatedReason.fake) {
+				if (!j.cleared) {
+					fake -= Number(j.total);
+				}
+			} else if (j.invalidatedReason === JoinInvalidatedReason.leave) {
+				if (!j.cleared) {
+					leave -= Number(j.total);
+				}
+			}
+		});
 
+		let regular = 0;
 		let clearRegular = 0;
+		invCodes.forEach(ic => {
+			clearRegular += ic.clearedAmount;
+			regular += ic.uses - ic.clearedAmount;
+		});
+
+		let custom = 0;
 		let clearCustom = 0;
-		let clearFake = 0;
-		let clearLeave = 0;
-		customInvs.forEach(inv => {
-			switch (inv.generatedReason) {
-				case CustomInvitesGeneratedReason.clear_regular:
-					clearRegular += inv.amount;
-					regular += inv.amount;
-					break;
-
-				case CustomInvitesGeneratedReason.clear_fake:
-					clearFake += inv.amount;
-					fake += inv.amount;
-					break;
-
-				case CustomInvitesGeneratedReason.fake:
-					fake += inv.amount;
-					break;
-
-				case CustomInvitesGeneratedReason.clear_leave:
-					clearLeave += inv.amount;
-					leave += inv.amount;
-					break;
-
-				case CustomInvitesGeneratedReason.leave:
-					leave += inv.amount;
-					break;
-
-				case CustomInvitesGeneratedReason.clear_custom:
-					clearCustom += inv.amount;
-					custom += inv.amount;
-					break;
-
-				default:
-					custom += inv.amount;
-					break;
+		customInvs.forEach(ci => {
+			if (ci.cleared) {
+				clearCustom += ci.amount;
+			} else {
+				custom += ci.amount;
 			}
 		});
 
 		const numTotal = regular + custom + fake + leave;
-		const clearTotal = clearRegular + clearCustom + clearFake + clearLeave;
+		const clearTotal = clearRegular + clearCustom;
 
 		// Try and get the member if they are still in the guild
 		let member = guild.members.get(user.id);
 		if (!member) {
-			member = await guild.getRESTMember(user.id);
+			member = await guild.getRESTMember(user.id).catch(() => undefined);
 		}
 
 		if (member) {
@@ -266,9 +272,7 @@ export default class extends Command {
 			value: t('cmd.info.invites.clear.text', {
 				total: clearTotal,
 				regular: clearRegular,
-				custom: clearCustom,
-				fake: clearFake,
-				leave: clearLeave
+				custom: clearCustom
 			}),
 			inline: true
 		});
@@ -424,7 +428,7 @@ export default class extends Command {
 			const detailMsg =
 				'\n' +
 				t('cmd.info.bonusInvites.details', {
-					cmd: `\`${settings.prefix}info @${user.username} bonus\``
+					cmd: `\`${settings.prefix}info ${user.id} bonus\``
 				});
 
 			// Crop the text because we don't know how long the 'reasons' are that
@@ -470,7 +474,7 @@ export default class extends Command {
 			const detailMsg =
 				'\n' +
 				t('cmd.info.invitedMembers.details', {
-					cmd: `\`${settings.prefix}info @${user.username} members\``
+					cmd: `\`${settings.prefix}info ${user.id} members\``
 				});
 
 			embed.fields.push({

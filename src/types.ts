@@ -133,13 +133,14 @@ export interface RabbitMqMember {
 }
 
 export type InternalSettingsTypes =
-	| 'String'
-	| 'Number'
 	| 'Boolean'
-	| 'Channel'
-	| 'Role'
+	| 'Number'
+	| 'Date'
+	| 'String'
 	| 'String[]'
+	| 'Channel'
 	| 'Channel[]'
+	| 'Role'
 	| 'Role[]'
 	| 'Enum<LeaderboardStyle>'
 	| 'Enum<RankAssignmentStyle>'

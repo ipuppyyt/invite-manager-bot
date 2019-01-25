@@ -31,7 +31,7 @@ export class PunishmentConfig extends BaseEntity {
 	@Column()
 	public type: PunishmentType;
 
-	@Column()
+	@Column({ type: 'int' })
 	public amount: number;
 
 	@Column()

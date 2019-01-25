@@ -15,6 +15,11 @@ import { InviteCode } from './InviteCode';
 import { Leave } from './Leave';
 import { Member } from './Member';
 
+export enum JoinInvalidatedReason {
+	fake = 'fake',
+	leave = 'leave'
+}
+
 @Entity()
 @Index(['guild', 'member', 'createdAt'], { unique: true })
 export class Join extends BaseEntity {
@@ -36,8 +41,20 @@ export class Join extends BaseEntity {
 	})
 	public possibleMatches: string;
 
+	@Column()
+	public invalidatedReason: JoinInvalidatedReason;
+
+	@Column({ default: false })
+	public cleared: boolean;
+
+	@Column({ nullable: true })
+	public guildId: string;
+
 	@ManyToOne(type => Guild, g => g.joins)
 	public guild: Guild;
+
+	@Column({ nullable: true })
+	public memberId: string;
 
 	@ManyToOne(type => Member, m => m.joins)
 	public member: Member;

@@ -25,7 +25,7 @@ export class Rank extends BaseEntity {
 	@Column({ nullable: true })
 	public deletedAt: Date;
 
-	@Column()
+	@Column({ type: 'int' })
 	public numInvites: number;
 
 	@Column({ type: 'text' })

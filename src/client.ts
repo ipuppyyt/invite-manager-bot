@@ -12,7 +12,8 @@ import { PremiumCache } from './cache/PremiumCache';
 import { PunishmentCache } from './cache/PunishmentsCache';
 import { SettingsCache } from './cache/SettingsCache';
 import { StrikesCache } from './cache/StrikesCache';
-
+import { Guild as DBGuild } from './models/Guild';
+import { LogAction } from './models/Log';
 import { CaptchaService } from './services/Captcha';
 import { Commands } from './services/Commands';
 import { DBQueue } from './services/DBQueue';
@@ -22,9 +23,6 @@ import { Moderation } from './services/Moderation';
 import { RabbitMq } from './services/RabbitMq';
 import { Scheduler } from './services/Scheduler';
 import { ShardCommand } from './types';
-
-import { Guild as DBGuild } from './models/Guild';
-import { LogAction } from './models/Log';
 
 const config = require('../config.json');
 

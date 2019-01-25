@@ -1,4 +1,3 @@
-import { User } from 'eris';
 import { getRepository, In, Repository } from 'typeorm';
 
 import { IMClient } from '../client';
@@ -78,7 +77,7 @@ export class MemberSettingsCache extends GuildCache<
 
 	public async setOne<K extends MemberSettingsKey>(
 		guildId: string,
-		user: User,
+		userId: string,
 		key: K,
 		value: MemberSettingsObject[K]
 	) {
@@ -86,7 +85,7 @@ export class MemberSettingsCache extends GuildCache<
 		const dbVal = toDbValue(key, value);
 		const val = fromDbValue(key, dbVal);
 
-		let set = guildSet.get(user.id);
+		let set = guildSet.get(userId);
 		if (!set) {
 			set = { ...memberDefaultSettings };
 		}
@@ -98,14 +97,14 @@ export class MemberSettingsCache extends GuildCache<
 			this.settingsRepo.save([
 				{
 					guildId,
-					memberId: user.id,
+					memberId: userId,
 					key,
 					value: dbVal
 				}
 			]);
 
 			set[key] = val;
-			guildSet.set(user.id, set);
+			guildSet.set(userId, set);
 		}
 
 		return val;

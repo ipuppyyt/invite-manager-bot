@@ -30,7 +30,7 @@ export class Strike extends BaseEntity {
 	@Column()
 	public type: ViolationType;
 
-	@Column()
+	@Column({ type: 'int' })
 	public amount: number;
 
 	@Column({ nullable: true })
