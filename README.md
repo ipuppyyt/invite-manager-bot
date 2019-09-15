@@ -1,4 +1,4 @@
-# InviteManager Discord Bot
+# InviteManager Discord Bot fork by chaun14
 
 ## Description
 
@@ -30,7 +30,7 @@ This is the code repository for the InviteManager Discord Bot.
 
 - NodeJS (tested using v10)
 - Database (tested using MySQL v5.7)  
-  (`MariaDB` should work, `PostgreSQL` and `MsSQL` might work, `SQLite` probably will not)
+  (`MariaDB` don't work, `PostgreSQL` and `MsSQL` might work, `SQLite` not work)
 
 ### Setup
 
