@@ -1,6 +1,6 @@
 import { VoiceConnection, VoiceConnectionManager } from 'eris';
 
-import { MusicItem } from './modules/music/models/MusicItem';
+import { MusicItem } from './music/models/MusicItem';
 
 export enum BotType {
 	regular = 'regular',
@@ -23,6 +23,7 @@ export enum GuildPermission {
 	MANAGE_MESSAGES = 'manageMessages',
 	EMBED_LINKS = 'embedLinks',
 	MANAGE_GUILD = 'manageGuild',
+	MANAGE_CHANNELS = 'manageChannels',
 	VIEW_AUDIT_LOGS = 'viewAuditLogs',
 	MANAGE_ROLES = 'manageRoles',
 	CREATE_INSTANT_INVITE = 'createInstantInvite',
@@ -31,6 +32,22 @@ export enum GuildPermission {
 	ADD_REACTIONS = 'addReactions',
 	MANAGE_EMOJIS = 'manageEmojis',
 	READ_MESSAGE_HISTORY = 'readMessageHistory'
+}
+
+export enum GuildFeature {
+	INVITE_SPLASH = 'INVITE_SPLASH',
+	VIP_REGIONS = 'VIP_REGIONS',
+	VANITY_URL = 'VANITY_URL',
+	VERIFIED = 'VERIFIED',
+	PARTNERED = 'PARTNERED',
+	PUBLIC = 'PUBLIC',
+	COMMERCE = 'COMMERCE',
+	NEWS = 'NEWS',
+	DISCOVERABLE = 'DISCOVERABLE',
+	FEATURABLE = 'FEATURABLE',
+	ANIMATED_ICON = 'ANIMATED_ICON',
+	BANNER = 'BANNER',
+	PUBLIC_DISABLED = 'PUBLIC_DISABLED'
 }
 
 export enum PromptResult {
@@ -67,7 +84,7 @@ export enum ShardCommand {
 export enum ChartType {
 	joins = 'joins',
 	leaves = 'leaves',
-	usage = 'usage'
+	joinsAndLeaves = 'joinsAndLeaves'
 }
 
 export enum BotCommand {
@@ -90,10 +107,7 @@ export enum BotCommand {
 
 	export = 'export',
 	premium = 'premium',
-	tryPremium = 'tryPremium',
-
-	makeMentionable = 'makeMentionable',
-	mentionRole = 'mentionRole'
+	tryPremium = 'tryPremium'
 
 	/*report = 'report',*/
 }
@@ -102,7 +116,6 @@ export enum InvitesCommand {
 	createInvite = 'createInvite',
 	addInvites = 'addInvites',
 	clearInvites = 'clearInvites',
-	fake = 'fake',
 	info = 'info',
 	inviteCodes = 'inviteCodes',
 	inviteDetails = 'inviteDetails',
@@ -128,6 +141,7 @@ export enum ModerationCommand {
 	check = 'check',
 	caseDelete = 'caseDelete',
 	caseView = 'caseView',
+	caseEdit = 'caseEdit',
 
 	ban = 'ban',
 	mute = 'mute',
@@ -138,6 +152,7 @@ export enum ModerationCommand {
 	unhoist = 'unhoist',
 	unmute = 'unmute',
 	warn = 'warn',
+	lockdown = 'lockdown',
 
 	clean = 'clean',
 	cleanText = 'cleanText',
@@ -145,6 +160,13 @@ export enum ModerationCommand {
 	purgeSafe = 'purgeSafe',
 	purgeUntil = 'purgeUntil',
 	purge = 'purge'
+}
+
+export enum ManagementCommand {
+	placeholder = 'placeholder',
+	reactionRole = 'reactionRole',
+	makeMentionable = 'makeMentionable',
+	mentionRole = 'mentionRole'
 }
 
 export enum MusicCommand {
@@ -177,7 +199,7 @@ export interface MusicQueue {
 	queue: MusicItem[];
 }
 
-export enum MusicPlatformTypes {
+export enum MusicPlatformType {
 	YouTube = 'youtube',
 	SoundCloud = 'soundcloud',
 	RaveDJ = 'ravedj',
@@ -233,6 +255,7 @@ export interface LavaPlayer extends VoiceConnection {
 	on(event: 'speakingStop', listener: (userID: string) => void): this;
 	on(event: 'stateUpdate', listener: (state: LavaPlayerState) => void): this;
 	on(event: 'end', listener: (event: LavaEndEvent) => void): this;
+	on(event: 'userDisconnect', listener: (userID: string) => void): this;
 }
 
 export interface LavaEndEvent {

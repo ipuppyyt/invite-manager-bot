@@ -1,50 +1,61 @@
 import { captureException, withScope } from '@sentry/node';
+import chalk from 'chalk';
 import { GuildChannel, Member, Message, PrivateChannel } from 'eris';
-import { readdirSync, statSync } from 'fs';
+import { readdir, statSync } from 'fs';
 import i18n from 'i18n';
-import { basename, resolve } from 'path';
+import { relative, resolve } from 'path';
 
-import { IMClient } from '../../client';
-import { defaultSettings } from '../../settings';
+import { guildDefaultSettings } from '../../settings';
 import { GuildPermission } from '../../types';
 import { Command, Context } from '../commands/Command';
 import { BooleanResolver } from '../resolvers';
 
-const cmdDir = resolve(__dirname, '../../modules/');
-const idRegex: RegExp = /^(?:<@!?)?(\d+)>? ?(.*)$/;
-const rateLimit = 1; // max commands per second
-const cooldown = 5; // in seconds
+import { IMService } from './Service';
 
-export class CommandsService {
-	private client: IMClient;
+const CMD_DIRS = [
+	resolve(__dirname, '../commands'),
+	resolve(__dirname, '../../invites/commands'),
+	resolve(__dirname, '../../moderation/commands'),
+	resolve(__dirname, '../../music/commands'),
+	resolve(__dirname, '../../management/commands')
+];
+const ID_REGEX: RegExp = /^(?:<@!?)?(\d+)>? ?(.*)$/;
+const RATE_LIMIT = 1; // max commands per second
+const COOLDOWN = 5; // in seconds
 
-	public commands: Command[];
-	private cmdMap: Map<string, Command>;
-	private commandCalls: Map<string, { last: number; warned: boolean }>;
+const readDir = async (dir: string) => {
+	return new Promise<string[]>((res, reject) => {
+		readdir(dir, (err, files) => {
+			if (err) {
+				reject(err);
+			} else {
+				res(files);
+			}
+		});
+	});
+};
 
-	public constructor(client: IMClient) {
-		this.client = client;
+export class CommandsService extends IMService {
+	public commands: Command[] = [];
+	private cmdMap: Map<string, Command> = new Map();
+	private commandCalls: Map<string, { last: number; warned: boolean }> = new Map();
 
-		this.commands = [];
-		this.cmdMap = new Map();
-		this.commandCalls = new Map();
-	}
-
-	public init() {
+	public async init() {
 		console.log(`Loading commands...`);
 
 		// Load all commands
-		const loadRecursive = (dir: string) =>
-			readdirSync(dir).forEach((fileName: string) => {
+		const loadRecursive = async (dir: string) => {
+			const fileNames = await readDir(dir);
+			for (const fileName of fileNames) {
 				const file = dir + '/' + fileName;
 
 				if (statSync(file).isDirectory()) {
-					loadRecursive(file);
-					return;
+					await loadRecursive(file);
+					continue;
 				}
 
 				if (!fileName.endsWith('.js')) {
-					return;
+					continue;
 				}
 
 				const clazz = require(file);
@@ -52,7 +63,7 @@ export class CommandsService {
 					const constr = clazz.default;
 					const parent = Object.getPrototypeOf(constr);
 					if (!parent || parent.name !== 'Command') {
-						return;
+						continue;
 					}
 
 					const inst: Command = new constr(this.client);
@@ -66,7 +77,7 @@ export class CommandsService {
 					this.cmdMap.set(inst.name.toLowerCase(), inst);
 
 					// Register aliases
-					inst.aliases.forEach(a => {
+					inst.aliases.forEach((a) => {
 						if (this.cmdMap.has(a.toLowerCase())) {
 							console.error(`Duplicate command alias ${a}`);
 							process.exit(1);
@@ -74,27 +85,25 @@ export class CommandsService {
 						this.cmdMap.set(a.toLowerCase(), inst);
 					});
 
-					console.log(
-						`Loaded \x1b[34m${inst.name}\x1b[0m from ` +
-							`\x1b[2m${basename(file)}\x1b[0m`
-					);
+					console.log(`Loaded ${chalk.blue(inst.name)} from ${chalk.gray(relative(process.cwd(), file))}`);
 				}
-			});
-		loadRecursive(cmdDir);
+			}
+		};
+		await Promise.all(CMD_DIRS.map((dir) => loadRecursive(dir)));
 
-		console.log(`Loaded \x1b[32m${this.commands.length}\x1b[0m commands!`);
+		console.log(`Loaded ${chalk.blue(this.commands.length)} commands!`);
+	}
 
-		// Attach events
+	public async onClientReady() {
+		// Attach events after the bot is ready
 		this.client.on('messageCreate', this.onMessage.bind(this));
+
+		await super.onClientReady();
 	}
 
 	public async onMessage(message: Message) {
 		// Skip if this is our own message, bot message or empty messages
-		if (
-			message.author.id === this.client.user.id ||
-			message.author.bot ||
-			!message.content.length
-		) {
+		if (message.author.id === this.client.user.id || message.author.bot || !message.content.length) {
 			return;
 		}
 
@@ -116,9 +125,7 @@ export class CommandsService {
 
 		// Save some constant stuff
 		let content = message.content.trim();
-		const sets = guild
-			? await this.client.cache.settings.get(guild.id)
-			: { ...defaultSettings };
+		const sets = guild ? await this.client.cache.guilds.get(guild.id) : { ...guildDefaultSettings };
 		const lang = sets.lang;
 
 		const t = (key: string, replacements?: { [key: string]: string }) =>
@@ -139,8 +146,8 @@ export class CommandsService {
 		// Process prefix first so we can use any possible prefixes
 		if (content.startsWith(sets.prefix)) {
 			content = content.substring(sets.prefix.length).trim();
-		} else if (idRegex.test(content)) {
-			const matches = content.match(idRegex);
+		} else if (ID_REGEX.test(content)) {
+			const matches = content.match(ID_REGEX);
 
 			if (matches[1] !== this.client.user.id) {
 				return;
@@ -220,15 +227,15 @@ export class CommandsService {
 					warned: false
 				};
 				this.commandCalls.set(message.author.id, lastCall);
-			} else if (now - lastCall.last < (1 / rateLimit) * 1000) {
+			} else if (now - lastCall.last < (1 / RATE_LIMIT) * 1000) {
 				// Only warn the first time we hit the rate limit
 				if (!lastCall.warned) {
 					lastCall.warned = true;
-					lastCall.last = now + cooldown * 1000;
+					lastCall.last = now + COOLDOWN * 1000;
 					await this.client.msg.sendReply(
 						message,
 						t('permissions.rateLimit', {
-							cooldown: cooldown.toString()
+							cooldown: COOLDOWN.toString()
 						})
 					);
 				}
@@ -242,9 +249,7 @@ export class CommandsService {
 			lastCall.last = now;
 		}
 
-		const isPremium = guild
-			? await this.client.cache.premium.get(guild.id)
-			: false;
+		const isPremium = guild ? await this.client.cache.premium.get(guild.id) : false;
 
 		if (!isPremium && cmd.premiumOnly) {
 			await this.client.msg.sendReply(message, t('permissions.premiumOnly'));
@@ -264,29 +269,22 @@ export class CommandsService {
 				member = await guild.getRESTMember(message.author.id);
 			}
 			if (!member) {
-				console.error(
-					`Could not get member ${message.author.id} for ${guild.id}`
-				);
+				console.error(`Could not get member ${message.author.id} for ${guild.id}`);
 				await this.client.msg.sendReply(message, t('permissions.memberError'));
 				return;
 			}
 
 			// Always allow admins
-			if (
-				!member.permission.has(GuildPermission.ADMINISTRATOR) &&
-				guild.ownerID !== member.id
-			) {
-				const perms = (await this.client.cache.permissions.get(guild.id))[
-					cmd.name
-				];
+			if (!member.permission.has(GuildPermission.ADMINISTRATOR) && guild.ownerID !== member.id) {
+				const perms = (await this.client.cache.permissions.get(guild.id))[cmd.name];
 
 				if (perms && perms.length > 0) {
 					// Check that we have at least one of the required roles
-					if (!perms.some(p => member.roles.indexOf(p) >= 0)) {
+					if (!perms.some((p) => member.roles.indexOf(p) >= 0)) {
 						await this.client.msg.sendReply(
 							message,
 							t('permissions.role', {
-								roles: perms.map(p => `<@&${p}>`).join(', ')
+								roles: perms.map((p) => `<@&${p}>`).join(', ')
 							})
 						);
 						return;
@@ -306,17 +304,14 @@ export class CommandsService {
 
 			// Check command permissions
 			const missingPerms = cmd.botPermissions.filter(
-				p =>
-					!(channel as GuildChannel).permissionsOf(this.client.user.id).has(p)
+				(p) => !(channel as GuildChannel).permissionsOf(this.client.user.id).has(p)
 			);
 			if (missingPerms.length > 0) {
 				await this.client.msg.sendReply(
 					message,
 					t(`permissions.missing`, {
 						channel: `<#${channel.id}>`,
-						permissions: missingPerms
-							.map(p => '`' + t(`permissions.${p}`) + '`')
-							.join(', ')
+						permissions: missingPerms.map((p) => '`' + t(`permissions.${p}`) + '`').join(', ')
 					})
 				);
 				return;
@@ -377,9 +372,7 @@ export class CommandsService {
 			const flagSplits = rawArg.split('=');
 			const isShort = !flagSplits[0].startsWith('--');
 			const name = flagSplits[0].replace(/-/gi, '');
-			const flag = cmd.flags.find(f =>
-				isShort ? f.short === name : f.name === name
-			);
+			const flag = cmd.flags.find((f) => (isShort ? f.short === name : f.name === name));
 
 			// Exit if this is not a flag
 			if (!flag) {
@@ -432,7 +425,7 @@ export class CommandsService {
 				// Since we are concatinating all arguments we have to restore quotes where required
 				rawVal = rawArgs
 					.slice(i)
-					.map(a => (a.indexOf(' ') > 0 ? `"${a}"` : a))
+					.map((a) => (a.indexOf(' ') > 0 ? `"${a}"` : a))
 					.join(' ');
 				if (rawVal.length === 0) {
 					rawVal = undefined;
@@ -472,6 +465,8 @@ export class CommandsService {
 			i++;
 		}
 
+		this.client.stats.cmdProcessed++;
+
 		// Run command
 		let error: any = null;
 		try {
@@ -484,31 +479,30 @@ export class CommandsService {
 		const execTime = Date.now() - start;
 
 		if (error) {
+			this.client.stats.cmdErrors++;
 			console.error(error);
 
-			withScope(scope => {
+			withScope((scope) => {
 				if (guild) {
 					scope.setUser({ id: guild.id });
 				}
 				scope.setTag('command', cmd.name);
+				scope.setExtra('channel', channel.id);
 				scope.setExtra('message', message.content);
 				captureException(error);
 			});
 
 			if (guild) {
-				this.client.dbQueue.addIncident(
-					{
-						id: null,
-						guildId: guild.id,
-						error: error.message,
-						details: {
-							command: cmd.name,
-							author: message.author.id,
-							message: message.content
-						}
-					},
-					guild
-				);
+				this.client.db.saveIncident(guild, {
+					id: null,
+					guildId: guild.id,
+					error: error.message,
+					details: {
+						command: cmd.name,
+						author: message.author.id,
+						message: message.content
+					}
+				});
 			}
 
 			await this.client.msg.sendReply(
@@ -522,19 +516,15 @@ export class CommandsService {
 		// Ignore messages that are not in guild chat or from disabled guilds
 		if (guild && !this.client.disabledGuilds.has(guild.id)) {
 			// We have to add the guild and members too, in case our DB does not have them yet
-			this.client.dbQueue.addCommandUsage(
-				{
-					id: null,
-					guildId: guild.id,
-					memberId: message.author.id,
-					command: cmd.name,
-					args: args.join(' '),
-					errored: error !== null,
-					time: execTime
-				},
-				guild,
-				message.author
-			);
+			this.client.db.saveCommandUsage(guild, message.author, {
+				id: null,
+				guildId: guild.id,
+				memberId: message.author.id,
+				command: cmd.name,
+				args: args.join(' '),
+				errored: error !== null,
+				time: execTime
+			});
 		}
 	}
 }

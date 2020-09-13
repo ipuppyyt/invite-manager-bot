@@ -1,36 +1,23 @@
 import { captureException, withScope } from '@sentry/node';
-import {
-	Embed,
-	EmbedBase,
-	EmbedOptions,
-	Emoji,
-	Guild,
-	GuildChannel,
-	Message,
-	TextableChannel,
-	User
-} from 'eris';
+import { Embed, EmbedOptions, Emoji, Guild, GuildChannel, Message, TextableChannel, User } from 'eris';
 import i18n from 'i18n';
 import moment from 'moment';
 
-import { IMClient } from '../../client';
 import { GuildPermission, PromptResult } from '../../types';
+
+import { IMService } from './Service';
 
 const upSymbol = '🔺';
 const downSymbol = '🔻';
 const truthy = new Set(['true', 'on', 'y', 'yes', 'enable']);
 
-function convertEmbedToPlain(embed: EmbedBase) {
+function convertEmbedToPlain(embed: EmbedOptions) {
 	const url = embed.url ? `(${embed.url})` : '';
-	const authorUrl =
-		embed.author && embed.author.url ? `(${embed.author.url})` : '';
+	const authorUrl = embed.author && embed.author.url ? `(${embed.author.url})` : '';
 
 	let fields = '';
 	if (embed.fields && embed.fields.length) {
-		fields =
-			'\n\n' +
-			embed.fields.map(f => `**${f.name}**\n${f.value}`).join('\n\n') +
-			'\n\n';
+		fields = '\n\n' + embed.fields.map((f) => `**${f.name}**\n${f.value}`).join('\n\n') + '\n\n';
 	}
 
 	return (
@@ -45,10 +32,7 @@ function convertEmbedToPlain(embed: EmbedBase) {
 }
 
 export type CreateEmbedFunc = (options?: EmbedOptions) => Embed;
-export type SendReplyFunc = (
-	message: Message,
-	reply: EmbedOptions | string
-) => Promise<Message>;
+export type SendReplyFunc = (message: Message, reply: EmbedOptions | string) => Promise<Message>;
 export type SendEmbedFunc = (
 	target: TextableChannel,
 	embed: EmbedOptions | string,
@@ -61,30 +45,16 @@ export type ShowPaginatedFunc = (
 	render: (page: number, maxPage: number) => Embed
 ) => Promise<void>;
 
-export class MessagingService {
-	private client: IMClient;
-
-	public constructor(client: IMClient) {
-		this.client = client;
-	}
-
-	public createEmbed(
-		options: EmbedOptions = {},
-		overrideFooter: boolean = true
-	): Embed {
-		let color = options.color
-			? (options.color as number | string)
-			: parseInt('00AE86', 16);
+export class MessagingService extends IMService {
+	public createEmbed(options: EmbedOptions = {}, overrideFooter: boolean = true): Embed {
+		let color = options.color ? (options.color as number | string) : parseInt('00AE86', 16);
 		// Parse colors in hashtag/hex format
 		if (typeof color === 'string') {
 			const code = color.startsWith('#') ? color.substr(1) : color;
 			color = parseInt(code, 16);
 		}
 
-		const footer =
-			overrideFooter || !options.footer
-				? this.getDefaultFooter()
-				: options.footer;
+		const footer = overrideFooter || !options.footer ? this.getDefaultFooter() : options.footer;
 
 		delete options.color;
 		return {
@@ -108,28 +78,18 @@ export class MessagingService {
 		return this.sendEmbed(message.channel, reply, message.author);
 	}
 
-	public sendEmbed(
-		target: TextableChannel,
-		embed: EmbedOptions | string,
-		fallbackUser?: User
-	) {
-		const e =
-			typeof embed === 'string'
-				? this.createEmbed({ description: embed })
-				: embed;
+	public sendEmbed(target: TextableChannel, embed: EmbedOptions | string, fallbackUser?: User) {
+		const e = typeof embed === 'string' ? this.createEmbed({ description: embed }) : embed;
 
-		e.fields = e.fields.filter(field => field && field.value);
+		e.fields = e.fields.filter((field) => field && field.value);
 
 		const content = convertEmbedToPlain(e);
 
-		const handleException = (err: Error, reportIndicent = true): undefined => {
-			withScope(scope => {
+		const handleException = (err: Error, reportIndicent = true) => {
+			withScope((scope) => {
 				if (target instanceof GuildChannel) {
 					scope.setUser({ id: target.guild.id });
-					scope.setExtra(
-						'permissions',
-						target.permissionsOf(this.client.user.id).json
-					);
+					scope.setExtra('permissions', target.permissionsOf(this.client.user.id).json);
 				}
 				scope.setExtra('channel', target.id);
 				scope.setExtra('message', embed);
@@ -140,97 +100,89 @@ export class MessagingService {
 				captureException(err);
 			});
 			if (reportIndicent && target instanceof GuildChannel) {
-				this.client.dbQueue.addIncident(
-					{
-						id: null,
-						guildId: target.guild.id,
-						error: err.message,
-						details: {
-							channel: target.id,
-							embed,
-							content
-						}
-					},
-					target.guild
-				);
+				this.client.db.saveIncident(target.guild, {
+					id: null,
+					guildId: target.guild.id,
+					error: err.message,
+					details: {
+						channel: target.id,
+						embed,
+						content
+					}
+				});
 			}
-			return undefined;
 		};
 
 		return new Promise<Message>((resolve, reject) => {
 			// Fallback functions when sending message fails
-			const sendDM = (error?: any) => {
+			const sendDM = async (error?: any): Promise<Message> => {
 				if (!fallbackUser) {
 					return undefined;
 				}
 
-				return fallbackUser
-					.getDMChannel()
-					.then(dmChannel => {
-						let msg =
-							'I encountered an error when trying to send a message. ' +
-							'Please report this to a developer:\n```' +
-							`${error.message}\n\n${error.message}\`\`\``;
-
-						if (error.code === 50013) {
-							const name = this.client.user.username;
-							msg =
-								`**${name} does not have permissions to post to that channel.\n` +
-								`Please allow ${name} to send messages in the <#${target.id}> channel.**\n\n`;
+				try {
+					const dmChannel = await fallbackUser.getDMChannel();
+					let msg =
+						'I encountered an error when trying to send a message. ' +
+						`Please report this to a developer:\n\`\`\`${error ? error.message : 'Unknown'}\`\`\``;
+					if (error && error.code === 50013) {
+						const name = this.client.user.username;
+						msg =
+							`**${name} does not have permissions to post to that channel.\n` +
+							`Please allow ${name} to send messages in the <#${target.id}> channel.**\n\n`;
+					}
+					try {
+						return await dmChannel.createMessage(msg);
+					} catch (err) {
+						if (err.code === 50007) {
+							// Cannot send messages to this user
+						} else {
+							handleException(err, false);
 						}
-
-						return dmChannel
-							.createMessage(msg)
-							.then(resolve)
-							.catch(err2 => handleException(err2, false));
-					})
-					.catch(err2 => handleException(err2, false));
+						return undefined;
+					}
+				} catch (err2) {
+					handleException(err2, false);
+					return undefined;
+				}
 			};
 
-			const sendPlain = (error?: any) => {
+			const sendPlain = async (error?: any): Promise<Message> => {
 				// If we don't have permission to send messages try DM
 				if (
 					target instanceof GuildChannel &&
-					!target
-						.permissionsOf(this.client.user.id)
-						.has(GuildPermission.SEND_MESSAGES)
+					!target.permissionsOf(this.client.user.id).has(GuildPermission.SEND_MESSAGES)
 				) {
 					return sendDM({ code: 50013 });
 				}
 
-				return target
-					.createMessage(content)
-					.then(resolve)
-					.catch(err => {
-						handleException(err);
-						return sendDM(error);
-					});
+				try {
+					return await target.createMessage(content);
+				} catch (err) {
+					handleException(err);
+					return sendDM(error);
+				}
 			};
 
-			const send = () => {
+			const send = async (): Promise<Message> => {
 				// If we don't have permissions to embed links try plain content
 				if (
 					target instanceof GuildChannel &&
-					(!target
-						.permissionsOf(this.client.user.id)
-						.has(GuildPermission.SEND_MESSAGES) ||
-						!target
-							.permissionsOf(this.client.user.id)
-							.has(GuildPermission.EMBED_LINKS))
+					(!target.permissionsOf(this.client.user.id).has(GuildPermission.SEND_MESSAGES) ||
+						!target.permissionsOf(this.client.user.id).has(GuildPermission.EMBED_LINKS))
 				) {
 					return sendPlain();
 				}
 
-				return target
-					.createMessage({ embed: e })
-					.then(resolve)
-					.catch(error => {
-						handleException(error);
-						return sendPlain(error);
-					});
+				try {
+					return await target.createMessage({ embed: e });
+				} catch (err) {
+					handleException(err);
+					return sendPlain(err);
+				}
 			};
 
-			return send();
+			resolve(send());
 		});
 	}
 
@@ -243,15 +195,11 @@ export class MessagingService {
 		let msg = template;
 
 		if (strings) {
-			Object.keys(strings).forEach(
-				k => (msg = msg.replace(new RegExp(`{${k}}`, 'g'), strings[k]))
-			);
+			Object.keys(strings).forEach((k) => (msg = msg.replace(new RegExp(`{${k}}`, 'g'), strings[k])));
 		}
 
 		if (dates) {
-			Object.keys(dates).forEach(
-				k => (msg = this.fillDatePlaceholder(msg, k, dates[k]))
-			);
+			Object.keys(dates).forEach((k) => (msg = this.fillDatePlaceholder(msg, k, dates[k])));
 		}
 
 		try {
@@ -259,10 +207,8 @@ export class MessagingService {
 			if (await this.client.cache.premium.get(guild.id)) {
 				return this.createEmbed(temp, false);
 			} else {
-				const lang = (await this.client.cache.settings.get(guild.id)).lang;
-				msg +=
-					'\n\n' +
-					i18n.__({ locale: lang, phrase: 'JOIN_LEAVE_EMBEDS_IS_PREMIUM' });
+				const lang = (await this.client.cache.guilds.get(guild.id)).lang;
+				msg += '\n\n' + i18n.__({ locale: lang, phrase: 'messages.joinLeaveEmbedsIsPremium' });
 			}
 		} catch (e) {
 			//
@@ -271,28 +217,20 @@ export class MessagingService {
 		return msg;
 	}
 
-	private fillDatePlaceholder(
-		msg: string,
-		name: string,
-		value: moment.Moment | string
-	) {
+	private fillDatePlaceholder(msg: string, name: string, value: moment.Moment | string) {
 		const date = typeof value === 'string' ? value : value.calendar();
-		const duration =
-			typeof value === 'string'
-				? value
-				: moment.duration(value.diff(moment())).humanize();
+		const duration = typeof value === 'string' ? value : moment.duration(value.diff(moment())).humanize();
 		const timeAgo = typeof value === 'string' ? value : value.fromNow();
+		const calendar = typeof value === 'string' ? value : value.calendar();
 
 		return msg
 			.replace(new RegExp(`{${name}:date}`, 'g'), date)
 			.replace(new RegExp(`{${name}:duration}`, 'g'), duration)
-			.replace(new RegExp(`{${name}:timeAgo}`, 'g'), timeAgo);
+			.replace(new RegExp(`{${name}:timeAgo}`, 'g'), timeAgo)
+			.replace(new RegExp(`{${name}:calendar}`, 'g'), calendar);
 	}
 
-	public async prompt(
-		message: Message,
-		promptStr: string
-	): Promise<[PromptResult, Message]> {
+	public async prompt(message: Message, promptStr: string): Promise<[PromptResult, Message]> {
 		await message.channel.createMessage(promptStr);
 
 		let confirmation: Message;
@@ -306,7 +244,7 @@ export class MessagingService {
 			return [PromptResult.FAILURE, confirmation];
 		};
 
-		return new Promise<[PromptResult, Message]>(resolve => {
+		return new Promise<[PromptResult, Message]>((resolve) => {
 			const func = async (msg: Message) => {
 				if (msg.author.id === message.author.id) {
 					confirmation = msg;
@@ -384,10 +322,8 @@ export class MessagingService {
 		if (page > 0) {
 			await prevMsg.addReaction(upSymbol);
 		} else {
-			const users = await prevMsg
-				.getReaction(upSymbol, 10)
-				.catch(() => [] as User[]);
-			if (users.find(u => u.id === author.id)) {
+			const users = await prevMsg.getReaction(upSymbol, 10).catch(() => [] as User[]);
+			if (users.find((u) => u.id === author.id)) {
 				await prevMsg.removeReaction(upSymbol, this.client.user.id);
 			}
 		}
@@ -395,10 +331,8 @@ export class MessagingService {
 		if (page < maxPage - 1) {
 			await prevMsg.addReaction(downSymbol);
 		} else {
-			const users = await prevMsg
-				.getReaction(downSymbol, 10)
-				.catch(() => [] as User[]);
-			if (users.find(u => u.id === author.id)) {
+			const users = await prevMsg.getReaction(downSymbol, 10).catch(() => [] as User[]);
+			if (users.find((u) => u.id === author.id)) {
 				await prevMsg.removeReaction(downSymbol, this.client.user.id);
 			}
 		}

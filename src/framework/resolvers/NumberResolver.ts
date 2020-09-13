@@ -3,6 +3,9 @@ import { Context } from '../commands/Command';
 
 import { Resolver } from './Resolver';
 
+const MAX_VALUE = Number.MAX_SAFE_INTEGER;
+const MIN_VALUE = Number.MIN_SAFE_INTEGER;
+
 export class NumberResolver extends Resolver {
 	private min?: number;
 	private max?: number;
@@ -21,17 +24,24 @@ export class NumberResolver extends Resolver {
 
 		const val = parseFloat(value);
 		if (isNaN(val) || !isFinite(val)) {
-			throw Error(t(`resolvers.${this.getType()}.invalid`));
+			throw Error(t(`resolvers.number.invalid`));
+		}
+
+		if (val < MIN_VALUE) {
+			throw Error(t(`resolvers.number.tooSmall`, { min: this.min || MIN_VALUE }));
+		}
+		if (val > MAX_VALUE) {
+			throw Error(t(`resolvers.number.tooLarge`, { max: this.max || MAX_VALUE }));
 		}
 
 		if (this.min) {
 			if (val < this.min) {
-				throw Error(t('arguments.number.tooSmall'));
+				throw Error(t(`resolvers.number.tooSmall`, { min: this.min }));
 			}
 		}
 		if (this.max) {
 			if (val > this.max) {
-				throw Error(t('arguments.number.tooLarge'));
+				throw Error(t(`resolvers.number.tooLarge`, { max: this.max }));
 			}
 		}
 

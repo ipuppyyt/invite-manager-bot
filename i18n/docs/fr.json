@@ -1,0 +1,152 @@
+{
+	"lang": "Français",
+	"modules": {
+		"title": "Modules",
+		"invites": {
+			"title": "Gestion des invitations",
+			"description": "Pendant que notre bot est sur votre serveur, nous suivons chaque invitation qui se produit sur votre serveur. Discord vous montre seulement qui a combien d'invitations. Notre bot analyse également qui a été invité par qui. Cela permet à notre bot de détecter les fausses invitations et de voir qui tente de tromper le système d’invitation.",
+			"examples": {
+				"title": "Examples"
+			},
+			"overview": {
+				"title": "Vue d'ensemble"
+			},
+			"customMessages": {
+				"title": "Message personnalisé"
+			}
+		},
+		"moderation": {
+			"title": "Modération",
+			"description": "Notre tout nouveau système de modération vous permet de modérer automatiquement de nombreuses choses. Veuillez consulter nos pages [avertissements]({{{linkStrikes}}}) et [sanctions]({{{linkPunishments}}}) pour plus d'informations. En bref, notre bot donne des 'avertissements' aux personnes qui se conduisent mal et après un certain nombre d'avertissements, l'utilisateur est sanctionné. Tout cela est configurable par l'utilisateur.",
+			"punishments": {
+				"title": "Sanctions"
+			},
+			"strikes": {
+				"title": "Avertissements"
+			}
+		},
+		"music": {
+			"title": "Musique",
+			"overview": {
+				"title": "Vue d'ensemble"
+			}
+		}
+	},
+	"other": {
+		"title": "Autre",
+		"donating": {
+			"title": "Faire un don",
+			"description": "other.donating.description",
+			"crypto": {
+				"title": "Crypto",
+				"description": "other.donating.crypto.description"
+			}
+		},
+		"roadmap": {
+			"title": "Feuille de route"
+		},
+		"support": {
+			"title": "Support"
+		},
+		"translations": {
+			"title": "Traductions",
+			"description": "other.translations.description",
+			"help": {
+				"title": "other.translations.help.title",
+				"description": "other.translations.help.description"
+			}
+		},
+		"webpanel": {
+			"title": "Webpanel",
+			"description": "other.webpanel.description"
+		},
+		"changelog": {
+			"title": "Notes de mises à jour"
+		},
+		"openSource": {
+			"title": "Open Source",
+			"description": "other.openSource.description",
+			"bot": {
+				"title": "Bot principal",
+				"description": "other.openSource.bot.description"
+			}
+		}
+	},
+	"premium": {
+		"title": "Prime",
+		"description": "Pour payer notre facture de serveur, nous proposons une version premium du bot. Pour voir toutes les fonctionnalités supplémentaires que vous obtenez, veuillez visiter notre [page de tarification]({{{ link }}}).",
+		"features": {
+			"title": "Fonctionnalités"
+		},
+		"tiers": {
+			"title": "Tiers"
+		},
+		"setup": {
+			"title": "Installation"
+		}
+	},
+	"start": {
+		"title": "Commencer",
+		"description": "Pour commencer, il suffit d'exécuter la commande `!setup` sur votre serveur.",
+		"alpha": {
+			"title": "Bot en Alpha",
+			"intro": "Le bot `InviteManager Alpha` est le bot que nous utilisons pour tester de nouvelles fonctionnalités. Les nouvelles fonctionnalités du bot Alpha ne seront pas toujours stables, mais si vous utilisez ce bot, vous serez les premiers à les voir et vous pourrez nous dire comment nous pouvons les améliorer avant qu'elles ne soient incluses dans le bot principal.",
+			"linkDescription": "Invitez InviteManager en Alpha ici"
+		},
+		"faq": {
+			"title": "Questions Courantes",
+			"prefix": {
+				"title": "Comment je change le préfix du bot?",
+				"description": "Vous pouvez faire `!config prefix -` pour changer le préfixe.\n\nSi vous ne connaissez pas votre préfixe actuel, vous pouvez utiliser `@InviteManager config prefix` pour afficher le préfixe."
+			},
+			"joinLeaveChannel": {
+				"title": "Comment je définie des messages d'arrivés et de départs?",
+				"description": "Définissez le salon en faisant \n`!config joinMessageChannel #channel` ou\n\n`!config leaveMessageChannel #channel`.\nAprès cela, les prochain messages seront affichées sur ce salon."
+			},
+			"joinLeaveMessage": {
+				"title": "Est-ce que je peut personnaliser les messages d'arrivées et de départs?",
+				"description": "Absolument! Vous pouvez changer le message en faisant par exemple\n``!config joinMessage {memberMention} **viens d'arriver**; Invité par **{inviterName}** (**{numInvites}** invitations)`\n\n ou\n\n`!config leaveMessage {memberName} **à quitté**; Invité par **{inviterName}**`.\n\nIl existe de nombreux espaces réservés disponibles. Vous pouvez voir la liste complète sur la page '[Messages personnalisés]({{{ link }}})'."
+			},
+			"ranks": {
+				"title": "Qu'est-ce que 'Ranks' et comment puis-je les utiliser?",
+				"description": "Les rôles sont utilisés pour attribuer des rôles aux personnes lorsqu'elles atteignent un certain nombre d'invitations. Par exemple. Si vous avez un rôle appelé `@Débutant` et que vous voulez que des personnes qui ont 5 invitations ou plus soient ajoutées à ce rôle, vous devrez créer un rôles comme ceci:`!add-rankadd-rank @Débutant 5 (et si vous voulez une description ici)`.Dès que quelqu'un aura 5 invitations, il sera automatiquement ajouté à ce rôle!"
+			},
+			"channel": {
+				"title": "Comment puis-je désactiver le bot dans un ou plusieurs salon ?",
+				"description": "Supprimez les autorisations de lecture dans les salons où vous ne souhaitez pas que le bot réponde."
+			},
+			"limitations": {
+				"title": "Limitation: pas de suivi avancé avant que le bot ne sois ajouté",
+				"description": "Le suivi avancé (qui a invité qui) ne fonctionne qu'après que vous ayez invité le bot. Le bot saura toujours le nombre d'invitations de tout le monde après l'invitation, ne vous inquiétez pas. Seules les informations supplémentaires sont manquantes et ne peuvent être collectées que pour les membres qui rejoignent après que vous ayez invité le bot."
+			}
+		},
+		"pro": {
+			"title": "Bot Pro",
+			"description": "start.pro.description"
+		},
+		"quick": {
+			"title": "Guide de démarrage rapide",
+			"setup": {
+				"title": "Installation",
+				"description": "start.quick.setup.description",
+				"first": {
+					"title": "start.quick.setup.first.title",
+					"description": "start.quick.setup.first.description"
+				},
+				"second": {
+					"title": "start.quick.setup.second.title",
+					"description": "start.quick.setup.second.description"
+				}
+			}
+		}
+	},
+	"reference": {
+		"title": "Référence",
+		"commands": {
+			"title": "Commandes"
+		},
+		"settings": {
+			"title": "Configurations / Paramètres"
+		}
+	}
+}

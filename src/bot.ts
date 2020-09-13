@@ -1,7 +1,7 @@
 import { configureScope, init } from '@sentry/node';
+import chalk from 'chalk';
 
 import { IMClient } from './client';
-import { sequelize } from './sequelize';
 
 const pkg = require('../package.json');
 const config = require('../config.json');
@@ -14,8 +14,8 @@ if (process.argv.length < 5) {
 	process.exit(1);
 }
 const rawParams = process.argv.slice(2);
-const args = rawParams.filter(a => !a.startsWith('--'));
-const flags = rawParams.filter(f => f.startsWith('--'));
+const args = rawParams.filter((a) => !a.startsWith('--'));
+const flags = rawParams.filter((f) => f.startsWith('--'));
 
 const type = config.bot.type;
 const token = args[0];
@@ -29,7 +29,7 @@ init({
 	release: pkg.version,
 	environment: process.env.NODE_ENV || 'production'
 });
-configureScope(scope => {
+configureScope((scope) => {
 	scope.setTag('botType', type);
 	scope.setTag('instance', instance);
 	scope.setTag('shard', `${shardId}/${shardCount}`);
@@ -39,15 +39,15 @@ process.on('unhandledRejection', (reason: any, p: any) => {
 	console.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
 });
 
-console.log('-------------------------------------');
-console.log('Syncing database...');
-console.log('-------------------------------------');
-sequelize.sync().then(async () => {
-	console.log('-------------------------------------');
+const main = async () => {
+	console.log(chalk.green('-------------------------------------'));
 	console.log(
-		`This is shard ${shardId}/${shardCount} of ${type} instance ${instance}`
+		chalk.green(
+			`This is shard ${chalk.blue(`${shardId}/${shardCount}`)} of ${chalk.blue(type)} instance ${chalk.blue(instance)}`
+		)
 	);
-	console.log('-------------------------------------');
+	console.log(chalk.green('-------------------------------------'));
+
 	const client = new IMClient({
 		version: pkg.version,
 		token,
@@ -59,8 +59,22 @@ sequelize.sync().then(async () => {
 		config
 	});
 
-	console.log('-------------------------------------');
-	console.log('Starting bot...');
-	console.log('-------------------------------------');
-	client.connect();
-});
+	console.log(chalk.green('-------------------------------------'));
+	console.log(chalk.green('Starting bot...'));
+	console.log(chalk.green('-------------------------------------'));
+
+	await client.init();
+
+	console.log(chalk.green('-------------------------------------'));
+	console.log(chalk.green('Waiting for start ticket...'));
+	console.log(chalk.green('-------------------------------------'));
+
+	await client.waitForStartupTicket();
+
+	console.log(chalk.green('-------------------------------------'));
+	console.log(chalk.green('Connecting to discord...'));
+	console.log(chalk.green('-------------------------------------'));
+	await client.connect();
+};
+
+main().catch((err) => console.error(err));

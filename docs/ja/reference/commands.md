@@ -9,69 +9,81 @@ According to the **Type** of the argument or flag you can provide different valu
 
 ### ブール値
 
-This arguments expects `true` or `false`. You can also use `yes` and `no`.
+この引数は、`true` または `false`を要求しています。 `yes`と `no`使用できます。
 
 ### 番号
 
-This arguments expects a number
+この引数には数値が必要です
 
 ### 列挙型
 
-This arguments expects a value from a specific set of valid values.
+この引数は、有効な値の特定のセットからの値を要求します。
 
-> Depending on the command the valid values can vary. Use `!help <command>` (eg. `!help addRank`) to get more information about the command and the valid values for the enum.
+> 有効な値はコマンドによって異なります。コマンドと列挙型の有効な値に関する詳細情報を取得するには、`!help<command>` (eg. `!help addRank`) と使用してください。
 
 ### 招待コード
 
-This arguments expects a Discord Invite Code.
+この引数は、Discord Invite Code を想定しています。
 
-> You can put only the part after `https://discord.gg/` to prevent Discord from creating a preview.
+> `https://discord.gg/` の後ろの部分置くことができ、Discord がプレビューを作成しないようにします。
 
 ### ユーザー
 
-This arguments expects a Discord User. You can use any of the following methods to provide a user:
+この引数は Discord ユーザーを想定しています。 次のいずれかの方法を使用して、ユーザーに指定できます:
 
-- Mention the user: `@Valandur`
-- Use their ID: `102785693046026240`
-- Use their name: `Valandur`
-- Use their name and discriminator: `Valandur#3581`
-- Use quotes if their name has a space: `"Valandur with a space"`
+-ユーザーをメンション: `@Valandur`
+
+- 彼らの ID を使用: `102785693046026240`
+- 彼らの名前を使用: `Valandur`
+- 名前と識別名を使用: `Valandur#3581`
+- 名前にスペースが含まれる場合は引用符を使用します: `"Valandur with a space"`
 
 ### 役職
 
-This arguments expects a Discord Role. You can use any of the following methods to provide a role:
+この引数は、Discord の Role を想定しています。 次のいずれかの方法を使用して、Role を指定できます。
 
-- Mention the role: `@Admin`
-- Use the ID: `102785693046026240`
-- Use the name: `Admin`
-- Use quotes if the name has a space: `"Admin with a space"`
+- role をメンション: `@Admin`
+- ID を使用: `102785693046026240`
+- 名前を使用: `Admin`
+- 名前にスペースがある場合は引用符を使用します: `"Admin with a space"`
 
 ### チャンネル
 
-This arguments expects a Discord Channel. You can use any of the following methods to provide a channel:
+この引数は Discord チャンネルを想定しています。 次のいずれかの方法を使用して、チャンネルを要求できます:
 
-- Mention the channel: `#general`
-- Use the ID: `409846838129197057`
-- Use the name: `general`
-- Use quotes if the name has a space: `"general with a space"`
+- チャンネルのメンション:`#general`
+- ID を使用: `409846838129197057`
+- 名前を使用: `general`
+- 名前にスペースがある場合は引用符を使用します: `"general with a space"`
 
 ### コマンド
 
-resolvers.command.typeInfo
+This argument expects a command of this bot. You can use any of the following methods to provide a command:
+
+- Use the command name: `invites`
+- Use an alias of the command: `p`
 
 ### テキスト
 
-This arguments expects any text. You can use quotes (`"Text with quotes"`) for text that has spaces.
+この引数には、任意のテキストが必要です。 スペースを含むテキストには、引用符(`"Text with quotes"`) を使用できます。
 
-> If the text is the last argument you don't have to use quotes.
+> テキストが最後の引数である場合、引用符を使用する必要はありません。
 
 ### 日付
 
-resolvers.date.typeInfo
+This argument expects a date. You can use various formats, but we recommend: `YYYY-MM-DD`
 
 ### 期間
 
-resolvers.duration.typeInfo
+This argument expects a duration. The following duration types are supported:
+
+- Seconds: `s` (`5s` = 5 seconds)
+- Minutes: `min` (`3min` = 3 minutes)
+- Hours: `h` (`4h` = 4 hours)
+- Days: `d` (`2d` = 2 days)
+- Weeks: `w` (`1w` = 1 week)
+- Months: `mo` (`6mo` = 6 months)
+- Years: `y` (`10y` = 10 years)
 
 ## Overview
 
@@ -82,25 +94,24 @@ resolvers.duration.typeInfo
 | [addInvites](#addInvites)         | メンバーに招待を追加(又は削除)します。             | !addInvites \<user\> \<amount\> [reason]                         |
 | [clearInvites](#clearInvites)     | サーバー(ユーザー)の招待を削除します。             | !clearInvites [-d value\|--date=value][-cb\|--clearbonus] [user] |
 | [createInvite](#createInvite)     | 永久の招待コードを作成します。                     | !createInvite \<name\> [channel]                                 |
-| [fake](#fake)                     | 騙そうとしているユーザーを見つけるのに役立ちます。 | !fake [page]                                                     |
 | [info](#info)                     | 特定のメンバーに関する情報を表示します。           | !info \<user\> [details][page]                                   |
 | [inviteCodes](#inviteCodes)       | すべての招待コードの一覧を取得する                 | !inviteCodes                                                     |
 | [inviteDetails](#inviteDetails)   | 招待状の送信元に関する詳細が表示されます。         | !inviteDetails [user]                                            |
 | [invites](#invites)               | Show personal invites.                             | !invites [user]                                                  |
-| [leaderboard](#leaderboard)       | 招待が最も多いメンバーを表示します。               | !leaderboard [-c value\|--compare=value][duration] [page]        |
-| [removeInvites](#removeInvites)   | cmd.removeInvites.self.description                 | !removeInvites \<user\> \<amount\> [reason]                      |
+| [leaderboard](#leaderboard)       | 招待が最も多いメンバーを表示します。               | !leaderboard [page]                                              |
+| [removeInvites](#removeInvites)   | Removes a specified amount of invites from a user. | !removeInvites \<user\> \<amount\> [reason]                      |
 | [restoreInvites](#restoreInvites) | 以前にクリアした招待状をすべて復元します。         | !restoreInvites [user]                                           |
 | [subtractFakes](#subtractFakes)   | すべてのユーザーから偽の招待を削除します。         | !subtractFakes                                                   |
 | [subtractLeaves](#subtractLeaves) | すべてのユーザーの退出履歴を削除します。           | !subtractLeaves                                                  |
 
 ### Ranks
 
-| Command                   | Description                   | Usage                                |
-| ------------------------- | ----------------------------- | ------------------------------------ |
-| [addRank](#addRank)       | 新しいランクを追加する。      | !addRank \<role\> \<invites\> [info] |
-| [fixRanks](#fixRanks)     | cmd.fixRanks.self.description | !fixRanks                            |
-| [ranks](#ranks)           | すべてのランクを見る          | !ranks [page]                        |
-| [removeRank](#removeRank) | ランクを外します。            | !removeRank \<rank\>                 |
+| Command                   | Description                                   | Usage                                |
+| ------------------------- | --------------------------------------------- | ------------------------------------ |
+| [addRank](#addRank)       | 新しいランクを追加する。                      | !addRank \<role\> \<invites\> [info] |
+| [fixRanks](#fixRanks)     | Deletes any ranks where the role was deleted. | !fixRanks                            |
+| [ranks](#ranks)           | すべてのランクを見る                          | !ranks [page]                        |
+| [removeRank](#removeRank) | ランクを外します。                            | !removeRank \<rank\>                 |
 
 ### Config
 
@@ -118,7 +129,7 @@ resolvers.duration.typeInfo
 | Command             | Description                                            | Usage           |
 | ------------------- | ------------------------------------------------------ | --------------- |
 | [botInfo](#botInfo) | BOT に関する基本的な情報を入手してください。           | !botInfo        |
-| [credits](#credits) | Show developers and contributors of the bot.           | !credits        |
+| [credits](#credits) | BOT の開発者と貢献者を表示します。                     | !credits        |
 | [getBot](#getBot)   | ボットへの招待リンクを入手できます。                   | !getBot         |
 | [help](#help)       | ヘルプを表示する。                                     | !help [command] |
 | [members](#members) | 現在のサーバーのメンバー数を表示します。               | !members        |
@@ -147,7 +158,8 @@ resolvers.duration.typeInfo
 | [cleanShort](#cleanShort)             | 短いメッセージを消去する                                                                                           | !cleanShort \<maxTextLength\> [numberOfMessages]                 |
 | [cleanText](#cleanText)               | 指定のキーワードを含むメッセージを削除します。                                                                     | !cleanText \<text\> [numberOfMessages]                           |
 | [kick](#kick)                         | サーバーからメンバーを蹴ります。                                                                                   | !kick \<member\> [reason]                                        |
-| [mute](#mute)                         | ユーザーをミュートする                                                                                             | !mute \<user\> [reason]                                          |
+| [lockdown](#lockdown)                 | Lockdown a specific channel (Prevents anyone without special roles from sending messages)                          | !lockdown [-t value\|--timeout=value][channel]                   |
+| [mute](#mute)                         | ユーザーをミュートする                                                                                             | !mute [-d value\|--duration=value] \<user\> [reason]             |
 | [punishmentConfig](#punishmentConfig) | 一定量の警告に達したときに罰を設定します。                                                                         | !punishmentConfig [punishment][strikes] [args]                   |
 | [purge](#purge)                       | チャネル内のメッセージを削除します。                                                                               | !purge \<quantity\> [user]                                       |
 | [purgeUntil](#purgeUntil)             | 指定されたメッセージまでチャネル内のメッセージを削除します。                                                       | !purgeUntil \<messageID\>                                        |
@@ -180,11 +192,9 @@ resolvers.duration.typeInfo
 
 ### Other
 
-| Command                             | Description                                                      | Usage                      |
-| ----------------------------------- | ---------------------------------------------------------------- | -------------------------- |
-| [graph](#graph)                     | このサーバー上のさまざまな統計グラフを表示します。               | !graph \<type\> [duration] |
-| [makeMentionable](#makeMentionable) | 役割を 60 秒間またはそれが使用されるまでメンション可能にします。 | !makeMentionable \<role\>  |
-| [mentionRole](#mentionRole)         | メンションできない役職についてメンションしてください。           | !mentionRole \<role\>      |
+| Command         | Description                                        | Usage                      |
+| --------------- | -------------------------------------------------- | -------------------------- |
+| [graph](#graph) | このサーバー上のさまざまな統計グラフを表示します。 | !graph \<type\> [from][to] |
 
 <a name='addInvites'></a>
 
@@ -283,9 +293,9 @@ resolvers.duration.typeInfo
 
 ### Flags
 
-| Flag                              | Short     | Type          | Description                          |
-| --------------------------------- | --------- | ------------- | ------------------------------------ |
-| &#x2011;&#x2011;deleteMessageDays | &#x2011;d | [番号](#番号) | cmd.ban.self.flags.deleteMessageDays |
+| Flag                              | Short     | Type          | Description                                            |
+| --------------------------------- | --------- | ------------- | ------------------------------------------------------ |
+| &#x2011;&#x2011;deleteMessageDays | &#x2011;d | [番号](#番号) | BAN するユーザーのメッセージを指定した日数分削除します |
 
 ### Examples
 
@@ -595,10 +605,10 @@ BOT に関する基本的な情報を入手してください。
 
 ### Arguments
 
-| Argument | Type              | Required | Description           | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| -------- | ----------------- | -------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| key      | [列挙型](#列挙型) | No       | 表示/変更したい設定。 | 以下のいずれかの値を使用:`announcementVoice`, `announceNextSong`, `autoModAllCapsEnabled`, `autoModAllCapsMinCharacters`, `autoModAllCapsPercentageCaps`, `autoModDeleteBotMessage`, `autoModDeleteBotMessageTimeoutInSeconds`, `autoModDisabledForOldMembers`, `autoModDisabledForOldMembersThreshold`, `autoModDuplicateTextEnabled`, `autoModDuplicateTextTimeframeInSeconds`, `autoModEmojisEnabled`, `autoModEmojisMaxNumberOfEmojis`, `autoModEnabled`, `autoModHoistEnabled`, `autoModIgnoredChannels`, `autoModIgnoredRoles`, `autoModInvitesEnabled`, `autoModLinksBlacklist`, `autoModLinksEnabled`, `autoModLinksFollowRedirects`, `autoModLinksWhitelist`, `autoModLogEnabled`, `autoModMentionRolesEnabled`, `autoModMentionRolesMaxNumberOfMentions`, `autoModMentionUsersEnabled`, `autoModMentionUsersMaxNumberOfMentions`, `autoModModeratedChannels`, `autoModModeratedRoles`, `autoModQuickMessagesEnabled`, `autoModQuickMessagesNumberOfMessages`, `autoModQuickMessagesTimeframeInSeconds`, `autoModWordsBlacklist`, `autoModWordsEnabled`, `autoSubtractFakes`, `autoSubtractLeaves`, `autoSubtractLeaveThreshold`, `captchaVerificationFailedMessage`, `captchaVerificationLogEnabled`, `captchaVerificationOnJoin`, `captchaVerificationSuccessMessage`, `captchaVerificationTimeout`, `captchaVerificationWelcomeMessage`, `channels`, `fadeMusicEndDelay`, `fadeMusicOnTalk`, `getUpdates`, `hideLeftMembersFromLeaderboard`, `ignoredChannels`, `joinMessage`, `joinMessageChannel`, `lang`, `leaderboardStyle`, `leaveMessage`, `leaveMessageChannel`, `logChannel`, `modLogChannel`, `modPunishmentBanDeleteMessage`, `modPunishmentKickDeleteMessage`, `modPunishmentMuteDeleteMessage`, `modPunishmentSoftbanDeleteMessage`, `modPunishmentWarnDeleteMessage`, `musicVolume`, `mutedRole`, `prefix`, `rankAnnouncementChannel`, `rankAnnouncementMessage`, `rankAssignmentStyle` |
-| value    | [値](#値)         | No       | 設定の新しい値        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Argument | Type              | Required | Description           | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------- | ----------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| key      | [列挙型](#列挙型) | No       | 表示/変更したい設定。 | 以下のいずれかの値を使用:`announcementVoice`, `announceNextSong`, `autoModAllCapsEnabled`, `autoModAllCapsMinCharacters`, `autoModAllCapsPercentageCaps`, `autoModDeleteBotMessage`, `autoModDeleteBotMessageTimeoutInSeconds`, `autoModDisabledForOldMembers`, `autoModDisabledForOldMembersThreshold`, `autoModDuplicateTextEnabled`, `autoModDuplicateTextTimeframeInSeconds`, `autoModEmojisEnabled`, `autoModEmojisMaxNumberOfEmojis`, `autoModEnabled`, `autoModHoistEnabled`, `autoModIgnoredChannels`, `autoModIgnoredRoles`, `autoModInvitesEnabled`, `autoModLinksBlacklist`, `autoModLinksEnabled`, `autoModLinksFollowRedirects`, `autoModLinksWhitelist`, `autoModLogEnabled`, `autoModMentionRolesEnabled`, `autoModMentionRolesMaxNumberOfMentions`, `autoModMentionUsersEnabled`, `autoModMentionUsersMaxNumberOfMentions`, `autoModModeratedChannels`, `autoModModeratedRoles`, `autoModQuickMessagesEnabled`, `autoModQuickMessagesNumberOfMessages`, `autoModQuickMessagesTimeframeInSeconds`, `autoModWordsBlacklist`, `autoModWordsEnabled`, `autoSubtractFakes`, `autoSubtractLeaves`, `autoSubtractLeaveThreshold`, `captchaVerificationFailedMessage`, `captchaVerificationLogEnabled`, `captchaVerificationOnJoin`, `captchaVerificationSuccessMessage`, `captchaVerificationTimeout`, `captchaVerificationWelcomeMessage`, `channels`, `defaultMusicPlatform`, `disabledMusicPlatforms`, `fadeMusicEndDelay`, `fadeMusicOnTalk`, `getUpdates`, `hideLeftMembersFromLeaderboard`, `ignoredChannels`, `joinMessage`, `joinMessageChannel`, `joinRoles`, `lang`, `leaderboardStyle`, `leaveMessage`, `leaveMessageChannel`, `logChannel`, `modLogChannel`, `modPunishmentBanDeleteMessage`, `modPunishmentKickDeleteMessage`, `modPunishmentMuteDeleteMessage`, `modPunishmentSoftbanDeleteMessage`, `modPunishmentWarnDeleteMessage`, `musicVolume`, `mutedRole`, `prefix`, `rankAnnouncementChannel`, `rankAnnouncementMessage`, `rankAssignmentStyle` |
+| value    | [値](#値)         | No       | 設定の新しい値        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### Examples
 
@@ -647,7 +657,7 @@ BOT に関する基本的な情報を入手してください。
 
 ## !credits
 
-Show developers and contributors of the bot.
+BOT の開発者と貢献者を表示します。
 
 ### Usage
 
@@ -707,50 +717,13 @@ InviteManager のデータを csv シートにエクスポートします。
 !export leaderboard
 ```
 
-<a name='fake'></a>
-
----
-
-## !fake
-
-騙そうとしているユーザーを見つけるのに役立ちます。
-
-### Usage
-
-```text
-!fake [page]
-```
-
-### Aliases
-
-- `!fakes`
-- `!cheaters`
-- `!cheater`
-- `!invalid`
-
-### Arguments
-
-| Argument | Type          | Required | Description                              | Details |
-| -------- | ------------- | -------- | ---------------------------------------- | ------- |
-| page     | [番号](#番号) | No       | 偽の招待リストのどのページを取得するか。 |         |
-
-### Examples
-
-```text
-!fake
-```
-
-```text
-!fake 4
-```
-
 <a name='fixRanks'></a>
 
 ---
 
 ## !fixRanks
 
-cmd.fixRanks.self.description
+Deletes any ranks where the role was deleted.
 
 ### Usage
 
@@ -805,7 +778,7 @@ cmd.fixRanks.self.description
 ### Usage
 
 ```text
-!graph <type> [duration]
+!graph <type> [from] [to]
 ```
 
 ### Aliases
@@ -815,10 +788,11 @@ cmd.fixRanks.self.description
 
 ### Arguments
 
-| Argument | Type              | Required | Description              | Details                                             |
-| -------- | ----------------- | -------- | ------------------------ | --------------------------------------------------- |
-| type     | [列挙型](#列挙型) | Yes      | 表示するチャートの種類。 | 以下のいずれかの値を使用:`joins`, `leaves`, `usage` |
-| duration | [期間](#期間)     | No       | チャートの期間。         |                                                     |
+| Argument | Type              | Required | Description              | Details                                                      |
+| -------- | ----------------- | -------- | ------------------------ | ------------------------------------------------------------ |
+| type     | [列挙型](#列挙型) | Yes      | 表示するチャートの種類。 | 以下のいずれかの値を使用:`joins`, `joinsAndLeaves`, `leaves` |
+| from     | [日付](#日付)     | No       | Start date of the chart  |                                                              |
+| to       | [日付](#日付)     | No       | End date of the chart    |                                                              |
 
 ### Examples
 
@@ -850,9 +824,9 @@ cmd.fixRanks.self.description
 
 ### Arguments
 
-| Argument | Type                  | Required | Description                        | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| -------- | --------------------- | -------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| command  | [コマンド](#コマンド) | No       | 詳細情報を取得するためのコマンド。 | 以下のいずれかの値を使用:`addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fake`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lyrics`, `makeMentionable`, `mashup`, `memberConfig`, `members`, `mentionRole`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
+| Argument | Type                  | Required | Description                        | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------- | --------------------- | -------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| command  | [コマンド](#コマンド) | No       | 詳細情報を取得するためのコマンド。 | 以下のいずれかの値を使用:`addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `lyrics`, `mashup`, `memberConfig`, `members`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
 
 ### Examples
 
@@ -1111,7 +1085,7 @@ Show personal invites.
 ### Usage
 
 ```text
-!leaderboard [-c value|--compare=value] [duration] [page]
+!leaderboard [page]
 ```
 
 ### Aliases
@@ -1122,14 +1096,7 @@ Show personal invites.
 
 | Argument | Type          | Required | Description                              | Details |
 | -------- | ------------- | -------- | ---------------------------------------- | ------- |
-| duration | [期間](#期間) | No       | リーダーボードを計算する期間。           |         |
 | page     | [番号](#番号) | No       | リーダーボードのどのページを取得するか。 |         |
-
-### Flags
-
-| Flag                    | Short     | Type          | Description                              |
-| ----------------------- | --------- | ------------- | ---------------------------------------- |
-| &#x2011;&#x2011;compare | &#x2011;c | [期間](#期間) | 現在のリーダーボード順位が比較される日付 |
 
 ### Examples
 
@@ -1143,6 +1110,38 @@ Show personal invites.
 
 ```text
 !leaderboard 30d 6
+```
+
+<a name='lockdown'></a>
+
+---
+
+## !lockdown
+
+Lockdown a specific channel (Prevents anyone without special roles from sending messages)
+
+### Usage
+
+```text
+!lockdown [-t value|--timeout=value] [channel]
+```
+
+### Arguments
+
+| Argument | Type                      | Required | Description                             | Details |
+| -------- | ------------------------- | -------- | --------------------------------------- | ------- |
+| channel  | [チャンネル](#チャンネル) | No       | The channel that you want to lock down. |         |
+
+### Flags
+
+| Flag                    | Short     | Type          | Description                                                                                                  |
+| ----------------------- | --------- | ------------- | ------------------------------------------------------------------------------------------------------------ |
+| &#x2011;&#x2011;timeout | &#x2011;t | [期間](#期間) | The timeout after which the lockdown automatically ends. Run the command again to end the lockdown manually. |
+
+### Examples
+
+```text
+!lockdown
 ```
 
 <a name='lyrics'></a>
@@ -1169,41 +1168,6 @@ Show personal invites.
 
 ```text
 !lyrics
-```
-
-<a name='makeMentionable'></a>
-
----
-
-## !makeMentionable
-
-役割を 60 秒間またはそれが使用されるまでメンション可能にします。
-
-### Usage
-
-```text
-!makeMentionable <role>
-```
-
-### Aliases
-
-- `!make-mentionable`
-- `!mm`
-
-### Arguments
-
-| Argument | Type          | Required | Description                    | Details |
-| -------- | ------------- | -------- | ------------------------------ | ------- |
-| role     | [役職](#役職) | Yes      | あなたがメンションしたい役割。 |         |
-
-### Examples
-
-```text
-!makeMentionable @Role
-```
-
-```text
-!makeMentionable "Role with space"
 ```
 
 <a name='mashup'></a>
@@ -1287,41 +1251,6 @@ Show personal invites.
 !members
 ```
 
-<a name='mentionRole'></a>
-
----
-
-## !mentionRole
-
-メンションできない役職についてメンションしてください。
-
-### Usage
-
-```text
-!mentionRole <role>
-```
-
-### Aliases
-
-- `!mention-role`
-- `!mr`
-
-### Arguments
-
-| Argument | Type          | Required | Description                    | Details |
-| -------- | ------------- | -------- | ------------------------------ | ------- |
-| role     | [役職](#役職) | Yes      | あなたが言及したいメンション。 |         |
-
-### Examples
-
-```text
-!mentionRole @Role
-```
-
-```text
-!mentionRole "Role with space"
-```
-
 <a name='mute'></a>
 
 ---
@@ -1333,7 +1262,7 @@ Show personal invites.
 ### Usage
 
 ```text
-!mute <user> [reason]
+!mute [-d value|--duration=value] <user> [reason]
 ```
 
 ### Arguments
@@ -1342,6 +1271,12 @@ Show personal invites.
 | -------- | --------------------- | -------- | ------------------------------------ | ------- |
 | user     | [メンバー](#メンバー) | Yes      | ミュートする必要があるユーザー。     |         |
 | reason   | [テキスト](#テキスト) | No       | このユーザーがミュートされている理由 |         |
+
+### Flags
+
+| Flag                     | Short     | Type          | Description                       |
+| ------------------------ | --------- | ------------- | --------------------------------- |
+| &#x2011;&#x2011;duration | &#x2011;d | [期間](#期間) | The duration to mute the user for |
 
 ### Examples
 
@@ -1420,10 +1355,10 @@ Show personal invites.
 
 ### Arguments
 
-| Argument | Type                  | Required | Description                                    | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| -------- | --------------------- | -------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| cmd      | [コマンド](#コマンド) | No       | 権限を設定するためのコマンド。                 | 以下のいずれかの値を使用:`addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fake`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lyrics`, `makeMentionable`, `mashup`, `memberConfig`, `members`, `mentionRole`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
-| role     | [役職](#役職)         | No       | コマンドへのアクセスを許可または拒否する役職。 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Argument | Type                  | Required | Description                                    | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------- | --------------------- | -------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cmd      | [コマンド](#コマンド) | No       | 権限を設定するためのコマンド。                 | 以下のいずれかの値を使用:`addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `lyrics`, `mashup`, `memberConfig`, `members`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
+| role     | [役職](#役職)         | No       | コマンドへのアクセスを許可または拒否する役職。 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### Examples
 
@@ -1599,10 +1534,10 @@ InviteManager のプレミアムバージョンに関する情報。
 
 ### Arguments
 
-| Argument | Type                  | Required | Description              | Details |
-| -------- | --------------------- | -------- | ------------------------ | ------- |
-| quantity | [番号](#番号)         | Yes      | 削除するメッセージ数。   |         |
-| user     | [ユーザー](#ユーザー) | No       | cmd.purge.self.args.user |         |
+| Argument | Type                  | Required | Description                            | Details |
+| -------- | --------------------- | -------- | -------------------------------------- | ------- |
+| quantity | [番号](#番号)         | Yes      | 削除するメッセージ数。                 |         |
+| user     | [ユーザー](#ユーザー) | No       | ユーザーのメッセージは削除されました。 |         |
 
 ### Examples
 
@@ -1676,9 +1611,9 @@ InviteManager のプレミアムバージョンに関する情報。
 
 ### Arguments
 
-| Argument | Type          | Required | Description              | Details |
-| -------- | ------------- | -------- | ------------------------ | ------- |
-| page     | [番号](#番号) | No       | cmd.ranks.self.args.page |         |
+| Argument | Type          | Required | Description                         | Details |
+| -------- | ------------- | -------- | ----------------------------------- | ------- |
+| page     | [番号](#番号) | No       | The page of the ranks list to show. |         |
 
 ### Examples
 
@@ -1692,7 +1627,7 @@ InviteManager のプレミアムバージョンに関する情報。
 
 ## !removeInvites
 
-cmd.removeInvites.self.description
+Removes a specified amount of invites from a user.
 
 ### Usage
 
@@ -1706,11 +1641,11 @@ cmd.removeInvites.self.description
 
 ### Arguments
 
-| Argument | Type                  | Required | Description                        | Details |
-| -------- | --------------------- | -------- | ---------------------------------- | ------- |
-| user     | [ユーザー](#ユーザー) | Yes      | cmd.removeInvites.self.args.user   |         |
-| amount   | [番号](#番号)         | Yes      | cmd.removeInvites.self.args.amount |         |
-| reason   | [テキスト](#テキスト) | No       | cmd.removeInvites.self.args.reason |         |
+| Argument | Type                  | Required | Description                          | Details |
+| -------- | --------------------- | -------- | ------------------------------------ | ------- |
+| user     | [ユーザー](#ユーザー) | Yes      | The user to remove the invites from. |         |
+| amount   | [番号](#番号)         | Yes      | The amount of invites to remove.     |         |
+| reason   | [テキスト](#テキスト) | No       | The reason for removing the invites. |         |
 
 ### Examples
 
@@ -2010,9 +1945,9 @@ cmd.removeInvites.self.description
 
 ### Flags
 
-| Flag                              | Short     | Type          | Description                              |
-| --------------------------------- | --------- | ------------- | ---------------------------------------- |
-| &#x2011;&#x2011;deleteMessageDays | &#x2011;d | [番号](#番号) | cmd.softBan.self.flags.deleteMessageDays |
+| Flag                              | Short     | Type          | Description                                        |
+| --------------------------------- | --------- | ------------- | -------------------------------------------------- |
+| &#x2011;&#x2011;deleteMessageDays | &#x2011;d | [番号](#番号) | Delete messages from the user this many days back. |
 
 ### Examples
 

@@ -1,17 +1,16 @@
 import { Channel, Role } from 'eris';
 
+import { ActivityStatus, ActivityType, BotSettingsKey } from './framework/models/BotSetting';
 import {
-	ActivityStatus,
-	ActivityType,
 	AnnouncementVoice,
-	BotSettingsKey,
-	InviteCodeSettingsKey,
+	GuildSettingsKey,
 	Lang,
 	LeaderboardStyle,
-	MemberSettingsKey,
-	RankAssignmentStyle,
-	SettingsKey
-} from './sequelize';
+	RankAssignmentStyle
+} from './framework/models/GuildSetting';
+import { InviteCodeSettingsKey } from './framework/models/InviteCodeSetting';
+import { MemberSettingsKey } from './framework/models/MemberSetting';
+import { MusicPlatformType } from './types';
 
 export type InternalSettingsTypes =
 	| 'Boolean'
@@ -28,7 +27,9 @@ export type InternalSettingsTypes =
 	| 'Enum<Lang>'
 	| 'Enum<AnnouncementVoice>'
 	| 'Enum<ActivityStatus>'
-	| 'Enum<ActivityType>';
+	| 'Enum<ActivityType>'
+	| 'Enum<MusicPlatformTypes>'
+	| 'Enum<MusicPlatformTypes>[]';
 
 export interface SettingsInfo<T> {
 	type: InternalSettingsTypes;
@@ -59,13 +60,16 @@ export enum SettingsGroup {
 	mentions = 'mentions',
 	emojis = 'emojis',
 	music = 'music',
-	bot = 'bot'
+	bot = 'bot',
+	fadeMusic = 'fadeMusic',
+	announcement = 'announcement',
+	platform = 'platform'
 }
 
 // ------------------------------------
-// Settings
+// GuildSettings
 // ------------------------------------
-export interface SettingsObject {
+export interface GuildSettingsObject {
 	prefix: string;
 	lang: Lang;
 	logChannel: string;
@@ -73,6 +77,7 @@ export interface SettingsObject {
 	channels: string[];
 	ignoredChannels: string[];
 
+	joinRoles: string[];
 	joinMessage: string;
 	joinMessageChannel: string;
 	leaveMessage: string;
@@ -158,10 +163,13 @@ export interface SettingsObject {
 	fadeMusicOnTalk: boolean;
 	fadeMusicStartDuration: number;
 	fadeMusicEndDelay: number;
+
+	defaultMusicPlatform: MusicPlatformType;
+	disabledMusicPlatforms: MusicPlatformType[];
 }
 
-export const settingsInfo: {
-	[k in SettingsKey]: SettingsInfo<SettingsObject[k]>;
+export const guildSettingsInfo: {
+	[k in GuildSettingsKey]: SettingsInfo<GuildSettingsObject[k]>;
 } = {
 	prefix: {
 		type: 'String',
@@ -197,11 +205,15 @@ export const settingsInfo: {
 		defaultValue: []
 	},
 
+	joinRoles: {
+		type: 'Role[]',
+		grouping: [SettingsGroup.invites, SettingsGroup.general],
+		defaultValue: []
+	},
 	joinMessage: {
 		type: 'String',
 		grouping: [SettingsGroup.invites, SettingsGroup.joins],
-		defaultValue:
-			'{memberMention} **joined**; Invited by **{inviterName}** (**{numInvites}** invites)',
+		defaultValue: '{memberMention} **joined**; Invited by **{inviterName}** (**{numInvites}** invites)',
 		hasPremiumInfo: true
 	},
 	joinMessageChannel: {
@@ -269,8 +281,7 @@ export const settingsInfo: {
 	rankAnnouncementMessage: {
 		type: 'String',
 		grouping: [SettingsGroup.invites, SettingsGroup.ranks],
-		defaultValue:
-			'Congratulations, **{memberMention}** has reached the **{rankName}** rank!',
+		defaultValue: 'Congratulations, **{memberMention}** has reached the **{rankName}** rank!',
 		exampleValues: ['', ''],
 		hasPremiumInfo: true
 	},
@@ -292,8 +303,7 @@ export const settingsInfo: {
 	captchaVerificationSuccessMessage: {
 		type: 'String',
 		grouping: [SettingsGroup.moderation, SettingsGroup.captcha],
-		defaultValue:
-			'You have successfully entered the captcha. Welcome to the server!',
+		defaultValue: 'You have successfully entered the captcha. Welcome to the server!',
 		exampleValues: ['Thanks for entering the captcha, enjoy our server!'],
 		hasPremiumInfo: true
 	},
@@ -303,9 +313,7 @@ export const settingsInfo: {
 		defaultValue:
 			'You did not enter the captha right within the specified time.' +
 			`We're sorry, but we have to kick you from the server. Feel free to join again.`,
-		exampleValues: [
-			'Looks like you are not human :(. You can join again and try again later if this was a mistake!'
-		],
+		exampleValues: ['Looks like you are not human :(. You can join again and try again later if this was a mistake!'],
 		hasPremiumInfo: true
 	},
 	captchaVerificationTimeout: {
@@ -556,33 +564,44 @@ export const settingsInfo: {
 
 	announceNextSong: {
 		type: 'Boolean',
-		grouping: [SettingsGroup.music, SettingsGroup.general],
+		grouping: [SettingsGroup.music, SettingsGroup.announcement],
 		defaultValue: true
 	},
 	announcementVoice: {
 		type: 'Enum<AnnouncementVoice>',
-		grouping: [SettingsGroup.music, SettingsGroup.general],
+		grouping: [SettingsGroup.music, SettingsGroup.announcement],
 		defaultValue: AnnouncementVoice.Joanna,
 		possibleValues: Object.values(AnnouncementVoice)
 	},
 
 	fadeMusicOnTalk: {
 		type: 'Boolean',
-		grouping: [SettingsGroup.music, SettingsGroup.general],
+		grouping: [SettingsGroup.music, SettingsGroup.fadeMusic],
 		defaultValue: true
 	},
 	fadeMusicEndDelay: {
 		type: 'Number',
-		grouping: [SettingsGroup.music, SettingsGroup.general],
+		grouping: [SettingsGroup.music, SettingsGroup.fadeMusic],
 		defaultValue: 1.0
+	},
+
+	defaultMusicPlatform: {
+		type: 'Enum<MusicPlatformTypes>',
+		grouping: [SettingsGroup.music, SettingsGroup.platform],
+		defaultValue: MusicPlatformType.SoundCloud
+	},
+	disabledMusicPlatforms: {
+		type: 'Enum<MusicPlatformTypes>[]',
+		grouping: [SettingsGroup.music, SettingsGroup.platform],
+		defaultValue: []
 	}
 };
 
-export const defaultSettings: SettingsObject = {} as any;
-Object.keys(settingsInfo).forEach((k: SettingsKey) => {
-	const info = settingsInfo[k];
+export const guildDefaultSettings: GuildSettingsObject = {} as any;
+Object.keys(guildSettingsInfo).forEach((k: GuildSettingsKey) => {
+	const info = guildSettingsInfo[k];
 	info.clearable = info.type.endsWith('[]') || info.defaultValue === null;
-	(defaultSettings[k] as any) = settingsInfo[k].defaultValue;
+	(guildDefaultSettings[k] as any) = guildSettingsInfo[k].defaultValue;
 });
 
 // ------------------------------------
@@ -636,9 +655,7 @@ export const inviteCodeDefaultSettings: InviteCodeSettingsObject = {} as any;
 Object.keys(inviteCodeSettingsInfo).forEach((k: InviteCodeSettingsKey) => {
 	const info = inviteCodeSettingsInfo[k];
 	info.clearable = info.type.endsWith('[]') || info.defaultValue === null;
-	(inviteCodeDefaultSettings[k] as any) = inviteCodeSettingsInfo[
-		k
-	].defaultValue;
+	(inviteCodeDefaultSettings[k] as any) = inviteCodeSettingsInfo[k].defaultValue;
 });
 
 // ------------------------------------
@@ -708,12 +725,7 @@ export function toDbValue(info: SettingsInfo<any>, value: any): any {
 	return _toDbValue(info.type, value);
 }
 function _toDbValue(type: string, value: any): string {
-	if (
-		value === 'none' ||
-		value === 'empty' ||
-		value === 'null' ||
-		value === null
-	) {
+	if (value === 'none' || value === 'empty' || value === 'null' || value === null) {
 		return null;
 	}
 
@@ -731,42 +743,35 @@ function _toDbValue(type: string, value: any): string {
 		}
 	} else if (type.endsWith('[]')) {
 		const subType = type.substring(0, type.length - 2);
-		return value && value.length > 0
-			? value.map((v: any) => _toDbValue(subType, v))
-			: null;
+		return value && value.length > 0 ? value.map((v: any) => _toDbValue(subType, v)) : null;
 	}
 
 	return value;
 }
 
-export function beautify(info: SettingsInfo<any>, value: any) {
+export function beautify(type: InternalSettingsTypes, value: any) {
 	if (typeof value === 'undefined' || value === null) {
 		return null;
 	}
 
-	switch (info.type) {
+	if (type.endsWith('[]')) {
+		return value.map((v: any) => beautify(type.substring(0, type.length - 2) as InternalSettingsTypes, v)).join(' ');
+	}
+
+	switch (type) {
 		case 'Boolean':
 			return value ? 'True' : 'False';
 
 		case 'Role':
 			return `<@&${value}>`;
 
-		case 'Role[]':
-			return value.map((v: any) => `<@&${v}>`).join(' ');
-
 		case 'Channel':
 			return `<#${value}>`;
 
-		case 'Channel[]':
-			return value.map((v: string) => `<#${v}>`).join(' ');
-
-		case 'String[]':
-			return value.map((v: string) => '`' + v + '`').join(', ');
-
 		default:
 			if (typeof value === 'string' && value.length > 1000) {
-				return value.substr(0, 1000) + '...';
+				return '`' + value.substr(0, 1000) + '`...';
 			}
-			return value;
+			return `\`${value}\``;
 	}
 }

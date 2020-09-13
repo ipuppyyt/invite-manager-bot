@@ -1,72 +1,54 @@
-import DBL from 'dblapi.js';
+import chalk from 'chalk';
 import { Client, Embed, Guild, Member, Message, TextChannel } from 'eris';
 import i18n from 'i18n';
 import moment, { Moment } from 'moment';
-import { Op } from 'sequelize';
 
+import { Cache } from './framework/cache/Cache';
+import { GuildSettingsCache } from './framework/cache/GuildSettingsCache';
 import { MemberSettingsCache } from './framework/cache/MemberSettingsCache';
 import { PermissionsCache } from './framework/cache/PermissionsCache';
 import { PremiumCache } from './framework/cache/PremiumCache';
-import { SettingsCache } from './framework/cache/SettingsCache';
+import { GuildSettingsKey } from './framework/models/GuildSetting';
+import { LogAction } from './framework/models/Log';
+import { IMRequestHandler } from './framework/RequestHandler';
 import { CommandsService } from './framework/services/Commands';
-import { DBQueueService } from './framework/services/DBQueue';
+import { DatabaseService } from './framework/services/DatabaseService';
 import { MessagingService } from './framework/services/Messaging';
+import { PremiumService } from './framework/services/PremiumService';
 import { RabbitMqService } from './framework/services/RabbitMq';
 import { SchedulerService } from './framework/services/Scheduler';
-import { InviteCodeSettingsCache } from './modules/invites/cache/InviteCodeSettingsCache';
-import { InvitesCache } from './modules/invites/cache/InvitesCache';
-import { RanksCache } from './modules/invites/cache/RanksCache';
-import { CaptchaService } from './modules/invites/services/Captcha';
-import { InvitesService } from './modules/invites/services/Invites';
-import { TrackingService } from './modules/invites/services/Tracking';
-import { PunishmentCache } from './modules/mod/cache/PunishmentsCache';
-import { StrikesCache } from './modules/mod/cache/StrikesCache';
-import { ModerationService } from './modules/mod/services/Moderation';
-import { MusicCache } from './modules/music/cache/MusicCache';
-import { MusicService } from './modules/music/services/MusicService';
-import {
-	botSettings,
-	dbStats,
-	guilds,
-	LogAction,
-	settings,
-	SettingsKey
-} from './sequelize';
-import {
-	botDefaultSettings,
-	BotSettingsObject,
-	defaultSettings
-} from './settings';
-import { BotType, ChannelType, GatewayInfo, LavaPlayerManager } from './types';
+import { IMService } from './framework/services/Service';
+import { InviteCodeSettingsCache } from './invites/cache/InviteCodeSettingsCache';
+import { InvitesCache } from './invites/cache/InvitesCache';
+import { LeaderboardCache } from './invites/cache/LeaderboardCache';
+import { RanksCache } from './invites/cache/RanksCache';
+import { VanityUrlCache } from './invites/cache/VanityUrlCache';
+import { CaptchaService } from './invites/services/Captcha';
+import { InvitesService } from './invites/services/Invites';
+import { TrackingService } from './invites/services/Tracking';
+import { ReactionRoleCache } from './management/cache/ReactionRoleCache';
+import { ManagementService } from './management/services/ManagementService';
+import { PunishmentCache } from './moderation/cache/PunishmentsCache';
+import { StrikesCache } from './moderation/cache/StrikesCache';
+import { ModerationService } from './moderation/services/Moderation';
+import { MusicCache } from './music/cache/MusicCache';
+import { MusicService } from './music/services/MusicService';
+import { botDefaultSettings, BotSettingsObject, guildDefaultSettings } from './settings';
+import { BotType, ChannelType, LavaPlayerManager } from './types';
 
 i18n.configure({
-	locales: [
-		'cs',
-		'de',
-		'en',
-		'es',
-		'fr',
-		'it',
-		'ja',
-		'nl',
-		'pl',
-		'pt',
-		'pt_BR',
-		'ro',
-		'ru',
-		'tr'
-	],
+	locales: ['cs', 'de', 'en', 'es', 'fr', 'it', 'ja', 'nl', 'pl', 'pt', 'pt_BR', 'ro', 'ru', 'tr'],
 	defaultLocale: 'en',
 	// syncFiles: true,
-	directory: __dirname + '/../locale',
+	directory: __dirname + '/../i18n/bot',
 	objectNotation: true,
-	logDebugFn: function(msg: string) {
+	logDebugFn: function (msg: string) {
 		console.log('debug', msg);
 	},
-	logWarnFn: function(msg: string) {
+	logWarnFn: function (msg: string) {
 		console.error('warn', msg);
 	},
-	logErrorFn: function(msg: string) {
+	logErrorFn: function (msg: string) {
 		console.error('error', msg);
 	}
 });
@@ -82,6 +64,41 @@ export interface ClientOptions {
 	config: any;
 }
 
+export interface ClientCacheObject {
+	[key: string]: Cache<any>;
+
+	inviteCodes: InviteCodeSettingsCache;
+	invites: InvitesCache;
+	vanity: VanityUrlCache;
+	leaderboard: LeaderboardCache;
+	ranks: RanksCache;
+	members: MemberSettingsCache;
+	permissions: PermissionsCache;
+	premium: PremiumCache;
+	punishments: PunishmentCache;
+	guilds: GuildSettingsCache;
+	strikes: StrikesCache;
+	music: MusicCache;
+	reactionRoles: ReactionRoleCache;
+}
+
+export interface ClientServiceObject {
+	[key: string]: IMService;
+
+	database: DatabaseService;
+	rabbitmq: RabbitMqService;
+	message: MessagingService;
+	moderation: ModerationService;
+	scheduler: SchedulerService;
+	commands: CommandsService;
+	captcha: CaptchaService;
+	invites: InvitesService;
+	music: MusicService;
+	tracking: TrackingService;
+	premium: PremiumService;
+	management: ManagementService;
+}
+
 export class IMClient extends Client {
 	public version: string;
 	public config: any;
@@ -91,24 +108,17 @@ export class IMClient extends Client {
 	public settings: BotSettingsObject;
 	public hasStarted: boolean = false;
 
-	public cache: {
-		inviteCodes: InviteCodeSettingsCache;
-		invites: InvitesCache;
-		ranks: RanksCache;
-		members: MemberSettingsCache;
-		permissions: PermissionsCache;
-		premium: PremiumCache;
-		punishments: PunishmentCache;
-		settings: SettingsCache;
-		strikes: StrikesCache;
-		music: MusicCache;
-	};
-	public dbQueue: DBQueueService;
-
-	public rabbitmq: RabbitMqService;
 	public shardId: number;
 	public shardCount: number;
 
+	public requestHandler: IMRequestHandler;
+	public service: ClientServiceObject;
+	private startingServices: IMService[];
+	public cache: ClientCacheObject;
+
+	// Service shortcuts
+	public db: DatabaseService;
+	public rabbitmq: RabbitMqService;
 	public msg: MessagingService;
 	public mod: ModerationService;
 	public scheduler: SchedulerService;
@@ -117,42 +127,39 @@ export class IMClient extends Client {
 	public invs: InvitesService;
 	public music: MusicService;
 	public tracking: TrackingService;
+	public premium: PremiumService;
+	public management: ManagementService;
+	// End service shortcuts
 
 	public startedAt: Moment;
 	public gatewayConnected: boolean;
-	public gatewayInfo: GatewayInfo;
-	public gatewayInfoCachedAt: Moment;
 	public activityInterval: NodeJS.Timer;
 	public voiceConnections: LavaPlayerManager;
-
-	private counts: {
-		cachedAt: Moment;
-		guilds: number;
-		members: number;
+	public stats: {
+		wsEvents: number;
+		wsWarnings: number;
+		wsErrors: number;
+		cmdProcessed: number;
+		cmdErrors: number;
 	};
-	public disabledGuilds: Set<string>;
 
-	private dbl: DBL;
+	public disabledGuilds: Set<string> = new Set();
 
-	public constructor({
-		version,
-		token,
-		type,
-		instance,
-		shardId,
-		shardCount,
-		flags,
-		config
-	}: ClientOptions) {
+	public constructor({ version, token, type, instance, shardId, shardCount, flags, config }: ClientOptions) {
 		super(token, {
-			disableEveryone: true,
+			allowedMentions: {
+				everyone: false,
+				roles: true,
+				users: true
+			},
 			firstShardID: shardId - 1,
 			lastShardID: shardId - 1,
 			maxShards: shardCount,
 			disableEvents: {
 				TYPING_START: true,
-				USER_UPDATE: true,
-				PRESENCE_UPDATE: true
+				PRESENCE_UPDATE: true,
+				VOICE_STATE_UPDATE: true,
+				USER_UPDATE: true
 			},
 			restMode: true,
 			messageLimit: 2,
@@ -161,13 +168,15 @@ export class IMClient extends Client {
 			guildCreateTimeout: 60000
 		});
 
-		this.startedAt = moment();
-		this.counts = {
-			cachedAt: moment.unix(0),
-			guilds: 0,
-			members: 0
+		this.stats = {
+			wsEvents: 0,
+			wsWarnings: 0,
+			wsErrors: 0,
+			cmdProcessed: 0,
+			cmdErrors: 0
 		};
 
+		this.requestHandler = new IMRequestHandler(this);
 		this.version = version;
 		this.type = type;
 		this.instance = instance;
@@ -175,36 +184,53 @@ export class IMClient extends Client {
 		this.shardCount = shardCount;
 		this.flags = flags;
 		this.config = config;
+		this.shardId = shardId;
+		this.shardCount = shardCount;
 
+		this.service = {
+			database: new DatabaseService(this),
+			rabbitmq: new RabbitMqService(this),
+			message: new MessagingService(this),
+			moderation: new ModerationService(this),
+			scheduler: new SchedulerService(this),
+			commands: new CommandsService(this),
+			captcha: new CaptchaService(this),
+			invites: new InvitesService(this),
+			tracking: new TrackingService(this),
+			music: new MusicService(this),
+			premium: new PremiumService(this),
+			management: new ManagementService(this)
+		};
+		this.startingServices = Object.values(this.service);
 		this.cache = {
 			inviteCodes: new InviteCodeSettingsCache(this),
 			invites: new InvitesCache(this),
+			vanity: new VanityUrlCache(this),
+			leaderboard: new LeaderboardCache(this),
 			ranks: new RanksCache(this),
 			members: new MemberSettingsCache(this),
 			permissions: new PermissionsCache(this),
 			premium: new PremiumCache(this),
 			punishments: new PunishmentCache(this),
-			settings: new SettingsCache(this),
+			guilds: new GuildSettingsCache(this),
 			strikes: new StrikesCache(this),
-			music: new MusicCache(this)
+			music: new MusicCache(this),
+			reactionRoles: new ReactionRoleCache(this)
 		};
-		this.dbQueue = new DBQueueService(this);
-		this.rabbitmq = new RabbitMqService(this);
-		this.msg = new MessagingService(this);
-		this.mod = new ModerationService(this);
-		this.scheduler = new SchedulerService(this);
-		this.cmds = new CommandsService(this);
-		this.captcha = new CaptchaService(this);
-		this.invs = new InvitesService(this);
-		this.tracking = new TrackingService(this);
-		this.music = new MusicService(this);
 
-		// Services
-		this.cmds.init();
-		this.rabbitmq.init();
-		this.scheduler.init();
-
-		this.disabledGuilds = new Set();
+		// Setup service shortcuts
+		this.db = this.service.database;
+		this.rabbitmq = this.service.rabbitmq;
+		this.msg = this.service.message;
+		this.mod = this.service.moderation;
+		this.scheduler = this.service.scheduler;
+		this.cmds = this.service.commands;
+		this.captcha = this.service.captcha;
+		this.invs = this.service.invites;
+		this.music = this.service.music;
+		this.tracking = this.service.tracking;
+		this.premium = this.service.premium;
+		this.management = this.service.management;
 
 		this.on('ready', this.onClientReady);
 		this.on('guildCreate', this.onGuildCreate);
@@ -216,6 +242,22 @@ export class IMClient extends Client {
 		this.on('shardDisconnect', this.onDisconnect);
 		this.on('warn', this.onWarn);
 		this.on('error', this.onError);
+		this.on('rawWS', this.onRawWS);
+	}
+
+	public async init() {
+		// Services
+		await Promise.all(Object.values(this.service).map((s) => s.init()));
+	}
+
+	public async waitForStartupTicket() {
+		const start = process.uptime();
+		const interval = setInterval(
+			() => console.log(`Waiting for ticket since ${chalk.blue(Math.floor(process.uptime() - start))} seconds...`),
+			10000
+		);
+		await this.service.rabbitmq.waitForStartupTicket();
+		clearInterval(interval);
 	}
 
 	private async onClientReady(): Promise<void> {
@@ -224,58 +266,44 @@ export class IMClient extends Client {
 			return;
 		}
 
-		this.hasStarted = true;
+		// This is for convenience, the services could also subscribe to 'ready' event on client
+		await Promise.all(Object.values(this.service).map((s) => s.onClientReady()));
 
-		const set = await botSettings.find({ where: { id: this.user.id } });
+		this.hasStarted = true;
+		this.startedAt = moment();
+
+		const set = await this.db.getBotSettings(this.user.id);
 		this.settings = set ? set.value : { ...botDefaultSettings };
 
-		console.log(`Client ready! Serving ${this.guilds.size} guilds.`);
-		console.log(`This is the ${this.type} version of the bot.`);
+		console.log(chalk.green(`Client ready! Serving ${chalk.blue(this.guilds.size)} guilds.`));
 
 		// Init all caches
-		await Promise.all(Object.values(this.cache).map(c => c.init()));
+		await Promise.all(Object.values(this.cache).map((c) => c.init()));
 
 		// Insert guilds into db
-		await guilds.bulkCreate(
-			this.guilds.map(g => ({
+		await this.db.saveGuilds(
+			this.guilds.map((g) => ({
 				id: g.id,
 				name: g.name,
 				icon: g.iconURL,
 				memberCount: g.memberCount,
 				deletedAt: null,
-				banReason: undefined
-			})),
-			{
-				updateOnDuplicate: [
-					'name',
-					'icon',
-					'memberCount',
-					'updatedAt',
-					'deletedAt'
-				]
-			}
+				banReason: null
+			}))
 		);
 
-		const bannedGuilds = await guilds.findAll({
-			where: {
-				id: this.guilds.map(g => g.id),
-				banReason: { [Op.not]: null }
-			},
-			raw: true
-		});
+		const bannedGuilds = await this.db.getBannedGuilds(this.guilds.map((g) => g.id));
 
 		// Do some checks for all guilds
-		this.guilds.forEach(async guild => {
-			const bannedGuild = bannedGuilds.find(g => g.id === guild.id);
+		this.guilds.forEach(async (guild) => {
+			const bannedGuild = bannedGuilds.find((g) => g.id === guild.id);
 
 			// Check if the guild was banned
 			if (bannedGuild) {
 				const dmChannel = await this.getDMChannel(guild.ownerID);
 				await dmChannel
 					.createMessage(
-						'Hi! Thanks for inviting me to your server `' +
-							guild.name +
-							'`!\n\n' +
+						`Hi! Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
 							'It looks like this guild was banned from using the InviteManager bot.\n' +
 							'If you believe this was a mistake please contact staff on our support server.\n\n' +
 							`${this.config.bot.links.support}\n\n` +
@@ -296,21 +324,40 @@ export class IMClient extends Client {
 
 				case BotType.pro:
 					// If this is the pro bot then leave any guilds that aren't pro
-					const premium = await this.cache.premium.get(guild.id);
+					let premium = await this.cache.premium._get(guild.id);
+
 					if (!premium) {
-						const dmChannel = await this.getDMChannel(guild.ownerID);
-						await dmChannel
-							.createMessage(
-								'Hi!' +
-									`Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
-									'I am the pro version of InviteManager, and only available to people ' +
-									'that support me on Patreon with the pro tier.\n\n' +
-									'To purchase the pro tier visit https://www.patreon.com/invitemanager\n\n' +
-									'If you purchased premium run `!premium check` and then `!premium activate` in the server\n\n' +
-									'I will be leaving your server now, thanks for having me!'
-							)
-							.catch(() => undefined);
-						await guild.leave();
+						// Let's try and see if this guild had pro before, and if maybe
+						// the member renewed it, but it didn't update.
+						const oldPremium = await this.db.getPremiumSubscriptionGuildForGuild(guild.id, false);
+						if (oldPremium) {
+							await this.premium.checkPatreon(oldPremium.memberId);
+							premium = await this.cache.premium._get(guild.id);
+						}
+
+						if (!premium) {
+							const dmChannel = await this.getDMChannel(guild.ownerID);
+							await dmChannel
+								.createMessage(
+									'Hi!' +
+										`Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
+										'I am the pro version of InviteManager, and only available to people ' +
+										'that support me on Patreon with the pro tier.\n\n' +
+										'To purchase the pro tier visit https://www.patreon.com/invitemanager\n\n' +
+										'If you purchased premium run `!premium check` and then `!premium activate` in the server\n\n' +
+										'I will be leaving your server soon, thanks for having me!'
+								)
+								.catch(() => undefined);
+							const onTimeout = async () => {
+								// Check one last time before leaving
+								if (await this.cache.premium._get(guild.id)) {
+									return;
+								}
+
+								await guild.leave();
+							};
+							setTimeout(onTimeout, 3 * 60 * 1000);
+						}
 					}
 					break;
 
@@ -319,50 +366,45 @@ export class IMClient extends Client {
 			}
 		});
 
-		// Setup discord bots api
-		if (this.config.bot.dblToken) {
-			this.dbl = new DBL(this.config.bot.dblToken, this);
-		}
-
 		await this.setActivity();
-		this.activityInterval = setInterval(
-			() => this.setActivity(),
-			1 * 60 * 1000
-		);
+		this.activityInterval = setInterval(() => this.setActivity(), 1 * 60 * 1000);
+	}
+
+	public serviceStartupDone(service: IMService) {
+		this.startingServices = this.startingServices.filter((s) => s !== service);
+		if (this.startingServices.length === 0) {
+			console.log(chalk.green(`All services ready`));
+			this.rabbitmq.endStartup().catch((err) => console.error(err));
+		}
 	}
 
 	private async onGuildCreate(guild: Guild): Promise<void> {
 		const channel = await this.getDMChannel(guild.ownerID);
+		const dbGuild = await this.db.getGuild(guild.id);
 
-		const dbGuild = await guilds.findById(guild.id, { paranoid: false });
 		if (!dbGuild) {
-			await guilds.insertOrUpdate({
-				id: guild.id,
-				name: guild.name,
-				icon: guild.iconURL,
-				memberCount: guild.memberCount,
-				deletedAt: undefined,
-				banReason: undefined
-			});
+			await this.db.saveGuilds([
+				{
+					id: guild.id,
+					name: guild.name,
+					icon: guild.iconURL,
+					memberCount: guild.memberCount,
+					createdAt: new Date(guild.createdAt),
+					deletedAt: null,
+					banReason: null
+				}
+			]);
 
 			const defChannel = await this.getDefaultChannel(guild);
 			const newSettings = {
-				...defaultSettings,
-				[SettingsKey.joinMessageChannel]: defChannel ? defChannel.id : null
+				...guildDefaultSettings,
+				[GuildSettingsKey.joinMessageChannel]: defChannel ? defChannel.id : null
 			};
 
-			await settings.bulkCreate(
-				[
-					{
-						id: null,
-						guildId: guild.id,
-						value: newSettings
-					}
-				],
-				{
-					ignoreDuplicates: true
-				}
-			);
+			await this.db.saveGuildSettings({
+				guildId: guild.id,
+				value: newSettings
+			});
 		} else if (dbGuild.banReason !== null) {
 			await channel
 				.createMessage(
@@ -370,40 +412,50 @@ export class IMClient extends Client {
 						'It looks like this guild was banned from using the InviteManager bot.\n' +
 						'If you believe this was a mistake please contact staff on our support server.\n\n' +
 						`${this.config.bot.links.support}\n\n` +
-						'I will be leaving your server now, thanks for having me!'
+						'I will be leaving your server soon, thanks for having me!'
 				)
 				.catch(() => undefined);
 			await guild.leave();
 			return;
 		}
 
-		// Insert tracking data
-		await this.tracking.insertGuildData(guild);
-
 		// Clear the deleted timestamp if it's still set
 		// We have to do this before checking premium or it will fail
 		if (dbGuild && dbGuild.deletedAt) {
 			dbGuild.deletedAt = null;
-			await dbGuild.save();
+			await this.db.saveGuilds([dbGuild]);
 		}
 
-		// We use a DB query instead of getting the value from the cache
-		const premium = await this.cache.premium._get(guild.id);
+		// Check pro bot
+		if (this.type === BotType.pro) {
+			// We use a DB query instead of getting the value from the cache
+			const premium = await this.cache.premium._get(guild.id);
 
-		if (this.type === BotType.pro && !premium) {
-			await channel
-				.createMessage(
-					`Hi! Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
-						'I am the pro version of InviteManager, and only available to people ' +
-						'that support me on Patreon with the pro tier.\n\n' +
-						'To purchase the pro tier visit https://www.patreon.com/invitemanager\n\n' +
-						'If you purchased premium run `!premium check` and then `!premium activate` in the server\n\n' +
-						'I will be leaving your server soon, thanks for having me!'
-				)
-				.catch(() => undefined);
-			setTimeout(() => guild.leave().catch(() => undefined), 5 * 60 * 1000);
-			return;
+			if (!premium) {
+				await channel
+					.createMessage(
+						`Hi! Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
+							'I am the pro version of InviteManager, and only available to people ' +
+							'that support me on Patreon with the pro tier.\n\n' +
+							'To purchase the pro tier visit https://www.patreon.com/invitemanager\n\n' +
+							'If you purchased premium run `!premium check` and then `!premium activate` in the server\n\n' +
+							'I will be leaving your server soon, thanks for having me!'
+					)
+					.catch(() => undefined);
+				const onTimeout = async () => {
+					if (await this.cache.premium._get(guild.id)) {
+						return;
+					}
+
+					await guild.leave();
+				};
+				setTimeout(onTimeout, 2 * 60 * 1000);
+				return;
+			}
 		}
+
+		// Insert tracking data
+		await this.tracking.insertGuildData(guild);
 
 		// Send welcome message to owner with setup instructions
 		channel
@@ -428,19 +480,20 @@ export class IMClient extends Client {
 		}
 
 		// If this is the pro bot and the guild has the regular bot do nothing
-		if (
-			this.type === BotType.pro &&
-			guild.members.has(this.config.bot.ids.regular)
-		) {
+		if (this.type === BotType.pro && guild.members.has(this.config.bot.ids.regular)) {
 			return;
 		}
 
 		// Remove the guild (only sets the 'deletedAt' timestamp)
-		await guilds.destroy({
-			where: {
-				id: guild.id
+		await this.db.saveGuilds([
+			{
+				id: guild.id,
+				name: guild.name,
+				icon: guild.iconURL,
+				memberCount: guild.memberCount,
+				deletedAt: new Date()
 			}
-		});
+		]);
 	}
 
 	private async onGuildMemberAdd(guild: Guild, member: Member) {
@@ -453,13 +506,8 @@ export class IMClient extends Client {
 
 		if (member.user.bot) {
 			// Check if it's our pro bot
-			if (
-				this.type === BotType.regular &&
-				member.user.id === this.config.bot.ids.pro
-			) {
-				console.log(
-					`DISABLING BOT FOR ${guildId} BECAUSE PRO VERSION IS ACTIVE`
-				);
+			if (this.type === BotType.regular && member.user.id === this.config.bot.ids.pro) {
+				console.log(`DISABLING BOT FOR ${guildId} BECAUSE PRO VERSION IS ACTIVE`);
 				this.disabledGuilds.add(guildId);
 			}
 			return;
@@ -468,10 +516,7 @@ export class IMClient extends Client {
 
 	private async onGuildMemberRemove(guild: Guild, member: Member) {
 		// If the pro version of our bot left, re-enable this version
-		if (
-			this.type === BotType.regular &&
-			member.user.id === this.config.bot.ids.pro
-		) {
+		if (this.type === BotType.regular && member.user.id === this.config.bot.ids.pro) {
 			this.disabledGuilds.delete(guild.id);
 			console.log(`ENABLING BOT IN ${guild.id} BECAUSE PRO VERSION LEFT`);
 		}
@@ -484,25 +529,20 @@ export class IMClient extends Client {
 		}
 
 		// Check for a "general" channel, which is often default chat
-		const gen = guild.channels.find(c => c.name === 'general');
+		const gen = guild.channels.find((c) => c.name === 'general');
 		if (gen) {
 			return gen;
 		}
 
 		// First channel in order where the bot can speak
 		return guild.channels
-			.filter(
-				c =>
-					c.type ===
-					ChannelType.GUILD_TEXT /*&&
-					c.permissionsOf(guild.self).has('SEND_MESSAGES')*/
-			)
+			.filter((c) => c.type === ChannelType.GUILD_TEXT /*&&
+					c.permissionsOf(guild.self).has('SEND_MESSAGES')*/)
 			.sort((a, b) => a.position - b.position || a.id.localeCompare(b.id))[0];
 	}
 
 	public async logModAction(guild: Guild, embed: Embed) {
-		const modLogChannelId = (await this.cache.settings.get(guild.id))
-			.modLogChannel;
+		const modLogChannelId = (await this.cache.guilds.get(guild.id)).modLogChannel;
 
 		if (modLogChannelId) {
 			const logChannel = guild.channels.get(modLogChannelId) as TextChannel;
@@ -512,20 +552,13 @@ export class IMClient extends Client {
 		}
 	}
 
-	public async logAction(
-		guild: Guild,
-		message: Message,
-		action: LogAction,
-		data: any
-	) {
-		const logChannelId = (await this.cache.settings.get(guild.id)).logChannel;
+	public async logAction(guild: Guild, message: Message, action: LogAction, data: any) {
+		const logChannelId = (await this.cache.guilds.get(guild.id)).logChannel;
 
 		if (logChannelId) {
 			const logChannel = guild.channels.get(logChannelId) as TextChannel;
 			if (logChannel) {
-				const content =
-					message.content.substr(0, 1000) +
-					(message.content.length > 1000 ? '...' : '');
+				const content = message.content.substr(0, 1000) + (message.content.length > 1000 ? '...' : '');
 
 				let json = JSON.stringify(data, null, 2);
 				if (json.length > 1000) {
@@ -559,74 +592,25 @@ export class IMClient extends Client {
 			}
 		}
 
-		this.dbQueue.addLogAction(
-			{
-				id: null,
-				guildId: guild.id,
-				memberId: message.author.id,
-				action,
-				message: message.content,
-				data,
-				createdAt: new Date(),
-				updatedAt: new Date()
-			},
-			guild,
-			message.author
-		);
-	}
-
-	public async getCounts() {
-		// If cached data is older than 12 hours, update it
-		if (
-			moment()
-				.subtract(4, 'hours')
-				.isAfter(this.counts.cachedAt)
-		) {
-			console.log('Fetching data counts from DB...');
-			const rows = await dbStats.findAll({
-				where: { key: ['guilds', 'members'] }
-			});
-			this.counts = {
-				cachedAt: moment(),
-				guilds: rows.find(r => r.key === 'guilds').value,
-				members: rows.find(r => r.key === 'members').value
-			};
-		}
-
-		return this.counts;
-	}
-
-	private async updateGatewayInfo() {
-		if (
-			moment()
-				.subtract(4, 'hours')
-				.isAfter(this.gatewayInfoCachedAt)
-		) {
-			console.log('Fetching gateway info...');
-			this.gatewayInfo = (await this.getBotGateway()) as GatewayInfo;
-			this.gatewayInfoCachedAt = moment();
-		}
+		this.db.saveLog(guild, message.author, {
+			id: null,
+			guildId: guild.id,
+			memberId: message.author.id,
+			action,
+			message: message.content,
+			data,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		});
 	}
 
 	public async setActivity() {
-		if (this.dbl) {
-			await this.dbl.postStats(
-				this.guilds.size,
-				this.shardId - 1,
-				this.shardCount
-			);
-		}
-
-		await this.updateGatewayInfo();
-
 		const status = this.settings.activityStatus;
 
 		if (!this.settings.activityEnabled) {
 			this.editStatus(status);
 			return;
 		}
-
-		const counts = await this.getCounts();
 
 		const type =
 			this.settings.activityType === 'playing'
@@ -639,14 +623,7 @@ export class IMClient extends Client {
 				? 3
 				: 0;
 
-		let name = `invitemanager.co - ${counts.guilds} servers!`;
-		if (this.settings.activityMessage) {
-			name = this.settings.activityMessage.replace(
-				/{serverCount}/gi,
-				counts.guilds.toString()
-			);
-		}
-
+		const name = this.settings.activityMessage || `docs.invitemanager.co!`;
 		const url = this.settings.activityUrl;
 
 		this.editStatus(status, { name, type, url });
@@ -674,9 +651,15 @@ export class IMClient extends Client {
 
 	private async onWarn(warn: string) {
 		console.error('DISCORD WARNING:', warn);
+		this.stats.wsWarnings++;
 	}
 
 	private async onError(error: Error) {
 		console.error('DISCORD ERROR:', error);
+		this.stats.wsErrors++;
+	}
+
+	private async onRawWS() {
+		this.stats.wsEvents++;
 	}
 }

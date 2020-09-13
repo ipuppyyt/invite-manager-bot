@@ -1,11 +1,7 @@
-# Open Source
+# Otwarte źródło
 
-Our bot is fully open source under the `GPL-3.0` license.
+inne.openSource.opis
 
-## invite-manager-bot
+## Główny Bot
 
-Written with `eris`
-
-[https://github.com/SideProjectGuys/invite-manager-bot](https://github.com/SideProjectGuys/invite-manager-bot)
-
-If you would like to help us, please contact us on our discord or make an issue/pull request!
+inne.openSource.bot.opis

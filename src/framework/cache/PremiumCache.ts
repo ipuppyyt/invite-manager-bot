@@ -1,15 +1,10 @@
-import {
-	premiumSubscriptionGuilds,
-	premiumSubscriptions,
-	sequelize
-} from '../../sequelize';
 import { BotType } from '../../types';
 
 import { Cache } from './Cache';
 
 export class PremiumCache extends Cache<boolean> {
 	public async init() {
-		// TODO
+		// NO-OP
 	}
 
 	// This is public on purpose, so we can use it in the IMClient class
@@ -19,24 +14,7 @@ export class PremiumCache extends Cache<boolean> {
 			return true;
 		}
 
-		const sub = await premiumSubscriptionGuilds.findOne({
-			where: {
-				guildId
-			},
-			include: [
-				{
-					attributes: [],
-					model: premiumSubscriptions,
-					where: {
-						validUntil: {
-							[sequelize.Op.gte]: new Date()
-						}
-					},
-					required: true
-				}
-			]
-		});
-
+		const sub = await this.client.db.getPremiumSubscriptionGuildForGuild(guildId);
 		return !!sub;
 	}
 }

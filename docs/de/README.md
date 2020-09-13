@@ -1,26 +1,22 @@
 # InviteManager
 
-## Reference
+## Verweise
 
-- [Commands](reference/commands.md)
-- [Settings](reference/settings.md)
+- [Befehle](/de/reference/commands.md)
+- [Konfigurationen / Einstellungen](/de/reference/settings.md)
 
-## Getting Started
+## Erste Schritte
 
-To get started, just run the `!setup` command on your server.
+Um zu beginnen, führe einfach den Befehl `!setup` auf deinem Server aus.
 
-## What does this bot do?
+### Einladungsmanagement
 
-Our bot tracks invites and allows you to moderate your server.
-
-### Invite Tracking
-
-While our bot is on your server, we track every invite that happens on your server. Discord only shows you who has how many invites. Our bot also analyses who was invited by whom. This allows our bot to detect fake invites and see who is trying to cheat the invite system.
+Während unser Bot auf deinem Server ist, verfolgen wir jede Einladung, die auf deinem Server stattfindet. Discord zeigt dir nur, wer wie viele Einladungen hat. Unser Bot analysiert auch, wer von wem eingeladen wurde. Dies ermöglicht unserem Bot gefälschte Einladungen zu erkennen und zu sehen, wer versucht das Einladungssystem zu betrügen.
 
 ### Moderation
 
-Our brand new moderation system allows you to auto-moderate many things. Please check our [strikes](modules/moderation/strikes.md#what-are-strikes) and [punishments](modules/moderation/punishments.md#what-are-punishments) pages for more info. In short, our bot gives out "strikes" to people who misbehave, and after a certain amount of strikes, the user receives a punishment. All of this is configurable by the user.
+Unser brandneues Moderationssystem ermöglicht es dir viele Dinge automatisch zu moderieren. Bitte schaue dir für weiteren Informationen unsere [Strikes](/de/modules/moderation/strikes.md) und [Bestraftungen](/de/modules/moderation/punishments.md) Seiten an. Kurz gesagt vergibt unser Bot 'Strikes' an Leute, die sich schlecht benehmen, und nach einer bestimmten Anzahl von Strikes erhält der User eine Bestrafung. All das ist durch den Benutzer konfigurierbar.
 
-## Premium Features
+## Premium
 
-To pay our server bill, we offer a premium version of the bot. To see all the extra feature you get, please visit our [pricing page](premium/tiers.md#pricing).
+Um unsere Server Rechnungen zu bezahlen, bieten wir eine Premium-Version des Bots an. Um alle Premium Features zu sehen, besuche unsere [Premium Seite](/de/premium/features.md).

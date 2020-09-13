@@ -1,45 +1,44 @@
-- Getting Started
+- Pierwsze kroki
 
-  - [Quick Start](/pl/getting-started/quick-start.md)
-  - [FAQs](/pl/getting-started/faq.md)
-  - [Alpha Bot](/pl/getting-started/alpha.md)
+  - [Szybki Start](/pl/getting-started/quick-start.md)
+  - [FAQ](/pl/getting-started/faq.md)
+  - [Bot w wersji Alfa](/pl/getting-started/alpha.md)
   - [Pro Bot](/pl/getting-started/pro.md)
 
-- Reference
+- Odniesienia
 
-  - [Commands](/pl/reference/commands.md)
-  - [Configs / Settings](/pl/reference/settings.md)
+  - [Komendy](/pl/reference/commands.md)
+  - [Konfiguracje/Ustawienia](/pl/reference/settings.md)
 
 - Premium
 
-  - [Features](/pl/premium/features.md)
-  - [Tiers](/pl/premium/tiers.md)
-  - [Setting Up Pro](/pl/premium/setting-up.md)
+  - [Funkcje](/pl/premium/features.md)
+  - [Poziomy](/pl/premium/tiers.md)
+  - [Konfiguracja](/pl/premium/setup.md)
 
-- Modules
+- Moduły
 
-  - Invite Management
+  - Zarządzanie zaproszeniami
 
-    - [Overview](/pl/modules/invites/commands.md)
-    - [Custom Messages](/pl/modules/invites/custom-messages.md)
-      - [Examples](/pl/modules/invites/examples.md)
+    - [Przegląd](/pl/modules/invites/overview.md)
+    - [Niestandardowe wiadomości](/pl/modules/invites/custom-messages.md)
+      - [Przykłady](/pl/modules/invites/examples.md)
 
-  - Moderation
+  - Moderacyjne
 
-    - [Overview](/pl/modules/moderation/overview.md)
-    - [Strikes](/pl/modules/moderation/strikes.md)
-    - [Punishments](/pl/modules/moderation/punishments.md)
+    - [Ostrzeżenia](/pl/modules/moderation/strikes.md)
+    - [Kary](/pl/modules/moderation/punishments.md)
 
-  - Music
+  - Muzyka
 
-    - [Overview](/pl/modules/music/overview.md)
+    - [Przegląd](/pl/modules/music/overview.md)
 
-- Other
+- Inne
 
-  - [Webpanel](/pl/other/webpanel.md)
-  - [Translations](/pl/other/translations.md)
-  - [Donating](/pl/other/donating.md)
-  - [Support](/pl/other/support.md)
-  - [Changelog](/pl/other/changelog.md)
-  - [Roadmap](/pl/other/roadmap.md)
-  - [Open Source](/pl/other/open-source.md)
+  - [Panel internetowy](/pl/other/webpanel.md)
+  - [Tłumaczenia](/pl/other/translations.md)
+  - [Dotacje](/pl/other/donating.md)
+  - [Wsparcie](/pl/other/support.md)
+  - [Dziennik zmian](/pl/other/changelog.md)
+  - [Mapa](/pl/other/roadmap.md)
+  - [Otwarte źródło](/pl/other/open-source.md)

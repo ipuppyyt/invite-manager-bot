@@ -20,11 +20,11 @@ export class MemberResolver extends Resolver {
 				member = await guild.getRESTMember(id).then(() => undefined);
 			}
 			if (!member) {
-				throw Error(t(`resolvers.${this.getType()}.notFound`));
+				throw Error(t(`resolvers.member.notFound`));
 			}
 		} else {
 			const name = value.toLowerCase();
-			const members = guild.members.filter(m => {
+			const members = guild.members.filter((m) => {
 				const mName = m.username.toLowerCase() + '#' + m.discriminator;
 				return mName.includes(name) || name.includes(mName);
 			});
@@ -32,13 +32,13 @@ export class MemberResolver extends Resolver {
 				member = members[0];
 			} else {
 				if (members.length === 0) {
-					throw Error(t(`resolvers.${this.getType()}.notFound`));
+					throw Error(t(`resolvers.member.notFound`));
 				} else {
 					throw Error(
-						t(`resolvers.${this.getType()}.multiple`, {
+						t(`resolvers.member.multiple`, {
 							members: members
 								.slice(0, 10)
-								.map(m => `\`${m.username}#${m.discriminator}\``)
+								.map((m) => `\`${m.username}#${m.discriminator}\``)
 								.join(', ')
 						})
 					);

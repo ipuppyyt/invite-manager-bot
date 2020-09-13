@@ -17,20 +17,20 @@ export class RoleResolver extends Resolver {
 			const id = value.match(idRegex)[1];
 			role = guild.roles.get(id);
 			if (!role) {
-				throw Error(t(`resolvers.${this.getType()}.notFound`));
+				throw Error(t(`resolvers.role.notFound`));
 			}
 		} else {
 			const name = value.toLowerCase();
 
 			// Trying to find exact match
-			let roles = guild.roles.filter(r => {
+			let roles = guild.roles.filter((r) => {
 				const rName = r.name.toLowerCase();
 				return rName === name;
 			});
 
 			// If no roles found, allow for partial match
 			if (roles.length === 0) {
-				roles = guild.roles.filter(r => {
+				roles = guild.roles.filter((r) => {
 					const rName = r.name.toLowerCase();
 					return rName.includes(name) || name.includes(rName);
 				});
@@ -40,13 +40,13 @@ export class RoleResolver extends Resolver {
 				role = roles[0];
 			} else {
 				if (roles.length === 0) {
-					throw Error(t(`resolvers.${this.getType()}.notFound`));
+					throw Error(t(`resolvers.role.notFound`));
 				} else {
 					throw Error(
-						t(`resolvers.${this.getType()}.multiple`, {
+						t(`resolvers.role.multiple`, {
 							roles: roles
 								.slice(0, 10)
-								.map(r => `\`${r.name}\``)
+								.map((r) => `\`${r.name}\``)
 								.join(', ')
 						})
 					);

@@ -1,14 +1,9 @@
 import { IMClient } from '../../client';
-import {
-	ActivityStatus,
-	ActivityType,
-	AnnouncementVoice,
-	Lang,
-	LeaderboardStyle,
-	RankAssignmentStyle
-} from '../../sequelize';
 import { InternalSettingsTypes, SettingsInfo } from '../../settings';
+import { MusicPlatformType } from '../../types';
 import { Context } from '../commands/Command';
+import { ActivityStatus, ActivityType } from '../models/BotSetting';
+import { AnnouncementVoice, Lang, LeaderboardStyle, RankAssignmentStyle } from '../models/GuildSetting';
 
 import {
 	ArrayResolver,
@@ -26,10 +21,7 @@ export class SettingsValueResolver extends Resolver {
 	private infos: { [key: string]: SettingsInfo<any> };
 	private resolvers: { [key in InternalSettingsTypes]: Resolver };
 
-	public constructor(
-		client: IMClient,
-		infos: { [x: string]: SettingsInfo<any> }
-	) {
+	public constructor(client: IMClient, infos: { [x: string]: SettingsInfo<any> }) {
 		super(client);
 
 		this.infos = infos;
@@ -44,25 +36,15 @@ export class SettingsValueResolver extends Resolver {
 			String: new StringResolver(client),
 			'String[]': new ArrayResolver(client, StringResolver),
 			'Enum<Lang>': new EnumResolver(client, Object.values(Lang)),
-			'Enum<LeaderboardStyle>': new EnumResolver(
+			'Enum<LeaderboardStyle>': new EnumResolver(client, Object.values(LeaderboardStyle)),
+			'Enum<RankAssignmentStyle>': new EnumResolver(client, Object.values(RankAssignmentStyle)),
+			'Enum<AnnouncementVoice>': new EnumResolver(client, Object.values(AnnouncementVoice)),
+			'Enum<ActivityType>': new EnumResolver(client, Object.values(ActivityType)),
+			'Enum<ActivityStatus>': new EnumResolver(client, Object.values(ActivityStatus)),
+			'Enum<MusicPlatformTypes>': new EnumResolver(client, Object.values(MusicPlatformType)),
+			'Enum<MusicPlatformTypes>[]': new ArrayResolver(
 				client,
-				Object.values(LeaderboardStyle)
-			),
-			'Enum<RankAssignmentStyle>': new EnumResolver(
-				client,
-				Object.values(RankAssignmentStyle)
-			),
-			'Enum<AnnouncementVoice>': new EnumResolver(
-				client,
-				Object.values(AnnouncementVoice)
-			),
-			'Enum<ActivityType>': new EnumResolver(
-				client,
-				Object.values(ActivityType)
-			),
-			'Enum<ActivityStatus>': new EnumResolver(
-				client,
-				Object.values(ActivityStatus)
+				new EnumResolver(client, Object.values(MusicPlatformType))
 			)
 		};
 	}

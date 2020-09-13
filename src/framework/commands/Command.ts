@@ -1,23 +1,19 @@
-import { Guild, Member, Message, Permission } from 'eris';
+import { Guild, Member, Message } from 'eris';
 
 import { IMClient } from '../../client';
-import { SettingsObject } from '../../settings';
+import { GuildSettingsObject } from '../../settings';
 import {
 	BotCommand,
 	CommandGroup,
 	GuildPermission,
 	InvitesCommand,
+	ManagementCommand,
 	ModerationCommand,
 	MusicCommand
 } from '../../types';
 import { BooleanResolver } from '../resolvers';
 import { Resolver, ResolverConstructor } from '../resolvers/Resolver';
-import {
-	CreateEmbedFunc,
-	SendEmbedFunc,
-	SendReplyFunc,
-	ShowPaginatedFunc
-} from '../services/Messaging';
+import { CreateEmbedFunc, SendEmbedFunc, SendReplyFunc, ShowPaginatedFunc } from '../services/Messaging';
 
 export interface Arg {
 	name: string;
@@ -49,7 +45,7 @@ interface FlagInfo {
 }
 
 export interface CommandOptions {
-	name: BotCommand | InvitesCommand | ModerationCommand | MusicCommand;
+	name: BotCommand | InvitesCommand | ModerationCommand | MusicCommand | ManagementCommand;
 	aliases: string[];
 	args?: Arg[];
 	flags?: Flag[];
@@ -61,16 +57,13 @@ export interface CommandOptions {
 	extraExamples?: string[];
 }
 
-export type TranslateFunc = (
-	key: string,
-	replacements?: { [key: string]: any }
-) => string;
+export type TranslateFunc = (key: string, replacements?: { [key: string]: any }) => string;
 
 export type Context = {
 	guild: Guild;
 	me: Member;
 	t: TranslateFunc;
-	settings: SettingsObject;
+	settings: GuildSettingsObject;
 	isPremium: boolean;
 };
 
@@ -78,7 +71,7 @@ export abstract class Command {
 	public client: IMClient;
 	public resolvers: Resolver[];
 
-	public name: BotCommand | InvitesCommand | ModerationCommand | MusicCommand;
+	public name: BotCommand | InvitesCommand | ModerationCommand | MusicCommand | ManagementCommand;
 
 	public aliases: string[];
 	public args: Arg[];
@@ -103,7 +96,7 @@ export abstract class Command {
 	public constructor(client: IMClient, props: CommandOptions) {
 		this.client = client;
 		this.name = props.name;
-		this.aliases = props.aliases.map(a => a.toLowerCase());
+		this.aliases = props.aliases.map((a) => a.toLowerCase());
 		this.args = props.args ? props.args : [];
 		this.flags = props.flags ? props.flags : [];
 		this.group = props.group;
@@ -118,11 +111,8 @@ export abstract class Command {
 		this.usage = `{prefix}${this.name} `;
 
 		this.flagResolvers = new Map();
-		this.flags.forEach(flag => {
-			const res =
-				flag.resolver instanceof Resolver
-					? flag.resolver
-					: new flag.resolver(this.client);
+		this.flags.forEach((flag) => {
+			const res = flag.resolver instanceof Resolver ? flag.resolver : new flag.resolver(this.client);
 			this.flagResolvers.set(flag.name, res);
 			delete flag.resolver;
 
@@ -132,7 +122,7 @@ export abstract class Command {
 		});
 
 		this.resolvers = [];
-		this.args.forEach(arg => {
+		this.args.forEach((arg) => {
 			if (arg.resolver instanceof Resolver) {
 				this.resolvers.push(arg.resolver);
 			} else {
@@ -155,9 +145,7 @@ export abstract class Command {
 			const flag = this.flags[i];
 			const help = this.flagResolvers.get(flag.name).getHelp(context);
 			const descr = context.t(`cmd.${this.name}.self.flags.${flag.name}`);
-			info +=
-				`**--${flag.name}**\n${descr}\n` +
-				(help ? `${help.substr(0, 800)}\n\n` : '\n');
+			info += `**--${flag.name}**\n${descr}\n` + (help ? `${help.substr(0, 800)}\n\n` : '\n');
 		}
 		for (let i = 0; i < this.args.length; i++) {
 			const arg = this.args[i];
@@ -198,10 +186,5 @@ export abstract class Command {
 		return ret;
 	}
 
-	public abstract action(
-		message: Message,
-		args: any[],
-		flags: { [x: string]: any },
-		context: Context
-	): any;
+	public abstract action(message: Message, args: any[], flags: { [x: string]: any }, context: Context): any;
 }

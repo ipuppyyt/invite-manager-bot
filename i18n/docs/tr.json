@@ -1,0 +1,152 @@
+{
+	"lang": "Türkçe",
+	"modules": {
+		"title": "Modüller",
+		"invites": {
+			"title": "Davet Yönetimi",
+			"description": "Botumuz sunucunuzdayken, sunucunuzda gerçekleşen her daveti izleriz. Discord sadece size kimin davet ettiğini gösterir. Botumuz ayrıca kimin kimi davet ettiğini analiz eder. Bu botumuzun sahte davetiyeleri tespit etmesini ve davet sistemini kandırmaya çalıştığını görmesini sağlar.",
+			"examples": {
+				"title": "Örnekler"
+			},
+			"overview": {
+				"title": "Genel Bakış"
+			},
+			"customMessages": {
+				"title": "Özel mesaj"
+			}
+		},
+		"moderation": {
+			"title": "Moderasyon",
+			"description": "Yeni moderasyon sistemimiz birçok şeyi otomatik olarak yönetmenizi sağlar. Daha fazla bilgi için lütfen [strikes] ({{{ linkStrikes }}}) ve [punishments] ({{{ linkPunishments }}}) sayfalarımızı kontrol edin. Kısacası, botumuz yanlış davranan insanlara 'grev' verir ve belirli bir grevden sonra kullanıcı bir ceza alır. Tüm bunlar kullanıcı tarafından yapılandırılabilir.",
+			"punishments": {
+				"title": "Cezalar"
+			},
+			"strikes": {
+				"title": "Grevler"
+			}
+		},
+		"music": {
+			"title": "Müzik",
+			"overview": {
+				"title": "Genel Bakış"
+			}
+		}
+	},
+	"other": {
+		"title": "Diğer",
+		"donating": {
+			"title": "Oy verme",
+			"description": "other.donating.description",
+			"crypto": {
+				"title": "Kripto",
+				"description": "other.donating.crypto.description"
+			}
+		},
+		"roadmap": {
+			"title": "Harita yolu"
+		},
+		"support": {
+			"title": "Destek"
+		},
+		"translations": {
+			"title": "Çeviriler",
+			"description": "other.translations.description",
+			"help": {
+				"title": "other.translations.help.title",
+				"description": "other.translations.help.description"
+			}
+		},
+		"webpanel": {
+			"title": "Site Paneli",
+			"description": "other.webpanel.description"
+		},
+		"changelog": {
+			"title": "Değişiklikler"
+		},
+		"openSource": {
+			"title": "Açık kaynak",
+			"description": "other.openSource.description",
+			"bot": {
+				"title": "Ana bot",
+				"description": "other.openSource.bot.description"
+			}
+		}
+	},
+	"premium": {
+		"title": "Premium",
+		"description": "To pay our server bill, we offer a premium version of the bot. To see all the extra feature you get, please visit our [pricing page]({{{ link }}}).",
+		"features": {
+			"title": "Özellikleri"
+		},
+		"tiers": {
+			"title": "Aşamalar"
+		},
+		"setup": {
+			"title": "Kurma"
+		}
+	},
+	"start": {
+		"title": "Başlangıç",
+		"description": "Başlamak için sunucunuzda `!setup` komutunu çalıştırmanız yeterlidir. ",
+		"alpha": {
+			"title": "Alpha Bot",
+			"intro": "`InviteManager Alpha` bot, yeni özellikleri test etmek için kullandığımız bottur. Alpha bot'taki yeni özellikler her zaman istikrarlı olmayacak, ancak bu botu kullanırsanız, onları ilk gören siz olacaksınız ve ana bota dahil edilmeden önce onları nasıl daha iyi hale getirebileceğimiz konusunda bize geri bildirimde bulunabilirsiniz. .",
+			"linkDescription": "Invite the InviteManager Alpha here"
+		},
+		"faq": {
+			"title": "FAQs",
+			"prefix": {
+				"title": "Botun ön ekini nasıl değiştirebilirim?",
+				"description": "Öneki değiştirmek için `!config prefix -` yapabilirsiniz.\n\nGeçerli önekinizi bilmiyorsanız, öneki görmek için`@InviteManager config prefix`  komtunu kullanabilirsiniz."
+			},
+			"joinLeaveChannel": {
+				"title": "Katılma ve ayrılma mesajlarını nasıl ayarlarım?",
+				"description": "Yaparak kanalı ayarlayın\n\n`!config joinMessageChannel #kanal`\n\nya da\n\n`!config leaveMessageChannel #kanal`.\n\nBunu yaptıktan sonra yeni katılmalar ve ayrılmalar o kanala gönderilecek."
+			},
+			"joinLeaveMessage": {
+				"title": "Can I customize the join and leave messages?",
+				"description": "Kesinlikle! Mesajı yaparak örneğin değiştirebilirsiniz\n\n`! config joinMessage {memberMention} ** katıldı **; ** {inviterName} ** tarafından davet edildi (** {numInvites} ** davet yaptı) `\n\nya da\n\n`! config leaveMessage {memberName} ** ayrıldı **; ** {inviterName} ** `tarafından davet edilmişti.\n\nKullanılabilecek çok sayıda yer tutucu var. Listenin tamamını '[Custom Messages]({{{ link }}})' sayfasında görebilirsiniz."
+			},
+			"ranks": {
+				"title": "What are 'Ranks' and how can I use them?",
+				"description": "Rütbe, belirli bir sayıda davete ulaştıklarında insanlara rol atamak için kullanılır. Örneğin. `@Başlangıçcı` adında bir rolünüz varsa ve 5 veya daha fazla daveti olan kişilerin bu role eklenmesini istiyorsanız şu şekilde bir sıralama oluşturmanız gerekir:`! add-rank @Başlangıçcı 5 (ve burada bir açıklama istersiniz) `. Birisi 5 davet alır almaz, otomatik olarak bu role eklenir!"
+			},
+			"channel": {
+				"title": "Bir / bazı kanallar dışındaki tüm botları nasıl devre dışı bırakabilirim?",
+				"description": "Botun yanıt vermesini istemediğiniz kanallarda okunan mesaj izinlerini kaldırın."
+			},
+			"limitations": {
+				"title": "Limitation: No advanced tracking before the bot joins",
+				"description": "Gelişmiş izleme (kim kimi davet ettiğinde) yalnızca botu davet ettikten sonra çalışır. Bot, herkesin davet ettikten sonra sayımı davet ettiğini bilecek, endişelenmeyin. Yalnızca ek bilgiler eksiktir ve yalnızca botu davet ettikten sonra katılan üyeler için toplanabilir."
+			}
+		},
+		"pro": {
+			"title": "Profesyonel Bot",
+			"description": "start.pro.description"
+		},
+		"quick": {
+			"title": "Hızlı başlangıç",
+			"setup": {
+				"title": "Kurma",
+				"description": "start.quick.setup.description",
+				"first": {
+					"title": "start.quick.setup.first.title",
+					"description": "start.quick.setup.first.description"
+				},
+				"second": {
+					"title": "start.quick.setup.second.title",
+					"description": "start.quick.setup.second.description"
+				}
+			}
+		}
+	},
+	"reference": {
+		"title": "Referans",
+		"commands": {
+			"title": "Komutlar"
+		},
+		"settings": {
+			"title": "Configs / Settings"
+		}
+	}
+}

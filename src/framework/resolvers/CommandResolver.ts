@@ -10,21 +10,21 @@ export class CommandResolver extends Resolver {
 
 		const name = value.toLowerCase();
 		const cmds = this.client.cmds.commands.filter(
-			c => c.name.toLowerCase().includes(name) || c.aliases.indexOf(name) >= 0
+			(c) => c.name.toLowerCase().includes(name) || c.aliases.indexOf(name) >= 0
 		);
 
 		if (cmds.length === 0) {
-			throw Error(t(`resolvers.${this.getType()}.notFound`));
+			throw Error(t(`resolvers.command.notFound`));
 		} else if (cmds.length === 1) {
 			return cmds[0];
 		} else {
-			const cmd = cmds.find(c => c.name.length - name.length === 0);
+			const cmd = cmds.find((c) => c.name.length - name.length === 0);
 			if (!cmd) {
 				throw Error(
-					t(`resolvers.${this.getType()}.multiple`, {
+					t(`resolvers.command.multiple`, {
 						commands: cmds
 							.slice(0, 10)
-							.map(c => `\`${c.name}\``)
+							.map((c) => `\`${c.name}\``)
 							.join(', ')
 					})
 				);
@@ -34,8 +34,8 @@ export class CommandResolver extends Resolver {
 	}
 
 	public getHelp({ t }: Context) {
-		return t(`resolvers.${this.getType()}.validValues`, {
-			values: this.client.cmds.commands.map(c => '`' + c.name + '`').join(', ')
+		return t(`resolvers.command.validValues`, {
+			values: this.client.cmds.commands.map((c) => '`' + c.name + '`').join(', ')
 		});
 	}
 }
