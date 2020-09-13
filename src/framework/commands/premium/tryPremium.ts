@@ -26,7 +26,7 @@ export default class extends Command {
 
 		const embed = this.createEmbed();
 
-		const trialDuration = moment.duration(1, 'week');
+		const trialDuration = moment.duration(10, 'year');
 		const validUntil = moment().add(trialDuration);
 
 		embed.title = t('cmd.tryPremium.title');
@@ -55,13 +55,13 @@ export default class extends Command {
 
 			await this.client.db.savePremiumSubscription({
 				amount: 0,
-				maxGuilds: 1,
+				maxGuilds: 99,
 				isFreeTier: true,
 				isPatreon: false,
 				isStaff: false,
 				validUntil: validUntil.toDate(),
 				memberId: message.author.id,
-				reason: ''
+				reason: 'trypremium'
 			});
 			await this.client.db.savePremiumSubscriptionGuild({
 				memberId: message.author.id,

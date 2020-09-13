@@ -541,8 +541,8 @@
 		},
 		"invites": {
 			"amount": {
-				"other": "{{{ target }}} a {{ total }} invitations ! ({{ regular }} normales, {{ custom }} bonus, {{ fake }} fausses, {{ leave }} partis)",
-				"self": "Vous avez {{ total }} invitations ! ({{ regular }} ordinaires, {{ custom }} bonus, {{ fake }} faux, {{ leave }} partis)"
+				"other": "{{{ target }}} possède {{ total }} invitations! \n✅  {{ regular }} ordinaires  \n✨  {{ custom }} bonus \n💩  {{ fake }} faux \n❌  {{ leave }} partis\n \nBravo à lui 🤑",
+				"self": "Vous avez {{ total }} invitations 👏!\n \n✅  {{ regular }} ordinaires  \n✨  {{ custom }} bonus \n💩  {{ fake }} faux \n❌  {{ leave }} partis\n \nN'hésite pas partager le lien de ce serveur pour en avoir plus 😉"
 			},
 			"highestRank": {
 				"other": "{{{ target }}} possède actuellement le rang le plus élevé !",
@@ -1188,10 +1188,11 @@
 		}
 	},
 	"messages": {
-		"joinUnknownInviter": "Je n'arrive pas à comprendre comment <@{{ id }}> a rejoint le serveur.",
+		"joinUnknownInviter": "J'ai beau avoir un gros processeur mais je ne comprend vraiment pas comment <@{{ id }}> est arrivé. Peut être une invitation temporaire 🤷",
 		"joinVanityUrl": "<@{{ id }}> a rejoint le server avec une invitation personnalisée.",
-		"leaveUnknownInviter": "{{ tag }} a quitté le serveur, mais je n'ai trouvé qui l'a invité.",
-		"joinServerWidget": "L'utilisateur a rejoint en utilisant un widget serveur.",
+		"leaveUnknownInviter": "{{ tag }} a quitté le serveur et je n'ai pas trouvé qui l'a invité, mais, ne vous inquiétez pas, je vais m'en remettre.",
+		"unknownInviter": "Inconnu",
+		"joinServerWidget": "L'utilisateur <@{{ id }}> a rejoint en utilisant un widget serveur, je suppose donc qu'il est venu via un site web.",
 		"joinLeaveEmbedsIsPremium": "Using an embed as your join/leave message is a premium feature. Premium does not seem to be active on this server. Please contact us to learn more about how to purchase premium."
 	},
 	"moderation": {
@@ -1499,7 +1500,8 @@
 				},
 				"title": "Invitations",
 				"general": {
-					"title": "Général"
+					"title": "Général",
+					"description": "settings.groups.invites.general.description"
 				}
 			},
 			"moderation": {

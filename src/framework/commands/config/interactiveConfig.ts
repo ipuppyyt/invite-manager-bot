@@ -37,18 +37,9 @@ export default class extends Command {
 
 	public async action(message: Message, args: any[], flags: {}, context: Context): Promise<any> {
 		const embed = this.createEmbed({
-			title: 'InviteManager',
+			title: 'InviteLogger',
 			description: 'Loading...'
 		});
-
-		// Ask users to use the webpanel on the regular bot
-		if (this.client.type === BotType.regular) {
-			embed.description = context.t('cmd.interactiveConfig.useWeb', {
-				configCmd: `\`${context.settings.prefix}config\``,
-				link: `https://app.invitemanager.gg/guild/${context.guild.id}/settings`
-			});
-			return this.sendReply(message, embed);
-		}
 
 		if (
 			message.channel instanceof GuildChannel &&
@@ -106,7 +97,7 @@ export default class extends Command {
 		let page = 0;
 
 		do {
-			let title = 'InviteManager';
+			let title = 'InviteLogger';
 			for (let i = 0; i < path.length; i++) {
 				title += ' - ' + t(`settings.groups.${path.slice(0, i + 1).join('.')}.title`);
 			}

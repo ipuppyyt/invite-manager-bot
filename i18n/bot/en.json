@@ -282,9 +282,9 @@
 				"args": {
 					"type": "The type of export you want."
 				},
-				"description": "Export data of InviteManager to a csv sheet."
+				"description": "Export data of InviteLogger to a csv sheet."
 			},
-			"title": "InviteManager - Export"
+			"title": "InviteLogger - Export"
 		},
 		"fake": {
 			"join": {
@@ -308,7 +308,7 @@
 			"self": {
 				"description": "Get an invite link for the bot."
 			},
-			"title": "Add InviteManager to your server"
+			"title": "Add InviteLogger to your server"
 		},
 		"graph": {
 			"joins": {
@@ -353,7 +353,7 @@
 				},
 				"description": "Display help."
 			},
-			"text": "This is a list of commands you can use. You can get more info about a specific command by using `{{ prefix }}help <command>` (e.g. `{{ prefix }}help add-ranks`)",
+			"text": "InviteLogger classic is a fork from (invitemanager.co) by chaun14#1403 for ftnl (ftnl.fr)\n\nThis is a list of commands you can use. You can get more info about a specific command by using `{{ prefix }}help <command>` (e.g. `{{ prefix }}help add-ranks`)",
 			"usage": {
 				"title": "Usage"
 			}
@@ -541,8 +541,8 @@
 		},
 		"invites": {
 			"amount": {
-				"other": "{{{ target }}} has {{ total }} invites! ({{ regular }} regular, {{ custom }} bonus, {{ fake }} fake, {{ leave }} leaves)",
-				"self": "You have {{ total }} invites! ({{ regular }} regular, {{ custom }} bonus, {{ fake }} fake, {{ leave }} leaves)"
+				"other": "{{{ target }}} has {{ total }} invites! \n✅  {{ regular }} regular  \n✨  {{ custom }} bonus \n💩  {{ fake }} fake \n❌  {{ leave }} leaves\n \nGG to him🤑",
+				"self": "You have {{ total }} invites! 👏!\n \n✅  {{ regular }} regular  \n✨  {{ custom }} bonus \n💩  {{ fake }} fake \n❌  {{ leave }} leaves\n \nShare this guild with your friends for more 😉"
 			},
 			"highestRank": {
 				"other": "{{{ target }}} currently has the highest rank!",
@@ -784,13 +784,13 @@
 				"activate": "Use {{{ cmd }}} to activate it on this server",
 				"deactivate": "Use {{{ cmd }}} to deactivate it on this server",
 				"text": "Your premium subscription is valid for {{ date }}.\n\nYou have activated premium on {{{ limit }}} servers.\n{{{ guildList }}}\n\n[What can I do with premium?]({{{ link }}})",
-				"title": "InviteManager Premium"
+				"title": "InviteLogger Premium"
 			},
 			"self": {
 				"args": {
 					"action": "The action to perform. None for premium info. `check` to check your premium status. `activate` to use your premium for this server."
 				},
-				"description": "Info about premium version of InviteManager."
+				"description": "Info about premium version of InviteLogger."
 			}
 		},
 		"punishmentConfig": {
@@ -877,7 +877,7 @@
 		},
 		"setup": {
 			"faq": {
-				"text": "A complete guide on setting up the bot can be found here: https://docs.invitemanager.co/",
+				"text": "A complete guide on setting up the bot can be found here: https://docs.InviteLogger.co/",
 				"title": "FAQs and more"
 			},
 			"help": {
@@ -897,7 +897,7 @@
 				"title": "Missing permission: Manage Roles"
 			},
 			"prefix": {
-				"text": "You can change the prefix by doing `!config prefix !`\n\nIf you don't know the bots prefix, you can find it using `@InviteManager config prefix`.",
+				"text": "You can change the prefix by doing `!config prefix !`\n\nIf you don't know the bots prefix, you can find it using `@InviteLogger config prefix`.",
 				"title": "Changing the prefix"
 			},
 			"premium": {
@@ -908,7 +908,7 @@
 				"description": "Help with setting up the bot and checking for problems (e.g. missing permissions)"
 			},
 			"text": "After inviting the bot, all invites will be tracked automatically.",
-			"title": "Setting up InviteManager",
+			"title": "Setting up InviteLogger",
 			"viewAuditLogs": {
 				"text": "The bot does not have the `View Audit Logs` permissions. This permission allows the bot to better track invites.",
 				"title": "Missing permission: View Audit Logs"
@@ -982,11 +982,11 @@
 			"timedOut": "The request has timed out, please try again.",
 			"canceled": "The try-premium process has been aborted.",
 			"self": {
-				"description": "Try the premium version of InviteManager for free for a limited duration."
+				"description": "Try the premium version of InviteLogger for free for a limited duration."
 			},
 			"started": "You successfully started your trial! Use `{{ prefix }}premium` to check how much time you have left.",
 			"text": "You can try out our premium features for {{ duration }}. You can only do this once. Would you like to test it now?",
-			"title": "InviteManager - Try Premium"
+			"title": "InviteLogger - Try Premium"
 		},
 		"unban": {
 			"canNotUnban": "I cannot unban this member.",
@@ -1169,7 +1169,18 @@
 		},
 		"reactionRole": {
 			"noMessageFoundInDatabase": "The placeholder message with the specified id could not be found.",
-			"unknownEmoji": "Unknown emoji. The bot must be in the guild where the emoji comes from!"
+			"unknownEmoji": "Unknown emoji. The bot must be in the guild where the emoji comes from!",
+			"self": {
+				"flags": {
+					"remove": "cmd.reactionRole.self.flags.remove"
+				},
+				"args": {
+					"messageId": "cmd.reactionRole.self.args.messageId",
+					"emoji": "cmd.reactionRole.self.args.emoji",
+					"role": "cmd.reactionRole.self.args.role"
+				},
+				"description": "cmd.reactionRole.self.description"
+			}
 		},
 		"lockdown": {
 			"channelUnlocked": "The lockdown for {{{ channel }}} has ended.",
@@ -1220,10 +1231,12 @@
 		"viewAuditLogs": "View Audit Logs",
 		"manageMessages": "Manage Messages",
 		"readMessageHistory": "Read Message History",
-		"missing": "InviteManager is missing the permissions {{{ permissions }}} in {{{ channel }}}",
+		"missing": "InviteLogger is missing the permissions {{{ permissions }}} in {{{ channel }}}",
 		"banMembers": "Ban Members",
 		"kickMembers": "Kick Members",
-		"memberError": "Could not get member"
+		"memberError": "Could not get member",
+		"manageChannels": "permissions.manageChannels",
+		"addReactions": "permissions.addReactions"
 	},
 	"resolvers": {
 		"boolean": {
@@ -1467,7 +1480,7 @@
 			"description": "The channels in which the bot will react to commands."
 		},
 		"getUpdates": {
-			"description": "Enable to receive development updates about InviteManager.",
+			"description": "Enable to receive development updates about InviteLogger.",
 			"title": "Get Updates"
 		},
 		"groups": {
@@ -1499,7 +1512,8 @@
 				},
 				"title": "Invites",
 				"general": {
-					"title": "General"
+					"title": "General",
+					"description": "settings.groups.invites.general.description"
 				}
 			},
 			"moderation": {

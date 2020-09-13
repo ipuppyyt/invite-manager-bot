@@ -1499,7 +1499,8 @@
 				},
 				"title": "davetler",
 				"general": {
-					"title": "Genel"
+					"title": "Genel",
+					"description": "settings.groups.invites.general.description"
 				}
 			},
 			"moderation": {

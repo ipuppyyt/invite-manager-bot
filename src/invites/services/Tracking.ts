@@ -10,7 +10,7 @@ import { IMService } from '../../framework/services/Service';
 import { BasicMember, GuildPermission } from '../../types';
 import { deconstruct } from '../../util';
 
-const GUILDS_IN_PARALLEL = os.cpus().length;
+const GUILDS_IN_PARALLEL = 3;
 const INVITE_CREATE = 40;
 
 export class TrackingService extends IMService {
