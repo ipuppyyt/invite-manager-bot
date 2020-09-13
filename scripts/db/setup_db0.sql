@@ -82,6 +82,7 @@ CREATE TABLE `premiumSubscriptions` (
   `maxGuilds` int(11) NOT NULL DEFAULT '5',
   `isFreeTier` tinyint(1) NOT NULL DEFAULT '0',
   `isPatreon` tinyint(1) NOT NULL DEFAULT '0',
+  `isStaff` tinyint(1) NOT NULL DEFAULT '0',
   `validUntil` datetime DEFAULT NULL,
   `memberId` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `reason` text COLLATE utf8mb4_unicode_ci
