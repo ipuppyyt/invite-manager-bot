@@ -2,6 +2,7 @@
 	"devToken": "",
 	"sentryDsn": "",
 	"bot": {
+		"dbPrefix": "im",
 		"type": "regular",
 		"ids": {
 			"regular": "",

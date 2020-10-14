@@ -103,10 +103,10 @@ export class DatabaseService extends IMService {
 
 	private getDbInfo(dbShardOrGuildId: number | string): [string, Pool] {
 		if (typeof dbShardOrGuildId === 'number') {
-			return [`\`im_${dbShardOrGuildId}\``, this.pools.get(dbShardOrGuildId)];
+			return [`\`${this.client.config.bot.dbPrefix}_${dbShardOrGuildId}\``, this.pools.get(dbShardOrGuildId)];
 		} else {
 			const db = getShardIdForGuild(dbShardOrGuildId, this.dbCount);
-			return [`\`im_${db}\``, this.pools.get(db)];
+			return [`\`${this.client.config.bot.dbPrefix}_${db}\``, this.pools.get(db)];
 		}
 	}
 
