@@ -170,6 +170,23 @@ client.on('message', (message) => {
 		message.channel.send('The given shard has been queued');
 	}
 
+	if (message.content.startsWith('.help')) {
+		if (!config.controller.owners.includes(message.author.id)) {
+			message.reply("You're not allowed to do that");
+			return;
+		}
+
+		let embed = new Discord.MessageEmbed();
+		embed.setDescription(
+			"Commands:\n .botstatus --> show bot's shards status\n.startAll --> start all downed shard\n.start <shardid> --> start a specific shard\n.stop <shardid> --> stop a specific shard"
+		);
+		embed.setFooter('We control the world');
+		embed.setTimestamp();
+		embed.setColor('#5400db');
+
+		message.channel.send(embed);
+	}
+
 	if (message.content.toLowerCase() === '.botstatus') {
 		let builder = '';
 
