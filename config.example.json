@@ -2,6 +2,7 @@
 	"devToken": "",
 	"sentryDsn": "",
 	"bot": {
+		"dbPrefix": "im",
 		"type": "regular",
 		"ids": {
 			"regular": "",
@@ -57,8 +58,10 @@
 	"controller": {
 		"botToken": "Bot controller token, not your main bot token pls",
 		"shardCount": 2,
-		"owners": ["417977361011572747", "302901933419790347"],
+		"owners": ["417977361011572747", "302901933419790347", "your id in this array"],
 		"incidentChannel": "id of a log channel",
 		"firstDebugPort": 40000
-	}
+	 }
+	]
+
 }
