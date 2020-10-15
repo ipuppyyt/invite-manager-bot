@@ -465,7 +465,8 @@
 				"role[]": "A list of roles, for example: @Admin @Mod",
 				"string": "Any text",
 				"string[]": "A list of words, for example: word another \"word with space\"",
-				"enum<musicplatformtypes>[]": "A list of music platform types"
+				"enum<musicplatformtypes>[]": "A list of music platform types",
+				"enum<musicplatformtypes>": "cmd.interactiveConfig.values.enum<musicplatformtypes>"
 			},
 			"welcome": "Use the reactions to pick one of the available options."
 		},
@@ -877,7 +878,7 @@
 		},
 		"setup": {
 			"faq": {
-				"text": "A complete guide on setting up the bot can be found here: https://docs.InviteLogger.co/",
+				"text": "A complete guide on setting up the bot can be found here: https://docs.invitemanager.co/",
 				"title": "FAQs and more"
 			},
 			"help": {
@@ -1213,7 +1214,8 @@
 				"mute": "You have been **muted** in **{{ guild }}**",
 				"warn": "You have been **warned** in **{{ guild }}**",
 				"reason": "Reason: {{ reason }}",
-				"amount": "Amount: {{ amount }}"
+				"amount": "Amount: {{ amount }}",
+				"softban": "moderation.punishments.dm.softban"
 			}
 		},
 		"strikes": {
