@@ -5,19 +5,12 @@ import { BotCommand, CommandGroup } from '../../../types';
 import { Command, Context } from '../Command';
 
 // Developers
-const developers: string[] = ['Andy#1801', 'Valandur#3581', 'santjum#0450', 'legendarylol#8215'];
+const developers: string[] = ['chaun14#1403', 'Andy#1801', 'Valandur#3581', 'santjum#0450', 'legendarylol#8215'];
 
 // Staff
-const moderators: string[] = [
-	'malok#8571',
-	'Alan Wen#3344',
-	'GTA Tetris#4587',
-	'𝕸σσɳ유#2296',
-	'SemiMute#2018',
-	'Mennoplays#0001'
-];
+const moderators: string[] = ["El M'apidae#5475", 'hiro san#1353'];
 
-const staff: string[] = ['Audio#0265', 'Chris.#0006', 'Gugu72#0016'];
+const staff: string[] = ['Join our support server to discover them'];
 
 const translators: string[] = [
 	'legendarylol#8215',
