@@ -1168,7 +1168,7 @@
 			"noMessageFoundInDatabase": "Le placeholder avec cet ID n'a pas pu être trouvé."
 		},
 		"reactionRole": {
-			"noMessageFoundInDatabase": "Le placeholder avec cet ID n'a pas pu être trouvé.",
+			"noMessageFoundInDatabase": "Impossible de trouver un message placeholder avec cet id. Pour en créer un `!placeholder <votre message ici>`",
 			"unknownEmoji": "Emoji inconnu. Le bot doit être dans le serveur d'où vient l'emoji !"
 		},
 		"lockdown": {

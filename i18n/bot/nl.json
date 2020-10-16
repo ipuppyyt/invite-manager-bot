@@ -1168,7 +1168,7 @@
 			"noMessageFoundInDatabase": "De placeholder bericht met de opgegeven id kan niet worden gevonden."
 		},
 		"reactionRole": {
-			"noMessageFoundInDatabase": "De placeholder bericht met de opgegeven id kan niet worden gevonden.",
+			"noMessageFoundInDatabase": "De placeholder bericht met de opgegeven id kan niet worden gevonden. To create one use `!placeholder <your message here>`",
 			"unknownEmoji": "Onbekende emoji. De bot moet in de guild zijn waar de emoji vandaan komt!"
 		},
 		"lockdown": {

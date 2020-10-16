@@ -1168,7 +1168,7 @@
 			"noMessageFoundInDatabase": "The placeholder message with the specified id could not be found."
 		},
 		"reactionRole": {
-			"noMessageFoundInDatabase": "The placeholder message with the specified id could not be found.",
+			"noMessageFoundInDatabase": "The placeholder message with the specified id could not be found. To create one use `!placeholder <your message here>`",
 			"unknownEmoji": "Unknown emoji. The bot must be in the guild where the emoji comes from!"
 		},
 		"lockdown": {
