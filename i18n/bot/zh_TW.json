@@ -261,7 +261,10 @@
 			"self": {
 				"args": {
 					"channel": "邀請代碼被創立在頻道。使用目前的頻道為默認。",
-					"name": "邀請代碼的名字。"
+					"name": "邀請代碼的名字。",
+					"temporaryMembership": "`true` or `false` --> Set if the invited users are granted as temporary members",
+					"maxUses": "`number` --> The max amount of uses of the invite code",
+					"expires": "`true` or `false` --> Set if the invite will expires after 24 hours"
 				},
 				"description": "創立獨特的邀請代碼。"
 			}

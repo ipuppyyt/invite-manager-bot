@@ -261,7 +261,10 @@
 			"self": {
 				"args": {
 					"channel": "Davet kodunun oluşturulduğu kanal. Geçerli kanalı varsayılan olarak kullanır.",
-					"name": "Davet kodunun adı."
+					"name": "Davet kodunun adı.",
+					"temporaryMembership": "`true` or `false` --> Set if the invited users are granted as temporary members",
+					"maxUses": "`number` --> The max amount of uses of the invite code",
+					"expires": "`true` or `false` --> Set if the invite will expires after 24 hours"
 				},
 				"description": "Özel davet kodları oluştur."
 			}

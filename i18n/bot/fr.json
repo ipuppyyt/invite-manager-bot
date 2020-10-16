@@ -261,7 +261,10 @@
 			"self": {
 				"args": {
 					"channel": "Le Salon ou le code d'invitation est créé. Utilise le canal actuel par défaut.",
-					"name": "Le nom du code d'invitation."
+					"name": "Le nom du code d'invitation.",
+					"temporaryMembership": "`true` or `false` --> Set if the invited users are granted as temporary members",
+					"maxUses": "`number` --> The max amount of uses of the invite code",
+					"expires": "`true` or `false` --> Set if the invite will expires after 24 hours"
 				},
 				"description": "Crée des codes d'invitation uniques."
 			}
