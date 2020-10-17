@@ -103,22 +103,7 @@ export enum GuildSettingsKey {
 	autoModEmojisMaxNumberOfEmojis = 'autoModEmojisMaxNumberOfEmojis',
 
 	// Moderation - Hoist
-	autoModHoistEnabled = 'autoModHoistEnabled',
-
-	// Music - General
-	musicVolume = 'musicVolume',
-
-	// Music - Announcements
-	announceNextSong = 'announceNextSong',
-	announcementVoice = 'announcementVoice',
-
-	// Music - Fade on talk
-	fadeMusicOnTalk = 'fadeMusicOnTalk',
-	fadeMusicEndDelay = 'fadeMusicEndDelay',
-
-	// Music - Platforms
-	defaultMusicPlatform = 'defaultMusicPlatform',
-	disabledMusicPlatforms = 'disabledMusicPlatforms'
+	autoModHoistEnabled = 'autoModHoistEnabled'
 }
 
 export enum Lang {

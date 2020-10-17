@@ -56,15 +56,14 @@ let child = spawn(/^win/.test(process.platform) ? 'npm.cmd' : 'npm', ['run', 'bu
 	stdio: 'inherit'
 });
 
-child.on('error', error => console.log(error));
+child.on('error', (error) => console.log(error));
 
 child.on('close', () => {
 	const cmds = [];
 	const cmdDirs = [
 		path.resolve('./bin/framework/commands'),
 		path.resolve('./bin//invites/commands'),
-		path.resolve('./bin/moderation/commands'),
-		path.resolve('./bin/music/commands')
+		path.resolve('./bin/moderation/commands')
 	];
 	const fakeClient = {
 		msg: {
@@ -77,8 +76,8 @@ child.on('close', () => {
 			commands: cmds
 		}
 	};
-	const loadRecursive = dir =>
-		fs.readdirSync(dir).forEach(fileName => {
+	const loadRecursive = (dir) =>
+		fs.readdirSync(dir).forEach((fileName) => {
 			const file = path.join(dir, fileName);
 
 			if (fs.statSync(file).isDirectory()) {
@@ -109,9 +108,9 @@ child.on('close', () => {
 
 	console.log(`Loaded \x1b[32m${cmds.length}\x1b[0m commands!`);
 
-	const getAllFiles = dir => {
+	const getAllFiles = (dir) => {
 		let files = [];
-		fs.readdirSync(dir).forEach(fileName => {
+		fs.readdirSync(dir).forEach((fileName) => {
 			const file = path.join(dir, fileName);
 
 			if (fs.statSync(file).isDirectory()) {
@@ -135,7 +134,7 @@ child.on('close', () => {
 		updateFiles: true
 	});
 
-	locales.forEach(locale => {
+	locales.forEach((locale) => {
 		const niceLocale = locale.replace('_', '-');
 		console.log(`  ${niceLocale}`);
 
@@ -158,14 +157,14 @@ child.on('close', () => {
 					out += `| Setting | Description |\n|---|---|\n`;
 					out += group.__settings
 						.map(
-							key =>
+							(key) =>
 								`| [${_tBot(`settings.${key}.title`)}](#${key.toLowerCase()}) | ${_tBot(`settings.${key}.description`)}`
 						)
 						.join('\n');
 				}
 				out += `\n\n`;
 			}
-			Object.keys(group).forEach(subGroup => {
+			Object.keys(group).forEach((subGroup) => {
 				if (subGroup === '__settings') {
 					return;
 				}
@@ -176,10 +175,10 @@ child.on('close', () => {
 
 		function generateExamples(cmd) {
 			const examples = [];
-			if (!cmd.args.some(a => a.required)) {
+			if (!cmd.args.some((a) => a.required)) {
 				examples.push('```text\n' + `!${cmd.name}` + '\n```\n');
 			}
-			return examples.concat(cmd.extraExamples.map(e => '```text\n' + e + '\n```\n'));
+			return examples.concat(cmd.extraExamples.map((e) => '```text\n' + e + '\n```\n'));
 		}
 
 		// Import after compile
@@ -188,7 +187,7 @@ child.on('close', () => {
 
 		// Generate config docs
 		const settings = {};
-		Object.keys(guildSettingsInfo).forEach(key => {
+		Object.keys(guildSettingsInfo).forEach((key) => {
 			const info = guildSettingsInfo[key];
 			let text = `---\n## ${_tBot(`settings.${key}.title`)}\n\n`;
 			text += `${_tBot(`settings.${key}.description`)}\n\n`;
@@ -202,13 +201,13 @@ child.on('close', () => {
 				text += `\`!config ${key} false\`\n\n`;
 			} else {
 				if (info.possibleValues) {
-					text += `Possible values: ${info.possibleValues.map(v => `\`${v}\``).join(', ')}\n\n`;
+					text += `Possible values: ${info.possibleValues.map((v) => `\`${v}\``).join(', ')}\n\n`;
 					text += `Example:\n\n`;
 					text += `\`!config ${key} ${info.possibleValues[0]}\`\n\n`;
 				}
 				if (info.exampleValues) {
 					text += `Examples:\n\n`;
-					info.exampleValues.forEach(ex => {
+					info.exampleValues.forEach((ex) => {
 						text += `\`!config ${key} ${ex}\`\n\n`;
 					});
 				}
@@ -219,7 +218,7 @@ child.on('close', () => {
 			info.markdown = text;
 
 			let curr = settings;
-			info.grouping.forEach(grp => {
+			info.grouping.forEach((grp) => {
 				let next = curr[grp];
 				if (!next) {
 					next = {};
@@ -244,7 +243,7 @@ child.on('close', () => {
 		outSettings += generateGroup([], settings);
 
 		outSettings += Object.keys(guildSettingsInfo)
-			.map(key => `<a name=${key}></a>\n\n` + guildSettingsInfo[key].markdown)
+			.map((key) => `<a name=${key}></a>\n\n` + guildSettingsInfo[key].markdown)
 			.join('\n\n');
 
 		fs.writeFileSync(`./docs/${niceLocale}/reference/settings.md`, outSettings);
@@ -257,15 +256,15 @@ child.on('close', () => {
 			'## Arguments & Flags\n\nMost commands accept arguments and/or flags.  \n' +
 			'According to the **Type** of the argument or flag you can provide different values.\n\n';
 
-		argTypes.forEach(argType => {
+		argTypes.forEach((argType) => {
 			const name = _tBot(`resolvers.${argType}.type`);
 			const info = _tBot(`resolvers.${argType}.typeInfo`);
 			outCmds += `### ${name}\n\n${info}\n\n`;
 		});
 
 		outCmds += '## Overview\n\n';
-		Object.keys(CommandGroup).forEach(group => {
-			const groupCmds = cmds.filter(c => c.group === group).sort((a, b) => a.name.localeCompare(b.name));
+		Object.keys(CommandGroup).forEach((group) => {
+			const groupCmds = cmds.filter((c) => c.group === group).sort((a, b) => a.name.localeCompare(b.name));
 			if (groupCmds.length === 0) {
 				return;
 			}
@@ -273,14 +272,10 @@ child.on('close', () => {
 			outCmds += `### ${group}\n\n| Command | Description | Usage |\n|---|---|---|\n`;
 			outCmds += groupCmds
 				.map(
-					cmd =>
+					(cmd) =>
 						`| [${cmd.name}](#${cmd.name}) ` +
 						`| ${_tBot(`cmd.${cmd.name}.self.description`)} | ` +
-						`${cmd.usage
-							.replace('{prefix}', '!')
-							.replace(/</g, '\\<')
-							.replace(/>/g, '\\>')
-							.replace(/\|/g, '\\|')} |`
+						`${cmd.usage.replace('{prefix}', '!').replace(/</g, '\\<').replace(/>/g, '\\>').replace(/\|/g, '\\|')} |`
 				)
 				.join('\n');
 			outCmds += '\n\n';
@@ -288,7 +283,7 @@ child.on('close', () => {
 
 		cmds
 			.sort((a, b) => a.name.localeCompare(b.name))
-			.forEach(cmd => {
+			.forEach((cmd) => {
 				const usage = cmd.usage.replace('{prefix}', '!');
 				const info = cmd.getInfo2({ t: _tBot });
 
@@ -305,7 +300,7 @@ child.on('close', () => {
 
 				if (cmd.aliases.length > 0) {
 					outCmds += '### Aliases\n\n';
-					outCmds += cmd.aliases.map(a => `- \`!${a}\``).join('\n') + '\n\n';
+					outCmds += cmd.aliases.map((a) => `- \`!${a}\``).join('\n') + '\n\n';
 				}
 
 				if (info.args.length > 0) {
@@ -330,7 +325,7 @@ child.on('close', () => {
 					// &#x2011; is the non-breaking hyphen character
 					outCmds += info.flags
 						.map(
-							flag =>
+							(flag) =>
 								`| &#x2011;&#x2011;${flag.name} ` +
 								`| ${flag.short ? '&#x2011;' + flag.short : ' '} ` +
 								`| [${flag.type}](#${flag.type.replace(/ /g, '')}) ` +
@@ -358,14 +353,14 @@ child.on('close', () => {
 		updateFiles: true
 	});
 
-	locales.forEach(locale => {
+	locales.forEach((locale) => {
 		const niceLocale = locale.replace('_', '-');
 		console.log(`  ${niceLocale}`);
 
 		const _tDocs = (phrase, replacements) => i18nDocs.__({ locale, phrase }, replacements);
 
 		const docFiles = getAllFiles(`./docs/_base/`);
-		docFiles.forEach(docFile => {
+		docFiles.forEach((docFile) => {
 			const newPath = path.relative('./docs/_base/', docFile).replace(/\.md/gi, '');
 
 			let text = fs.readFileSync(docFile, 'utf8');
@@ -374,7 +369,7 @@ child.on('close', () => {
 				let replace = {};
 				if (args[1]) {
 					replace = JSON.parse(`{${args[1]}}`);
-					Object.keys(replace).forEach(key => {
+					Object.keys(replace).forEach((key) => {
 						replace[key] = replace[key].replace(varRegex, (s, ...args) => _tDocs(args[0]));
 					});
 				}
@@ -388,14 +383,14 @@ child.on('close', () => {
 
 	// Generate the main readme and sidebar with all the languages
 	let sidebarText = '';
-	locales.forEach(locale => {
+	locales.forEach((locale) => {
 		const langName = i18nBot.__({ locale, phrase: 'lang' });
 		sidebarText += `- [${langName}](/${locale.replace('_', '-')}/README.md)\n`;
 	});
 	fs.writeFileSync(`./docs/_sidebar.md`, sidebarText);
 
 	let readmeText = '# InviteManager Docs\n\n';
-	locales.forEach(locale => {
+	locales.forEach((locale) => {
 		const langName = i18nBot.__({ locale, phrase: 'lang' });
 		readmeText += `- [${langName}](/${locale.replace('_', '-')}/README.md)\n`;
 	});

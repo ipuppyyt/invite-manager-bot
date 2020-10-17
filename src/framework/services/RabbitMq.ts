@@ -241,7 +241,6 @@ export class RabbitMqService extends IMService {
 			guilds: this.client.guilds.size,
 			error: err ? err.message : null,
 			tracking: this.getTrackingStatus(),
-			music: this.getMusicStatus(),
 			cache: this.getCacheSizes(),
 			metrics: this.getMetrics()
 		});
@@ -371,11 +370,6 @@ export class RabbitMqService extends IMService {
 				await sendResponse({ error: errors.join('\n') });
 				break;
 
-			case ShardCommand.RELOAD_MUSIC_NODES:
-				await this.client.music.loadMusicNodes();
-				await sendResponse({});
-				break;
-
 			case ShardCommand.LEAVE_GUILD:
 				if (!guild) {
 					return sendResponse({
@@ -436,11 +430,7 @@ export class RabbitMqService extends IMService {
 			initialPendingGuilds: this.client.tracking.initialPendingGuilds
 		};
 	}
-	private getMusicStatus() {
-		return {
-			connections: this.client.music.getMusicConnectionGuildIds()
-		};
-	}
+
 	private getCacheSizes() {
 		let channelCount = this.client.groupChannels.size + this.client.privateChannels.size;
 		let roleCount = 0;

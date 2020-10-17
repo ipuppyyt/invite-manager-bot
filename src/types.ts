@@ -1,7 +1,5 @@
 import { VoiceConnection, VoiceConnectionManager } from 'eris';
 
-import { MusicItem } from './music/models/MusicItem';
-
 export enum BotType {
 	regular = 'regular',
 	pro = 'pro',
@@ -64,7 +62,6 @@ export enum CommandGroup {
 	Premium = 'Premium',
 	Moderation = 'Moderation',
 	Report = 'Report',
-	Music = 'Music',
 	Other = 'Other'
 }
 
@@ -169,42 +166,12 @@ export enum ManagementCommand {
 	mentionRole = 'mentionRole'
 }
 
-export enum MusicCommand {
-	play = 'play',
-	pause = 'pause',
-	resume = 'resume',
-	skip = 'skip',
-	seek = 'seek',
-	queue = 'queue',
-	rewind = 'rewind',
-	nowPlaying = 'nowPlaying',
-	disconnect = 'disconnect',
-	search = 'search',
-	volume = 'volume',
-	repeat = 'repeat',
-	mashup = 'mashup',
-	lyrics = 'lyrics'
-}
-
 export enum ChannelType {
 	GUILD_TEXT = 0,
 	DM = 1,
 	GUILD_VOICE = 2,
 	GROUP_DM = 3,
 	GUILD_CATEGORY = 4
-}
-
-export interface MusicQueue {
-	current: MusicItem;
-	queue: MusicItem[];
-}
-
-export enum MusicPlatformType {
-	YouTube = 'youtube',
-	SoundCloud = 'soundcloud',
-	RaveDJ = 'ravedj',
-	iHeartRADIO = 'iheartradio',
-	TuneIn = 'tuneIn'
 }
 
 export interface BasicInvite {
@@ -222,64 +189,6 @@ export interface BasicMember {
 		discriminator: string;
 		avatarURL: string;
 	};
-}
-
-export interface LavaPlayerManager extends VoiceConnectionManager<LavaPlayer> {}
-
-export interface MusicServiceInterface extends LavaPlayerManager {}
-
-export interface LavaPlayerState {
-	position: number;
-	time: number;
-}
-
-export interface LavaPlayer extends VoiceConnection {
-	node: string;
-	hostname: string;
-	manager: LavaPlayerManager | null;
-	track: string | null;
-	state: LavaPlayerState;
-
-	play: (track: string) => void;
-	stop: () => void;
-	pause: () => void;
-	resume: () => void;
-	seek: (position: number) => void;
-	setVolume: (volume: number) => void;
-
-	on(event: 'debug' | 'warn', listener: (message: string) => void): this;
-	on(event: 'error' | 'disconnect', listener: (err: Error) => void): this;
-	on(event: 'reconnect', listener: () => void): this;
-	on(event: 'pong', listener: (latency: number) => void): this;
-	on(event: 'speakingStart', listener: (userID: string) => void): this;
-	on(event: 'speakingStop', listener: (userID: string) => void): this;
-	on(event: 'stateUpdate', listener: (state: LavaPlayerState) => void): this;
-	on(event: 'end', listener: (event: LavaEndEvent) => void): this;
-	on(event: 'userDisconnect', listener: (userID: string) => void): this;
-}
-
-export interface LavaEndEvent {
-	op: string;
-	reason: string;
-	type: string;
-	track: string;
-	guildId: string;
-}
-
-export interface LavaTrackInfo {
-	identifier: string;
-	isSeekable: boolean;
-	author: string;
-	length: number;
-	isStream: boolean;
-	position: number;
-	title: string;
-	uri: string;
-}
-
-export interface LavaTrack {
-	track: string;
-	info: LavaTrackInfo;
 }
 
 export interface GatewayInfo {

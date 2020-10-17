@@ -10,7 +10,6 @@ import { Punishment } from '../../moderation/models/Punishment';
 import { PunishmentConfig, PunishmentType } from '../../moderation/models/PunishmentConfig';
 import { Strike } from '../../moderation/models/Strike';
 import { StrikeConfig, ViolationType } from '../../moderation/models/StrikeConfig';
-import { MusicNode } from '../../music/models/MusicNode';
 import { BasicUser, BotType } from '../../types';
 import { getShardIdForGuild } from '../../util';
 import { BotSetting } from '../models/BotSetting';
@@ -53,7 +52,6 @@ enum TABLE {
 	members = '`members`',
 	memberSettings = '`memberSettings`',
 	messages = '`messages`',
-	musicNodes = '`musicNodes`',
 	premiumSubscriptionGuilds = '`premiumSubscriptionGuilds`',
 	premiumSubscriptions = '`premiumSubscriptions`',
 	punishmentConfigs = '`punishmentConfigs`',
@@ -798,15 +796,6 @@ export class DatabaseService extends IMService {
 	}
 	private async saveIncidents(indicents: Partial<Incident>[]) {
 		await this.insertOrUpdate(TABLE.incidents, ['guildId', 'error', 'details'], [], indicents, (i) => i.guildId);
-	}
-
-	// ---------------
-	//   Music nodes
-	// ---------------
-	public async getMusicNodes() {
-		const typeFilter =
-			this.client.type === BotType.custom ? 'isCustom' : this.client.type === BotType.pro ? 'isPremium' : 'isRegular';
-		return this.findMany<MusicNode>(GLOBAL_SHARD_ID, TABLE.musicNodes, `${typeFilter} = 1`, []);
 	}
 
 	// ---------------------

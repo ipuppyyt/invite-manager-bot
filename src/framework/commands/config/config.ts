@@ -283,14 +283,5 @@ export default class extends Command {
 			const cmd = this.client.cmds.commands.find((c) => c.name === InvitesCommand.subtractLeaves);
 			return async () => await cmd.action(message, [], {}, context);
 		}
-
-		if (key === GuildSettingsKey.announcementVoice) {
-			// Play sample announcement message
-			if (member.voiceState && member.voiceState.channelID) {
-				const channel = guild.channels.get(member.voiceState.channelID) as VoiceChannel;
-				const conn = await this.client.music.getMusicConnection(guild);
-				await conn.playAnnouncement(value, `Hi, my name is ${value}`, channel);
-			}
-		}
 	}
 }

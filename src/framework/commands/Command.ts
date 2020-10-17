@@ -8,8 +8,7 @@ import {
 	GuildPermission,
 	InvitesCommand,
 	ManagementCommand,
-	ModerationCommand,
-	MusicCommand
+	ModerationCommand
 } from '../../types';
 import { BooleanResolver } from '../resolvers';
 import { Resolver, ResolverConstructor } from '../resolvers/Resolver';
@@ -45,7 +44,7 @@ interface FlagInfo {
 }
 
 export interface CommandOptions {
-	name: BotCommand | InvitesCommand | ModerationCommand | MusicCommand | ManagementCommand;
+	name: BotCommand | InvitesCommand | ModerationCommand | ManagementCommand;
 	aliases: string[];
 	args?: Arg[];
 	flags?: Flag[];
@@ -71,7 +70,7 @@ export abstract class Command {
 	public client: IMClient;
 	public resolvers: Resolver[];
 
-	public name: BotCommand | InvitesCommand | ModerationCommand | MusicCommand | ManagementCommand;
+	public name: BotCommand | InvitesCommand | ModerationCommand | ManagementCommand;
 
 	public aliases: string[];
 	public args: Arg[];

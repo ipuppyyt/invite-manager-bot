@@ -10,7 +10,6 @@ import {
 } from './framework/models/GuildSetting';
 import { InviteCodeSettingsKey } from './framework/models/InviteCodeSetting';
 import { MemberSettingsKey } from './framework/models/MemberSetting';
-import { MusicPlatformType } from './types';
 
 export type InternalSettingsTypes =
 	| 'Boolean'
@@ -27,9 +26,7 @@ export type InternalSettingsTypes =
 	| 'Enum<Lang>'
 	| 'Enum<AnnouncementVoice>'
 	| 'Enum<ActivityStatus>'
-	| 'Enum<ActivityType>'
-	| 'Enum<MusicPlatformTypes>'
-	| 'Enum<MusicPlatformTypes>[]';
+	| 'Enum<ActivityType>';
 
 export interface SettingsInfo<T> {
 	type: InternalSettingsTypes;
@@ -59,11 +56,7 @@ export enum SettingsGroup {
 	spam = 'spam',
 	mentions = 'mentions',
 	emojis = 'emojis',
-	music = 'music',
-	bot = 'bot',
-	fadeMusic = 'fadeMusic',
-	announcement = 'announcement',
-	platform = 'platform'
+	bot = 'bot'
 }
 
 // ------------------------------------
@@ -154,18 +147,6 @@ export interface GuildSettingsObject {
 	autoModEmojisMaxNumberOfEmojis: number;
 
 	autoModHoistEnabled: boolean;
-
-	musicVolume: number;
-
-	announceNextSong: boolean;
-	announcementVoice: AnnouncementVoice;
-
-	fadeMusicOnTalk: boolean;
-	fadeMusicStartDuration: number;
-	fadeMusicEndDelay: number;
-
-	defaultMusicPlatform: MusicPlatformType;
-	disabledMusicPlatforms: MusicPlatformType[];
 }
 
 export const guildSettingsInfo: {
@@ -554,46 +535,6 @@ export const guildSettingsInfo: {
 		type: 'Boolean',
 		grouping: [SettingsGroup.moderation, SettingsGroup.emojis],
 		defaultValue: true
-	},
-
-	musicVolume: {
-		type: 'Number',
-		grouping: [SettingsGroup.music, SettingsGroup.general],
-		defaultValue: 100
-	},
-
-	announceNextSong: {
-		type: 'Boolean',
-		grouping: [SettingsGroup.music, SettingsGroup.announcement],
-		defaultValue: true
-	},
-	announcementVoice: {
-		type: 'Enum<AnnouncementVoice>',
-		grouping: [SettingsGroup.music, SettingsGroup.announcement],
-		defaultValue: AnnouncementVoice.Joanna,
-		possibleValues: Object.values(AnnouncementVoice)
-	},
-
-	fadeMusicOnTalk: {
-		type: 'Boolean',
-		grouping: [SettingsGroup.music, SettingsGroup.fadeMusic],
-		defaultValue: true
-	},
-	fadeMusicEndDelay: {
-		type: 'Number',
-		grouping: [SettingsGroup.music, SettingsGroup.fadeMusic],
-		defaultValue: 1.0
-	},
-
-	defaultMusicPlatform: {
-		type: 'Enum<MusicPlatformTypes>',
-		grouping: [SettingsGroup.music, SettingsGroup.platform],
-		defaultValue: MusicPlatformType.SoundCloud
-	},
-	disabledMusicPlatforms: {
-		type: 'Enum<MusicPlatformTypes>[]',
-		grouping: [SettingsGroup.music, SettingsGroup.platform],
-		defaultValue: []
 	}
 };
 
