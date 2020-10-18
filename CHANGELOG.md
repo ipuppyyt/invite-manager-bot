@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.8.1](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.8.0...v9.8.1) (2020-10-18)
+
+## [9.3.0](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.8...v9.3.0) (2020-03-24)
+
+### [9.2.8](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.7...v9.2.8) (2020-03-19)
+
+### [9.2.7](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.6...v9.2.7) (2020-01-08)
+
+### [9.2.6](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.5...v9.2.6) (2019-12-19)
+
+### [9.2.5](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.4...v9.2.5) (2019-12-16)
+
+### [9.2.4](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.3...v9.2.4) (2019-12-10)
+
+### [9.2.3](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.2...v9.2.3) (2019-12-10)
+
+### [9.2.2](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.1...v9.2.2) (2019-12-10)
+
+### [9.2.1](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.2.0...v9.2.1) (2019-12-10)
+
+## [9.2.0](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.1.1...v9.2.0) (2019-12-08)
+
 ## [9.8.0](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.7.0...v9.8.0) (2020-05-24)
 
 ### Features
