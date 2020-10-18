@@ -2,9 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [9.8.2](https://github.com/chaun14/invite-manager-bot/compare/v9.8.1...v9.8.2) (2020-10-18)
-
 ### [9.8.1](https://github.com/chaun14/invite-manager-bot/compare/v9.8.0...v9.8.1) (2020-10-18)
+
+### Features
+
+- **music:** Remove music systems and cmds ([80ad5ad](https://github.com/chaun14/invite-manager-bot/commit/2914f9270020f177ca5e7f0d50ec21f308e040fe))
+- **invite:** invites created with !createinvite commmand are more customizable ([9fa068f](https://github.com/chaun14/invite-manager-bot/commit/391b1fb0bc6da8dd047da5c9b1d9df2e664a7cf2))
+- **invite:** reaction role error more understandable ([61422fa](https://github.com/chaun14/invite-manager-bot/commit/9fa068fe603f6bc542ea7baa788e0582c6062aed))
+- **core:** new sharding manager ([7eda225](https://github.com/chaun14/invite-manager-bot/commit/8cc2e8479764cac47e52c862a3140023b87d5b2c))
+- **core:** custom db prefix ([b7a391b](https://github.com/chaun14/invite-manager-bot/commit/7eda2254355684ae363141b2ab8222ad7e24888d))
+
+### Bug Fixes
+
+- **credits:** Update credits.ts with latest info. ([391b1fb](https://github.com/chaun14/invite-manager-bot/commit/80ad5ad9e6e530d87dccd303aebc51f2ef9fca7a))
 
 ## [9.8.0](https://github.com/SideProjectGuys/invite-manager-bot/compare/v9.7.0...v9.8.0) (2020-05-24)
 

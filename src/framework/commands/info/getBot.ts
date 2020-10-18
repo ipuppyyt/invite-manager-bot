@@ -25,7 +25,9 @@ export default class extends Command {
 			params.push(`guild=${guild.id}`);
 		}
 
-		embed.description = `[${t('cmd.getBot.title')}]` + `(https://discord.com/oauth2/authorize?client_id=617497548743245835&permissions=473001191&scope=bot)`;
+		embed.description =
+			`[${t('cmd.getBot.title')}]` +
+			`(https://discord.com/oauth2/authorize?client_id=617497548743245835&permissions=473001191&scope=bot)`;
 
 		return this.sendReply(message, embed);
 	}

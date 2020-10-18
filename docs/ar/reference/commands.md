@@ -88,20 +88,20 @@ This argument expects a duration. The following duration types are supported:
 
 ### Invites
 
-| Command                           | Description                                        | Usage                                                            |
-| --------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------- |
-| [addInvites](#addInvites)         | أضافة/ازالة دعوات للعضو او منه.                    | !addInvites \<user\> \<amount\> [reason]                         |
-| [clearInvites](#clearInvites)     | تنظيف الاضافات للسيرفر او لمستعمل.                 | !clearInvites [-d value\|--date=value][-cb\|--clearbonus] [user] |
-| [createInvite](#createInvite)     | انشاء كود الدعوات فريد من نوعه.                    | !createInvite \<name\> [channel]                                 |
-| [info](#info)                     | عرض معلومات حول عضو معين.                          | !info \<user\> [details][page]                                   |
-| [inviteCodes](#inviteCodes)       | الحصول على قائمة كل ما لديك من روابط               | !inviteCodes                                                     |
-| [inviteDetails](#inviteDetails)   | يعرض تفاصيل من اين لك دعواتك.                      | !inviteDetails [user]                                            |
-| [invites](#invites)               | اظهار عدد الدعوات الخاصة.                          | !invites [user]                                                  |
-| [leaderboard](#leaderboard)       | إظهار الأعضاء مع اعلى الدعوات.                     | !leaderboard [page]                                              |
-| [removeInvites](#removeInvites)   | Removes a specified amount of invites from a user. | !removeInvites \<user\> \<amount\> [reason]                      |
-| [restoreInvites](#restoreInvites) | استعادة جميع الدعوات التي تم مسحها مسبقًا.         | !restoreInvites [user]                                           |
-| [subtractFakes](#subtractFakes)   | Remove fake invites from all users.                | !subtractFakes                                                   |
-| [subtractLeaves](#subtractLeaves) | Remove leaves from all users                       | !subtractLeaves                                                  |
+| Command                           | Description                                        | Usage                                                                    |
+| --------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------ |
+| [addInvites](#addInvites)         | أضافة/ازالة دعوات للعضو او منه.                    | !addInvites \<user\> \<amount\> [reason]                                 |
+| [clearInvites](#clearInvites)     | تنظيف الاضافات للسيرفر او لمستعمل.                 | !clearInvites [-d value\|--date=value][-cb\|--clearbonus] [user]         |
+| [createInvite](#createInvite)     | انشاء كود الدعوات فريد من نوعه.                    | !createInvite \<name\> [channel][maxuses] [expires][temporarymembership] |
+| [info](#info)                     | عرض معلومات حول عضو معين.                          | !info \<user\> [details][page]                                           |
+| [inviteCodes](#inviteCodes)       | الحصول على قائمة كل ما لديك من روابط               | !inviteCodes                                                             |
+| [inviteDetails](#inviteDetails)   | يعرض تفاصيل من اين لك دعواتك.                      | !inviteDetails [user]                                                    |
+| [invites](#invites)               | اظهار عدد الدعوات الخاصة.                          | !invites [user]                                                          |
+| [leaderboard](#leaderboard)       | إظهار الأعضاء مع اعلى الدعوات.                     | !leaderboard [page]                                                      |
+| [removeInvites](#removeInvites)   | Removes a specified amount of invites from a user. | !removeInvites \<user\> \<amount\> [reason]                              |
+| [restoreInvites](#restoreInvites) | استعادة جميع الدعوات التي تم مسحها مسبقًا.         | !restoreInvites [user]                                                   |
+| [subtractFakes](#subtractFakes)   | Remove fake invites from all users.                | !subtractFakes                                                           |
+| [subtractLeaves](#subtractLeaves) | Remove leaves from all users                       | !subtractLeaves                                                          |
 
 ### Ranks
 
@@ -169,25 +169,6 @@ This argument expects a duration. The following duration types are supported:
 | [unhoist](#unhoist)                   | Add a character in front of all members with a special character in front of their name, so they will be shown at the end of the member list. | !unhoist                                                         |
 | [unmute](#unmute)                     | فك الاسكات من شخص.                                                                                                                            | !unmute \<user\>                                                 |
 | [warn](#warn)                         | تحذير شخص.                                                                                                                                    | !warn \<member\> [reason]                                        |
-
-### Music
-
-| Command                   | Description                                                                                  | Usage                                                   |
-| ------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [disconnect](#disconnect) | فصل البوت من الروم الصوتي الحالي.                                                            | !disconnect                                             |
-| [lyrics](#lyrics)         | اظهار كلمات الاغنية التي تشتغل حاليا.                                                        | !lyrics [-l\|--live]                                    |
-| [mashup](#mashup)         | Create a mashup of 2 songs.                                                                  | !mashup \<videos\>                                      |
-| [nowPlaying](#nowPlaying) | اظهار المعلومات المتعلقة بالاغنية التي تشتغل حاليا.                                          | !nowPlaying [-p\|--pin]                                 |
-| [pause](#pause)           | ايقاف الاغنية التي تشتغل حاليا.                                                              | !pause                                                  |
-| [play](#play)             | Play the song if the queue is empty, otherwise it will add the song to the end of the queue. | !play [-p value\|--platform=value][-n\|--next] \<link\> |
-| [queue](#queue)           | اظهار الاغنية فالقائمة.                                                                      | !queue                                                  |
-| [repeat](#repeat)         | اختر الاغنية التي ستشتغل مع الاعادة.                                                         | !repeat                                                 |
-| [resume](#resume)         | متابعة الاغنية الحالية.                                                                      | !resume                                                 |
-| [rewind](#rewind)         | Rewind the song and start from the beginning.                                                | !rewind                                                 |
-| [search](#search)         | Search for the search term and let you chose one of the results.                             | !search [-p value\|--platform=value] \<search\>         |
-| [seek](#seek)             | Skip to a specific part of the song.                                                         | !seek [duration]                                        |
-| [skip](#skip)             | Skip the current song and play the next song in the queue.                                   | !skip [amount]                                          |
-| [volume](#volume)         | Set the volume if an argument is passed, or show the current volume.                         | !volume [volume]                                        |
 
 ### Other
 
@@ -604,10 +585,10 @@ This argument expects a duration. The following duration types are supported:
 
 ### Arguments
 
-| Argument | Type              | Required | Description                       | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| -------- | ----------------- | -------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| key      | [Enum](#Enum)     | No       | الاعدادات التي تحتاجها تظهر/تغير. | Use one of the following values: `announcementVoice`, `announceNextSong`, `autoModAllCapsEnabled`, `autoModAllCapsMinCharacters`, `autoModAllCapsPercentageCaps`, `autoModDeleteBotMessage`, `autoModDeleteBotMessageTimeoutInSeconds`, `autoModDisabledForOldMembers`, `autoModDisabledForOldMembersThreshold`, `autoModDuplicateTextEnabled`, `autoModDuplicateTextTimeframeInSeconds`, `autoModEmojisEnabled`, `autoModEmojisMaxNumberOfEmojis`, `autoModEnabled`, `autoModHoistEnabled`, `autoModIgnoredChannels`, `autoModIgnoredRoles`, `autoModInvitesEnabled`, `autoModLinksBlacklist`, `autoModLinksEnabled`, `autoModLinksFollowRedirects`, `autoModLinksWhitelist`, `autoModLogEnabled`, `autoModMentionRolesEnabled`, `autoModMentionRolesMaxNumberOfMentions`, `autoModMentionUsersEnabled`, `autoModMentionUsersMaxNumberOfMentions`, `autoModModeratedChannels`, `autoModModeratedRoles`, `autoModQuickMessagesEnabled`, `autoModQuickMessagesNumberOfMessages`, `autoModQuickMessagesTimeframeInSeconds`, `autoModWordsBlacklist`, `autoModWordsEnabled`, `autoSubtractFakes`, `autoSubtractLeaves`, `autoSubtractLeaveThreshold`, `captchaVerificationFailedMessage`, `captchaVerificationLogEnabled`, `captchaVerificationOnJoin`, `captchaVerificationSuccessMessage`, `captchaVerificationTimeout`, `captchaVerificationWelcomeMessage`, `channels`, `defaultMusicPlatform`, `disabledMusicPlatforms`, `fadeMusicEndDelay`, `fadeMusicOnTalk`, `getUpdates`, `hideLeftMembersFromLeaderboard`, `ignoredChannels`, `joinMessage`, `joinMessageChannel`, `joinRoles`, `lang`, `leaderboardStyle`, `leaveMessage`, `leaveMessageChannel`, `logChannel`, `modLogChannel`, `modPunishmentBanDeleteMessage`, `modPunishmentKickDeleteMessage`, `modPunishmentMuteDeleteMessage`, `modPunishmentSoftbanDeleteMessage`, `modPunishmentWarnDeleteMessage`, `musicVolume`, `mutedRole`, `prefix`, `rankAnnouncementChannel`, `rankAnnouncementMessage`, `rankAssignmentStyle` |
-| value    | [القيمة](#القيمة) | No       | الاعدادات الجديدة.                |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Argument | Type              | Required | Description                       | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------- | ----------------- | -------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| key      | [Enum](#Enum)     | No       | الاعدادات التي تحتاجها تظهر/تغير. | Use one of the following values: `autoModAllCapsEnabled`, `autoModAllCapsMinCharacters`, `autoModAllCapsPercentageCaps`, `autoModDeleteBotMessage`, `autoModDeleteBotMessageTimeoutInSeconds`, `autoModDisabledForOldMembers`, `autoModDisabledForOldMembersThreshold`, `autoModDuplicateTextEnabled`, `autoModDuplicateTextTimeframeInSeconds`, `autoModEmojisEnabled`, `autoModEmojisMaxNumberOfEmojis`, `autoModEnabled`, `autoModHoistEnabled`, `autoModIgnoredChannels`, `autoModIgnoredRoles`, `autoModInvitesEnabled`, `autoModLinksBlacklist`, `autoModLinksEnabled`, `autoModLinksFollowRedirects`, `autoModLinksWhitelist`, `autoModLogEnabled`, `autoModMentionRolesEnabled`, `autoModMentionRolesMaxNumberOfMentions`, `autoModMentionUsersEnabled`, `autoModMentionUsersMaxNumberOfMentions`, `autoModModeratedChannels`, `autoModModeratedRoles`, `autoModQuickMessagesEnabled`, `autoModQuickMessagesNumberOfMessages`, `autoModQuickMessagesTimeframeInSeconds`, `autoModWordsBlacklist`, `autoModWordsEnabled`, `autoSubtractFakes`, `autoSubtractLeaves`, `autoSubtractLeaveThreshold`, `captchaVerificationFailedMessage`, `captchaVerificationLogEnabled`, `captchaVerificationOnJoin`, `captchaVerificationSuccessMessage`, `captchaVerificationTimeout`, `captchaVerificationWelcomeMessage`, `channels`, `getUpdates`, `hideLeftMembersFromLeaderboard`, `ignoredChannels`, `joinMessage`, `joinMessageChannel`, `joinRoles`, `lang`, `leaderboardStyle`, `leaveMessage`, `leaveMessageChannel`, `logChannel`, `modLogChannel`, `modPunishmentBanDeleteMessage`, `modPunishmentKickDeleteMessage`, `modPunishmentMuteDeleteMessage`, `modPunishmentSoftbanDeleteMessage`, `modPunishmentWarnDeleteMessage`, `mutedRole`, `prefix`, `rankAnnouncementChannel`, `rankAnnouncementMessage`, `rankAssignmentStyle` |
+| value    | [القيمة](#القيمة) | No       | الاعدادات الجديدة.                |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### Examples
 
@@ -626,7 +607,7 @@ This argument expects a duration. The following duration types are supported:
 ### Usage
 
 ```text
-!createInvite <name> [channel]
+!createInvite <name> [channel] [maxUses] [expires] [temporaryMembership]
 ```
 
 ### Aliases
@@ -635,10 +616,13 @@ This argument expects a duration. The following duration types are supported:
 
 ### Arguments
 
-| Argument | Type              | Required | Description                                              | Details |
-| -------- | ----------------- | -------- | -------------------------------------------------------- | ------- |
-| name     | [نص](#نص)         | Yes      | الاسم لكود الدعوات.                                      |         |
-| channel  | [القناة](#القناة) | No       | الروم التي تم انشاء فيها الكود, تستعمل الروم الاعتيادية. |         |
+| Argument            | Type                | Required | Description                                                                     | Details |
+| ------------------- | ------------------- | -------- | ------------------------------------------------------------------------------- | ------- |
+| name                | [نص](#نص)           | Yes      | الاسم لكود الدعوات.                                                             |         |
+| channel             | [القناة](#القناة)   | No       | الروم التي تم انشاء فيها الكود, تستعمل الروم الاعتيادية.                        |         |
+| maxUses             | [رقم](#رقم)         | No       | `number` --> The max amount of uses of the invite code                          |         |
+| expires             | [Boolean](#Boolean) | No       | `true` or `false` --> Set if the invite will expires after 24 hours             |         |
+| temporaryMembership | [Boolean](#Boolean) | No       | `true` or `false` --> Set if the invited users are granted as temporary members |         |
 
 ### Examples
 
@@ -668,26 +652,6 @@ This argument expects a duration. The following duration types are supported:
 
 ```text
 !credits
-```
-
-<a name='disconnect'></a>
-
----
-
-## !disconnect
-
-فصل البوت من الروم الصوتي الحالي.
-
-### Usage
-
-```text
-!disconnect
-```
-
-### Examples
-
-```text
-!disconnect
 ```
 
 <a name='export'></a>
@@ -823,9 +787,9 @@ Deletes any ranks where the role was deleted.
 
 ### Arguments
 
-| Argument | Type        | Required | Description                                      | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| -------- | ----------- | -------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| command  | [أمر](#أمر) | No       | الرجاء اذكر الأمر الذي تريد ان تحصل معلومات عنه. | Use one of the following values: `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `lyrics`, `mashup`, `memberConfig`, `members`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
+| Argument | Type        | Required | Description                                      | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------- | ----------- | -------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| command  | [أمر](#أمر) | No       | الرجاء اذكر الأمر الذي تريد ان تحصل معلومات عنه. | Use one of the following values: `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `memberConfig`, `members`, `mute`, `permissions`, `ping`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `ranks`, `removeInvites`, `removeRank`, `restoreInvites`, `setup`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `warn` |
 
 ### Examples
 
@@ -1143,54 +1107,6 @@ Lockdown a specific channel (Prevents anyone without special roles from sending 
 !lockdown
 ```
 
-<a name='lyrics'></a>
-
----
-
-## !lyrics
-
-اظهار كلمات الاغنية التي تشتغل حاليا.
-
-### Usage
-
-```text
-!lyrics [-l|--live]
-```
-
-### Flags
-
-| Flag                 | Short     | Type                | Description                                                          |
-| -------------------- | --------- | ------------------- | -------------------------------------------------------------------- |
-| &#x2011;&#x2011;live | &#x2011;l | [Boolean](#Boolean) | If set, then the lyrics will sync with the current time of the song. |
-
-### Examples
-
-```text
-!lyrics
-```
-
-<a name='mashup'></a>
-
----
-
-## !mashup
-
-Create a mashup of 2 songs.
-
-### Usage
-
-```text
-!mashup <videos>
-```
-
-### Arguments
-
-| Argument | Type      | Required | Description                                | Details |
-| -------- | --------- | -------- | ------------------------------------------ | ------- |
-| videos   | [نص](#نص) | Yes      | The videos that should be mashed together. |         |
-
-### Examples
-
 <a name='memberConfig'></a>
 
 ---
@@ -1279,61 +1195,6 @@ Create a mashup of 2 songs.
 
 ### Examples
 
-<a name='nowPlaying'></a>
-
----
-
-## !nowPlaying
-
-اظهار المعلومات المتعلقة بالاغنية التي تشتغل حاليا.
-
-### Usage
-
-```text
-!nowPlaying [-p|--pin]
-```
-
-### Aliases
-
-- `!np`
-- `!now-playing`
-
-### Flags
-
-| Flag                | Short     | Type                | Description                                                                        |
-| ------------------- | --------- | ------------------- | ---------------------------------------------------------------------------------- |
-| &#x2011;&#x2011;pin | &#x2011;p | [Boolean](#Boolean) | Pin the now playing message and update it automatically whenever a new song plays. |
-
-### Examples
-
-```text
-!nowPlaying
-```
-
-<a name='pause'></a>
-
----
-
-## !pause
-
-ايقاف الاغنية التي تشتغل حاليا.
-
-### Usage
-
-```text
-!pause
-```
-
-### Aliases
-
-- `!stop`
-
-### Examples
-
-```text
-!pause
-```
-
 <a name='permissions'></a>
 
 ---
@@ -1354,10 +1215,10 @@ Create a mashup of 2 songs.
 
 ### Arguments
 
-| Argument | Type            | Required | Description                                    | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| -------- | --------------- | -------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| cmd      | [أمر](#أمر)     | No       | الأمر لتكوين أذونات ل.                         | Use one of the following values: `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `lyrics`, `mashup`, `memberConfig`, `members`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
-| role     | [وظيفة](#وظيفة) | No       | الدور الذي ينبغي منحه أو رفض الوصول إلى الأمر. |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Argument | Type            | Required | Description                                    | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------- | --------------- | -------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cmd      | [أمر](#أمر)     | No       | الأمر لتكوين أذونات ل.                         | Use one of the following values: `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `memberConfig`, `members`, `mute`, `permissions`, `ping`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `ranks`, `removeInvites`, `removeRank`, `restoreInvites`, `setup`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `warn` |
+| role     | [وظيفة](#وظيفة) | No       | الدور الذي ينبغي منحه أو رفض الوصول إلى الأمر. |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ### Examples
 
@@ -1384,39 +1245,6 @@ Create a mashup of 2 songs.
 ```text
 !ping
 ```
-
-<a name='play'></a>
-
----
-
-## !play
-
-Play the song if the queue is empty, otherwise it will add the song to the end of the queue.
-
-### Usage
-
-```text
-!play [-p value|--platform=value] [-n|--next] <link>
-```
-
-### Aliases
-
-- `!p`
-
-### Arguments
-
-| Argument | Type      | Required | Description                                   | Details |
-| -------- | --------- | -------- | --------------------------------------------- | ------- |
-| link     | [نص](#نص) | Yes      | The link to a specific song or a search term. |         |
-
-### Flags
-
-| Flag                     | Short     | Type                | Description                                                                       |
-| ------------------------ | --------- | ------------------- | --------------------------------------------------------------------------------- |
-| &#x2011;&#x2011;platform | &#x2011;p | [Enum](#Enum)       | Select the platform where you want the song to be played.                         |
-| &#x2011;&#x2011;next     | &#x2011;n | [Boolean](#Boolean) | If set, it will play this song next instead of adding it to the end of the queue. |
-
-### Examples
 
 <a name='prefix'></a>
 
@@ -1570,26 +1398,6 @@ Purge messages in a channel up until a specified message.
 
 ### Examples
 
-<a name='queue'></a>
-
----
-
-## !queue
-
-اظهار الاغنية فالقائمة.
-
-### Usage
-
-```text
-!queue
-```
-
-### Examples
-
-```text
-!queue
-```
-
 <a name='ranks'></a>
 
 ---
@@ -1695,30 +1503,6 @@ Removes a specified amount of invites from a user.
 !removeRank "Role with space"
 ```
 
-<a name='repeat'></a>
-
----
-
-## !repeat
-
-اختر الاغنية التي ستشتغل مع الاعادة.
-
-### Usage
-
-```text
-!repeat
-```
-
-### Aliases
-
-- `!loop`
-
-### Examples
-
-```text
-!repeat
-```
-
 <a name='restoreInvites'></a>
 
 ---
@@ -1759,108 +1543,6 @@ Removes a specified amount of invites from a user.
 !restoreInvites "User with space"
 ```
 
-<a name='resume'></a>
-
----
-
-## !resume
-
-متابعة الاغنية الحالية.
-
-### Usage
-
-```text
-!resume
-```
-
-### Aliases
-
-- `!start`
-
-### Examples
-
-```text
-!resume
-```
-
-<a name='rewind'></a>
-
----
-
-## !rewind
-
-Rewind the song and start from the beginning.
-
-### Usage
-
-```text
-!rewind
-```
-
-### Aliases
-
-- `!replay`
-
-### Examples
-
-```text
-!rewind
-```
-
-<a name='search'></a>
-
----
-
-## !search
-
-Search for the search term and let you chose one of the results.
-
-### Usage
-
-```text
-!search [-p value|--platform=value] <search>
-```
-
-### Arguments
-
-| Argument | Type      | Required | Description     | Details |
-| -------- | --------- | -------- | --------------- | ------- |
-| search   | [نص](#نص) | Yes      | The search term |         |
-
-### Flags
-
-| Flag                     | Short     | Type          | Description                                               |
-| ------------------------ | --------- | ------------- | --------------------------------------------------------- |
-| &#x2011;&#x2011;platform | &#x2011;p | [Enum](#Enum) | Select the platform where you want the song to be played. |
-
-### Examples
-
-<a name='seek'></a>
-
----
-
-## !seek
-
-Skip to a specific part of the song.
-
-### Usage
-
-```text
-!seek [duration]
-```
-
-### Arguments
-
-| Argument | Type        | Required | Description                                                                | Details |
-| -------- | ----------- | -------- | -------------------------------------------------------------------------- | ------- |
-| duration | [رقم](#رقم) | No       | The position the song will be skipped to (from the beginning, in seconds). |         |
-
-### Examples
-
-```text
-!seek
-```
-
 <a name='setup'></a>
 
 ---
@@ -1886,36 +1568,6 @@ Help with setting up the bot and checking for problems (e.g. missing permissions
 
 ```text
 !setup
-```
-
-<a name='skip'></a>
-
----
-
-## !skip
-
-Skip the current song and play the next song in the queue.
-
-### Usage
-
-```text
-!skip [amount]
-```
-
-### Aliases
-
-- `!next`
-
-### Arguments
-
-| Argument | Type        | Required | Description                     | Details |
-| -------- | ----------- | -------- | ------------------------------- | ------- |
-| amount   | [رقم](#رقم) | No       | How many songs will be skipped. |         |
-
-### Examples
-
-```text
-!skip
 ```
 
 <a name='softBan'></a>
@@ -2171,32 +1823,6 @@ Add a character in front of all members with a special character in front of the
 | user     | [عضو](#عضو) | Yes      | المستخدم الذي يجب فك اسكاته. |         |
 
 ### Examples
-
-<a name='volume'></a>
-
----
-
-## !volume
-
-Set the volume if an argument is passed, or show the current volume.
-
-### Usage
-
-```text
-!volume [volume]
-```
-
-### Arguments
-
-| Argument | Type        | Required | Description                          | Details |
-| -------- | ----------- | -------- | ------------------------------------ | ------- |
-| volume   | [رقم](#رقم) | No       | The value the volume will be set to. |         |
-
-### Examples
-
-```text
-!volume
-```
 
 <a name='warn'></a>
 

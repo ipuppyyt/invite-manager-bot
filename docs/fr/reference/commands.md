@@ -87,20 +87,20 @@ Cet argument attend une durée. Les durées suivantes sont supportées :
 
 ### Invites
 
-| Command                           | Description                                                                                | Usage                                                            |
-| --------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| [addInvites](#addInvites)         | Ajoute/supprime des invitations d'un membre.                                               | !addInvites \<user\> \<amount\> [reason]                         |
-| [clearInvites](#clearInvites)     | Effacer les invitations du serveur/d'un utilisateur.                                       | !clearInvites [-d value\|--date=value][-cb\|--clearbonus] [user] |
-| [createInvite](#createInvite)     | Crée des codes d'invitation uniques.                                                       | !createInvite \<name\> [channel]                                 |
-| [info](#info)                     | Afficher des informations sur un membre spécifique.                                        | !info \<user\> [details][page]                                   |
-| [inviteCodes](#inviteCodes)       | Obtenez une liste de tous vos codes d'invitation.                                          | !inviteCodes                                                     |
-| [inviteDetails](#inviteDetails)   | Affiche des détails sur l'origine de vos invitations.                                      | !inviteDetails [user]                                            |
-| [invites](#invites)               | Afficher les invitations personnelles.                                                     | !invites [user]                                                  |
-| [leaderboard](#leaderboard)       | Afficher les membres avec le plus d'invitations.                                           | !leaderboard [page]                                              |
-| [removeInvites](#removeInvites)   | Enlève un certain nombre d'invitations à un utilisateur.                                   | !removeInvites \<user\> \<amount\> [reason]                      |
-| [restoreInvites](#restoreInvites) | Restaurez toutes les invitations précédemment effacées.                                    | !restoreInvites [user]                                           |
-| [subtractFakes](#subtractFakes)   | Supprimez les fausses invitations de tous les utilisateurs.                                | !subtractFakes                                                   |
-| [subtractLeaves](#subtractLeaves) | Supprimer le nombre des invitations des personne qui ont quitter de tous les utilisateurs. | !subtractLeaves                                                  |
+| Command                           | Description                                                                                | Usage                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| [addInvites](#addInvites)         | Ajoute/supprime des invitations d'un membre.                                               | !addInvites \<user\> \<amount\> [reason]                                 |
+| [clearInvites](#clearInvites)     | Effacer les invitations du serveur/d'un utilisateur.                                       | !clearInvites [-d value\|--date=value][-cb\|--clearbonus] [user]         |
+| [createInvite](#createInvite)     | Crée des codes d'invitation uniques.                                                       | !createInvite \<name\> [channel][maxuses] [expires][temporarymembership] |
+| [info](#info)                     | Afficher des informations sur un membre spécifique.                                        | !info \<user\> [details][page]                                           |
+| [inviteCodes](#inviteCodes)       | Obtenez une liste de tous vos codes d'invitation.                                          | !inviteCodes                                                             |
+| [inviteDetails](#inviteDetails)   | Affiche des détails sur l'origine de vos invitations.                                      | !inviteDetails [user]                                                    |
+| [invites](#invites)               | Afficher les invitations personnelles.                                                     | !invites [user]                                                          |
+| [leaderboard](#leaderboard)       | Afficher les membres avec le plus d'invitations.                                           | !leaderboard [page]                                                      |
+| [removeInvites](#removeInvites)   | Enlève un certain nombre d'invitations à un utilisateur.                                   | !removeInvites \<user\> \<amount\> [reason]                              |
+| [restoreInvites](#restoreInvites) | Restaurez toutes les invitations précédemment effacées.                                    | !restoreInvites [user]                                                   |
+| [subtractFakes](#subtractFakes)   | Supprimez les fausses invitations de tous les utilisateurs.                                | !subtractFakes                                                           |
+| [subtractLeaves](#subtractLeaves) | Supprimer le nombre des invitations des personne qui ont quitter de tous les utilisateurs. | !subtractLeaves                                                          |
 
 ### Ranks
 
@@ -168,25 +168,6 @@ Cet argument attend une durée. Les durées suivantes sont supportées :
 | [unhoist](#unhoist)                   | Ajoute un caractère spécial devant le nom de chaque membre, donc ils seront affichés en dernier de la liste des membres. | !unhoist                                                         |
 | [unmute](#unmute)                     | Démuter un utilisateur                                                                                                   | !unmute \<user\>                                                 |
 | [warn](#warn)                         | Avertir un membre.                                                                                                       | !warn \<member\> [reason]                                        |
-
-### Music
-
-| Command                   | Description                                                                                    | Usage                                                   |
-| ------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [disconnect](#disconnect) | Déconnecter le bot du salon actuel.                                                            | !disconnect                                             |
-| [lyrics](#lyrics)         | Montrer les paroles de la chanson actuelle.                                                    | !lyrics [-l\|--live]                                    |
-| [mashup](#mashup)         | Créer un mashup des 2 chansons.                                                                | !mashup \<videos\>                                      |
-| [nowPlaying](#nowPlaying) | Montre les informations à propos de la musique en cours de lecture                             | !nowPlaying [-p\|--pin]                                 |
-| [pause](#pause)           | Mettre en pause la chanson actuelle.                                                           | !pause                                                  |
-| [play](#play)             | Joue la musique si la file d'attente est vide, et ajoute la musique à la fin de la file sinon. | !play [-p value\|--platform=value][-n\|--next] \<link\> |
-| [queue](#queue)           | Affiche les musiques en attente.                                                               | !queue                                                  |
-| [repeat](#repeat)         | Répète la musique indéfiniment.                                                                | !repeat                                                 |
-| [resume](#resume)         | Reprendre la musique en cours.                                                                 | !resume                                                 |
-| [rewind](#rewind)         | Rejoue la musique depuis le début.                                                             | !rewind                                                 |
-| [search](#search)         | Recherche le nom et vous laisse choisir un des résultats.                                      | !search [-p value\|--platform=value] \<search\>         |
-| [seek](#seek)             | Passer à une partie spécifique de la musique.                                                  | !seek [duration]                                        |
-| [skip](#skip)             | Passe la musique jouée et joue la musique suivante dans la file d'attente.                     | !skip [amount]                                          |
-| [volume](#volume)         | Défini le volume si une valeur est donnée, ou montre le volume actuel.                         | !volume [volume]                                        |
 
 ### Other
 
@@ -603,10 +584,10 @@ Affiche et modifie la configuration du serveur.
 
 ### Arguments
 
-| Argument | Type                        | Required | Description                                                           | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------- | --------------------------- | -------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| key      | [Énumération](#Énumération) | No       | Le paramètre de configuration que vous souhaitez afficher / modifier. | Utilisez une des valeurs suivantes : `announcementVoice`, `announceNextSong`, `autoModAllCapsEnabled`, `autoModAllCapsMinCharacters`, `autoModAllCapsPercentageCaps`, `autoModDeleteBotMessage`, `autoModDeleteBotMessageTimeoutInSeconds`, `autoModDisabledForOldMembers`, `autoModDisabledForOldMembersThreshold`, `autoModDuplicateTextEnabled`, `autoModDuplicateTextTimeframeInSeconds`, `autoModEmojisEnabled`, `autoModEmojisMaxNumberOfEmojis`, `autoModEnabled`, `autoModHoistEnabled`, `autoModIgnoredChannels`, `autoModIgnoredRoles`, `autoModInvitesEnabled`, `autoModLinksBlacklist`, `autoModLinksEnabled`, `autoModLinksFollowRedirects`, `autoModLinksWhitelist`, `autoModLogEnabled`, `autoModMentionRolesEnabled`, `autoModMentionRolesMaxNumberOfMentions`, `autoModMentionUsersEnabled`, `autoModMentionUsersMaxNumberOfMentions`, `autoModModeratedChannels`, `autoModModeratedRoles`, `autoModQuickMessagesEnabled`, `autoModQuickMessagesNumberOfMessages`, `autoModQuickMessagesTimeframeInSeconds`, `autoModWordsBlacklist`, `autoModWordsEnabled`, `autoSubtractFakes`, `autoSubtractLeaves`, `autoSubtractLeaveThreshold`, `captchaVerificationFailedMessage`, `captchaVerificationLogEnabled`, `captchaVerificationOnJoin`, `captchaVerificationSuccessMessage`, `captchaVerificationTimeout`, `captchaVerificationWelcomeMessage`, `channels`, `defaultMusicPlatform`, `disabledMusicPlatforms`, `fadeMusicEndDelay`, `fadeMusicOnTalk`, `getUpdates`, `hideLeftMembersFromLeaderboard`, `ignoredChannels`, `joinMessage`, `joinMessageChannel`, `joinRoles`, `lang`, `leaderboardStyle`, `leaveMessage`, `leaveMessageChannel`, `logChannel`, `modLogChannel`, `modPunishmentBanDeleteMessage`, `modPunishmentKickDeleteMessage`, `modPunishmentMuteDeleteMessage`, `modPunishmentSoftbanDeleteMessage`, `modPunishmentWarnDeleteMessage`, `musicVolume`, `mutedRole`, `prefix`, `rankAnnouncementChannel`, `rankAnnouncementMessage`, `rankAssignmentStyle` |
-| value    | [Valeur](#Valeur)           | No       | La nouvelle valeur du paramétrage.                                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Argument | Type                        | Required | Description                                                           | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------- | --------------------------- | -------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| key      | [Énumération](#Énumération) | No       | Le paramètre de configuration que vous souhaitez afficher / modifier. | Utilisez une des valeurs suivantes : `autoModAllCapsEnabled`, `autoModAllCapsMinCharacters`, `autoModAllCapsPercentageCaps`, `autoModDeleteBotMessage`, `autoModDeleteBotMessageTimeoutInSeconds`, `autoModDisabledForOldMembers`, `autoModDisabledForOldMembersThreshold`, `autoModDuplicateTextEnabled`, `autoModDuplicateTextTimeframeInSeconds`, `autoModEmojisEnabled`, `autoModEmojisMaxNumberOfEmojis`, `autoModEnabled`, `autoModHoistEnabled`, `autoModIgnoredChannels`, `autoModIgnoredRoles`, `autoModInvitesEnabled`, `autoModLinksBlacklist`, `autoModLinksEnabled`, `autoModLinksFollowRedirects`, `autoModLinksWhitelist`, `autoModLogEnabled`, `autoModMentionRolesEnabled`, `autoModMentionRolesMaxNumberOfMentions`, `autoModMentionUsersEnabled`, `autoModMentionUsersMaxNumberOfMentions`, `autoModModeratedChannels`, `autoModModeratedRoles`, `autoModQuickMessagesEnabled`, `autoModQuickMessagesNumberOfMessages`, `autoModQuickMessagesTimeframeInSeconds`, `autoModWordsBlacklist`, `autoModWordsEnabled`, `autoSubtractFakes`, `autoSubtractLeaves`, `autoSubtractLeaveThreshold`, `captchaVerificationFailedMessage`, `captchaVerificationLogEnabled`, `captchaVerificationOnJoin`, `captchaVerificationSuccessMessage`, `captchaVerificationTimeout`, `captchaVerificationWelcomeMessage`, `channels`, `getUpdates`, `hideLeftMembersFromLeaderboard`, `ignoredChannels`, `joinMessage`, `joinMessageChannel`, `joinRoles`, `lang`, `leaderboardStyle`, `leaveMessage`, `leaveMessageChannel`, `logChannel`, `modLogChannel`, `modPunishmentBanDeleteMessage`, `modPunishmentKickDeleteMessage`, `modPunishmentMuteDeleteMessage`, `modPunishmentSoftbanDeleteMessage`, `modPunishmentWarnDeleteMessage`, `mutedRole`, `prefix`, `rankAnnouncementChannel`, `rankAnnouncementMessage`, `rankAssignmentStyle` |
+| value    | [Valeur](#Valeur)           | No       | La nouvelle valeur du paramétrage.                                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ### Examples
 
@@ -625,7 +606,7 @@ Crée des codes d'invitation uniques.
 ### Usage
 
 ```text
-!createInvite <name> [channel]
+!createInvite <name> [channel] [maxUses] [expires] [temporaryMembership]
 ```
 
 ### Aliases
@@ -634,10 +615,13 @@ Crée des codes d'invitation uniques.
 
 ### Arguments
 
-| Argument | Type            | Required | Description                                                                    | Details |
-| -------- | --------------- | -------- | ------------------------------------------------------------------------------ | ------- |
-| name     | [Texte](#Texte) | Yes      | Le nom du code d'invitation.                                                   |         |
-| channel  | [Salon](#Salon) | No       | Le Salon ou le code d'invitation est créé. Utilise le canal actuel par défaut. |         |
+| Argument            | Type                | Required | Description                                                                     | Details |
+| ------------------- | ------------------- | -------- | ------------------------------------------------------------------------------- | ------- |
+| name                | [Texte](#Texte)     | Yes      | Le nom du code d'invitation.                                                    |         |
+| channel             | [Salon](#Salon)     | No       | Le Salon ou le code d'invitation est créé. Utilise le canal actuel par défaut.  |         |
+| maxUses             | [Nombre](#Nombre)   | No       | `number` --> The max amount of uses of the invite code                          |         |
+| expires             | [Booléen](#Booléen) | No       | `true` or `false` --> Set if the invite will expires after 24 hours             |         |
+| temporaryMembership | [Booléen](#Booléen) | No       | `true` or `false` --> Set if the invited users are granted as temporary members |         |
 
 ### Examples
 
@@ -667,26 +651,6 @@ Afficher les développeurs et les contributeurs du bot.
 
 ```text
 !credits
-```
-
-<a name='disconnect'></a>
-
----
-
-## !disconnect
-
-Déconnecter le bot du salon actuel.
-
-### Usage
-
-```text
-!disconnect
-```
-
-### Examples
-
-```text
-!disconnect
 ```
 
 <a name='export'></a>
@@ -822,9 +786,9 @@ Afficher l'aide.
 
 ### Arguments
 
-| Argument | Type                  | Required | Description                                                | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| -------- | --------------------- | -------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| command  | [Commande](#Commande) | No       | La commande pour obtenir des informations détaillées pour. | Utilisez une des valeurs suivantes : `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `lyrics`, `mashup`, `memberConfig`, `members`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
+| Argument | Type                  | Required | Description                                                | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------- | --------------------- | -------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| command  | [Commande](#Commande) | No       | La commande pour obtenir des informations détaillées pour. | Utilisez une des valeurs suivantes : `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `memberConfig`, `members`, `mute`, `permissions`, `ping`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `ranks`, `removeInvites`, `removeRank`, `restoreInvites`, `setup`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `warn` |
 
 ### Examples
 
@@ -1142,54 +1106,6 @@ Bloque un salon spécifique (empêche tout le monde sans rôle spécial d'envoye
 !lockdown
 ```
 
-<a name='lyrics'></a>
-
----
-
-## !lyrics
-
-Montrer les paroles de la chanson actuelle.
-
-### Usage
-
-```text
-!lyrics [-l|--live]
-```
-
-### Flags
-
-| Flag                 | Short     | Type                | Description                                                                |
-| -------------------- | --------- | ------------------- | -------------------------------------------------------------------------- |
-| &#x2011;&#x2011;live | &#x2011;l | [Booléen](#Booléen) | Si défini, les paroles seront synchronisées au temps actuel de la musique. |
-
-### Examples
-
-```text
-!lyrics
-```
-
-<a name='mashup'></a>
-
----
-
-## !mashup
-
-Créer un mashup des 2 chansons.
-
-### Usage
-
-```text
-!mashup <videos>
-```
-
-### Arguments
-
-| Argument | Type            | Required | Description                                     | Details |
-| -------- | --------------- | -------- | ----------------------------------------------- | ------- |
-| videos   | [Texte](#Texte) | Yes      | Les vidéos qui doivent être mélangées ensemble. |         |
-
-### Examples
-
 <a name='memberConfig'></a>
 
 ---
@@ -1278,61 +1194,6 @@ Rendre muet un utilisateur
 
 ### Examples
 
-<a name='nowPlaying'></a>
-
----
-
-## !nowPlaying
-
-Montre les informations à propos de la musique en cours de lecture
-
-### Usage
-
-```text
-!nowPlaying [-p|--pin]
-```
-
-### Aliases
-
-- `!np`
-- `!now-playing`
-
-### Flags
-
-| Flag                | Short     | Type                | Description                                                                                                 |
-| ------------------- | --------- | ------------------- | ----------------------------------------------------------------------------------------------------------- |
-| &#x2011;&#x2011;pin | &#x2011;p | [Booléen](#Booléen) | Épingle le message "Now playing" et le mets à jour automatiquement à chaque fois qu'une musique est lancée. |
-
-### Examples
-
-```text
-!nowPlaying
-```
-
-<a name='pause'></a>
-
----
-
-## !pause
-
-Mettre en pause la chanson actuelle.
-
-### Usage
-
-```text
-!pause
-```
-
-### Aliases
-
-- `!stop`
-
-### Examples
-
-```text
-!pause
-```
-
 <a name='permissions'></a>
 
 ---
@@ -1353,10 +1214,10 @@ Configurez les permissions pour utiliser des commandes.
 
 ### Arguments
 
-| Argument | Type                  | Required | Description                                         | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| -------- | --------------------- | -------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| cmd      | [Commande](#Commande) | No       | La commande pour configurer les autorisations pour. | Utilisez une des valeurs suivantes : `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `disconnect`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `lyrics`, `mashup`, `memberConfig`, `members`, `mute`, `nowPlaying`, `pause`, `permissions`, `ping`, `play`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `queue`, `ranks`, `removeInvites`, `removeRank`, `repeat`, `restoreInvites`, `resume`, `rewind`, `search`, `seek`, `setup`, `skip`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `volume`, `warn` |
-| role     | [Role](#Role)         | No       | Le rôle qui aura l'accès ou non à la commande.      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Argument | Type                  | Required | Description                                         | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------- | --------------------- | -------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cmd      | [Commande](#Commande) | No       | La commande pour configurer les autorisations pour. | Utilisez une des valeurs suivantes : `addInvites`, `addRank`, `ban`, `botConfig`, `botInfo`, `caseDelete`, `caseView`, `check`, `clean`, `cleanShort`, `cleanText`, `clearInvites`, `config`, `createInvite`, `credits`, `export`, `fixRanks`, `getBot`, `graph`, `help`, `info`, `interactiveConfig`, `inviteCodeConfig`, `inviteCodes`, `inviteDetails`, `invites`, `kick`, `leaderboard`, `lockdown`, `memberConfig`, `members`, `mute`, `permissions`, `ping`, `prefix`, `premium`, `punishmentConfig`, `purge`, `purgeUntil`, `ranks`, `removeInvites`, `removeRank`, `restoreInvites`, `setup`, `softBan`, `strike`, `strikeConfig`, `subtractFakes`, `subtractLeaves`, `support`, `tryPremium`, `unban`, `unhoist`, `unmute`, `warn` |
+| role     | [Role](#Role)         | No       | Le rôle qui aura l'accès ou non à la commande.      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### Examples
 
@@ -1383,39 +1244,6 @@ Mentionner le bot
 ```text
 !ping
 ```
-
-<a name='play'></a>
-
----
-
-## !play
-
-Joue la musique si la file d'attente est vide, et ajoute la musique à la fin de la file sinon.
-
-### Usage
-
-```text
-!play [-p value|--platform=value] [-n|--next] <link>
-```
-
-### Aliases
-
-- `!p`
-
-### Arguments
-
-| Argument | Type            | Required | Description                                | Details |
-| -------- | --------------- | -------- | ------------------------------------------ | ------- |
-| link     | [Texte](#Texte) | Yes      | Le lien vers une musique ou une recherche. |         |
-
-### Flags
-
-| Flag                     | Short     | Type                        | Description                                                                                 |
-| ------------------------ | --------- | --------------------------- | ------------------------------------------------------------------------------------------- |
-| &#x2011;&#x2011;platform | &#x2011;p | [Énumération](#Énumération) | Sélectionnez le salon où vous voulez que la musique soit jouée.                             |
-| &#x2011;&#x2011;next     | &#x2011;n | [Booléen](#Booléen)         | Si défini, cette musique sera jouée directement au lieu d'être ajoutée à la fin de la file. |
-
-### Examples
 
 <a name='prefix'></a>
 
@@ -1568,26 +1396,6 @@ Purger les messages dans un salon jusqu'à un message spécifié.
 
 ### Examples
 
-<a name='queue'></a>
-
----
-
-## !queue
-
-Affiche les musiques en attente.
-
-### Usage
-
-```text
-!queue
-```
-
-### Examples
-
-```text
-!queue
-```
-
 <a name='ranks'></a>
 
 ---
@@ -1693,30 +1501,6 @@ Supprimer un rang.
 !removeRank "Role with space"
 ```
 
-<a name='repeat'></a>
-
----
-
-## !repeat
-
-Répète la musique indéfiniment.
-
-### Usage
-
-```text
-!repeat
-```
-
-### Aliases
-
-- `!loop`
-
-### Examples
-
-```text
-!repeat
-```
-
 <a name='restoreInvites'></a>
 
 ---
@@ -1757,108 +1541,6 @@ Restaurez toutes les invitations précédemment effacées.
 !restoreInvites "User with space"
 ```
 
-<a name='resume'></a>
-
----
-
-## !resume
-
-Reprendre la musique en cours.
-
-### Usage
-
-```text
-!resume
-```
-
-### Aliases
-
-- `!start`
-
-### Examples
-
-```text
-!resume
-```
-
-<a name='rewind'></a>
-
----
-
-## !rewind
-
-Rejoue la musique depuis le début.
-
-### Usage
-
-```text
-!rewind
-```
-
-### Aliases
-
-- `!replay`
-
-### Examples
-
-```text
-!rewind
-```
-
-<a name='search'></a>
-
----
-
-## !search
-
-Recherche le nom et vous laisse choisir un des résultats.
-
-### Usage
-
-```text
-!search [-p value|--platform=value] <search>
-```
-
-### Arguments
-
-| Argument | Type            | Required | Description  | Details |
-| -------- | --------------- | -------- | ------------ | ------- |
-| search   | [Texte](#Texte) | Yes      | La recherche |         |
-
-### Flags
-
-| Flag                     | Short     | Type                        | Description                                                     |
-| ------------------------ | --------- | --------------------------- | --------------------------------------------------------------- |
-| &#x2011;&#x2011;platform | &#x2011;p | [Énumération](#Énumération) | Sélectionnez le salon où vous voulez que la musique soit jouée. |
-
-### Examples
-
-<a name='seek'></a>
-
----
-
-## !seek
-
-Passer à une partie spécifique de la musique.
-
-### Usage
-
-```text
-!seek [duration]
-```
-
-### Arguments
-
-| Argument | Type              | Required | Description                                                       | Details |
-| -------- | ----------------- | -------- | ----------------------------------------------------------------- | ------- |
-| duration | [Nombre](#Nombre) | No       | La musique sera jouée à ce moment (depuis le début, en secondes). |         |
-
-### Examples
-
-```text
-!seek
-```
-
 <a name='setup'></a>
 
 ---
@@ -1884,36 +1566,6 @@ Aide à la configuration du bot et à la recherche de problèmes (par exemple: a
 
 ```text
 !setup
-```
-
-<a name='skip'></a>
-
----
-
-## !skip
-
-Passe la musique jouée et joue la musique suivante dans la file d'attente.
-
-### Usage
-
-```text
-!skip [amount]
-```
-
-### Aliases
-
-- `!next`
-
-### Arguments
-
-| Argument | Type              | Required | Description                          | Details |
-| -------- | ----------------- | -------- | ------------------------------------ | ------- |
-| amount   | [Nombre](#Nombre) | No       | Combien de musiques seront ignorées. |         |
-
-### Examples
-
-```text
-!skip
 ```
 
 <a name='softBan'></a>
@@ -2169,32 +1821,6 @@ Démuter un utilisateur
 | user     | [Membre](#Membre) | Yes      | L'utilisateur qui doit reprendre la parole. |         |
 
 ### Examples
-
-<a name='volume'></a>
-
----
-
-## !volume
-
-Défini le volume si une valeur est donnée, ou montre le volume actuel.
-
-### Usage
-
-```text
-!volume [volume]
-```
-
-### Arguments
-
-| Argument | Type              | Required | Description                                   | Details |
-| -------- | ----------------- | -------- | --------------------------------------------- | ------- |
-| volume   | [Nombre](#Nombre) | No       | La valeur sur laquelle le volume sera défini. |         |
-
-### Examples
-
-```text
-!volume
-```
 
 <a name='warn'></a>
 

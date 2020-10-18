@@ -6,14 +6,14 @@ There are many config options that can be set. You don't have to set all of them
 
 ### General
 
-| Setting                              | Description                                                |
-| ------------------------------------ | ---------------------------------------------------------- |
-| [Prefix](#prefix)                    | The prefix used to trigger bot commands.                   |
-| [Language](#lang)                    | The language of the bot                                    |
-| [Log Channel](#logchannel)           | The channel where bot actions are logged.                  |
-| [Get Updates](#getupdates)           | Enable to receive development updates about InviteManager. |
-| [Command channels](#channels)        | The channels in which the bot will react to commands.      |
-| [Ignored channels](#ignoredchannels) | The channels in which the bot will ignore commands.        |
+| Setting                              | Description                                               |
+| ------------------------------------ | --------------------------------------------------------- |
+| [Prefix](#prefix)                    | The prefix used to trigger bot commands.                  |
+| [Language](#lang)                    | The language of the bot                                   |
+| [Log Channel](#logchannel)           | The channel where bot actions are logged.                 |
+| [Get Updates](#getupdates)           | Enable to receive development updates about InviteLogger. |
+| [Command channels](#channels)        | The channels in which the bot will react to commands.     |
+| [Ignored channels](#ignoredchannels) | The channels in which the bot will ignore commands.       |
 
 ### Invites
 
@@ -162,35 +162,6 @@ There are many config options that can be set. You don't have to set all of them
 | [Max # of Emojis](#automodemojismaxnumberofemojis) | The maximum amount of emojis a message is allowed to have before trigger the rule.                                        |
 | [Enabled](#automodhoistenabled)                    | Automatically give members nicknames if they try to hoist (use special characters to appear at the top of the user list). |
 
-### Music
-
-#### Music
-
-| Setting                      | Description                                                        |
-| ---------------------------- | ------------------------------------------------------------------ |
-| [Music Volume](#musicvolume) | The default volume that is set when the bot joins a voice channel. |
-
-#### Announcement
-
-| Setting                                  | Description                                                            |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
-| [Announce Next Song](#announcenextsong)  | Whether or not the next song should be announced in the voice channel. |
-| [Announcement Voice](#announcementvoice) | The voice used in the next song announcements.                         |
-
-#### Fade Music
-
-| Setting                                    | Description                                                                               |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| [Fade Music On Talk](#fademusicontalk)     | If enabled, the music will fade down while people are talking.                            |
-| [Fade Music End Delay](#fademusicenddelay) | The delay of how many seconds noone has to speak for the volume to return back to normal. |
-
-#### Platform
-
-| Setting                                             | Description                                                                               |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| [Default Music Platform](#defaultmusicplatform)     | The platform that is used to search / play music when no platform is selected explicitly. |
-| [Disabled Music Platforms](#disabledmusicplatforms) | Music platforms that are disabled and cannot be used to play music.                       |
-
 <a name=prefix></a>
 
 ---
@@ -258,7 +229,7 @@ Examples:
 
 ## Get Updates
 
-Enable to receive development updates about InviteManager.
+Enable to receive development updates about InviteLogger.
 
 Type: `Boolean`
 
@@ -1552,130 +1523,3 @@ Enable:
 Disable:
 
 `!config autoModHoistEnabled false`
-
-<a name=musicVolume></a>
-
----
-
-## Music Volume
-
-The default volume that is set when the bot joins a voice channel.
-
-Type: `Number`
-
-Default: `100`
-
-Reset to default:
-`!config musicVolume default`
-
-<a name=announceNextSong></a>
-
----
-
-## Announce Next Song
-
-Whether or not the next song should be announced in the voice channel.
-
-Type: `Boolean`
-
-Default: `true`
-
-Reset to default:
-`!config announceNextSong default`
-
-Enable:
-
-`!config announceNextSong true`
-
-Disable:
-
-`!config announceNextSong false`
-
-<a name=announcementVoice></a>
-
----
-
-## Announcement Voice
-
-The voice used in the next song announcements.
-
-Type: `Enum<AnnouncementVoice>`
-
-Default: `Joanna`
-
-Reset to default:
-`!config announcementVoice default`
-
-Possible values: `Joanna`, `Salli`, `Kendra`, `Kimberly`, `Ivy`, `Matthew`, `Justin`, `Joey`
-
-Example:
-
-`!config announcementVoice Joanna`
-
-<a name=fadeMusicOnTalk></a>
-
----
-
-## Fade Music On Talk
-
-If enabled, the music will fade down while people are talking.
-
-Type: `Boolean`
-
-Default: `true`
-
-Reset to default:
-`!config fadeMusicOnTalk default`
-
-Enable:
-
-`!config fadeMusicOnTalk true`
-
-Disable:
-
-`!config fadeMusicOnTalk false`
-
-<a name=fadeMusicEndDelay></a>
-
----
-
-## Fade Music End Delay
-
-The delay of how many seconds noone has to speak for the volume to return back to normal.
-
-Type: `Number`
-
-Default: `1`
-
-Reset to default:
-`!config fadeMusicEndDelay default`
-
-<a name=defaultMusicPlatform></a>
-
----
-
-## Default Music Platform
-
-The platform that is used to search / play music when no platform is selected explicitly.
-
-Type: `Enum<MusicPlatformTypes>`
-
-Default: `soundcloud`
-
-Reset to default:
-`!config defaultMusicPlatform default`
-
-<a name=disabledMusicPlatforms></a>
-
----
-
-## Disabled Music Platforms
-
-Music platforms that are disabled and cannot be used to play music.
-
-Type: `Enum<MusicPlatformTypes>[]`
-
-Default: ``
-
-Reset to default:
-`!config disabledMusicPlatforms default`
