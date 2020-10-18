@@ -1,6 +1,6 @@
 {
 	"name": "discord-invite-manager",
-	"version": "9.8.1",
+	"version": "9.8.2",
 	"description": "",
 	"main": "./bin/bot.js",
 	"scripts": {
@@ -22,12 +22,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/SideProjectGuys/invite-manager-bot.git"
+		"url": "git+https://github.com/chaun14/invite-manager-bot.git"
 	},
 	"author": "",
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/SideProjectGuys/invite-manager-bot/issues"
+		"url": "https://github.com/chaun14/invite-manager-bot/issues"
 	},
 	"homepage": "https://docs.invitemanager.co/",
 	"dependencies": {
