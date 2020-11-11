@@ -2,7 +2,7 @@
 
 ## Description
 
-This is the code repository for the InviteManager Discord Bot.
+This is the code repository for the invitelogger classic Discord Bot.
 
 ## Docs
 
@@ -12,7 +12,7 @@ This is the code repository for the InviteManager Discord Bot.
 
 ### Requirements
 
-- NodeJS (tested using v10)
+- NodeJS (tested using v12)
 - Database (tested using `MySQL` 5.7+, `MariaDB` 10.2+ should work)
 
 ### Setup
@@ -22,4 +22,5 @@ This is the code repository for the InviteManager Discord Bot.
    1. Use the `scripts/db/setup_db0.sql` script to set up the global database `im_0`
    1. Use the `scripts/db/setup_dbx.sql` script to set up the data databases `im_1`, `im_2`, ... (you need at least one)
 1. Copy the `config.example.json` to `config.json` and fill in required data
+1. `npm run build`
 1. `npm start`
