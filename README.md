@@ -13,7 +13,7 @@ This is the code repository for the invitelogger classic Discord Bot.
 ### Requirements
 
 - NodeJS (tested using v12)
-- Database (tested using `MySQL` 5.7+, `MariaDB` 10.2+ should work)
+- Database (tested using `MySQL` 5.7+, ⚠`MariaDB` 10.2+ shouldn't work )
 
 ### Setup
 
