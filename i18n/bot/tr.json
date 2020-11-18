@@ -544,8 +544,8 @@
 		},
 		"invites": {
 			"amount": {
-				"other": "{{{ target }}}'ın {{ total }} daveti var! ({{ normal }} düzenli, {{ custom }} bonus, {{ fake }} sahte, {{ leave }} ayrılma)",
-				"self": "Senin {{ total }} davetin var! ({{ normal }} düzenli, {{ custom }} bonus, {{ fake }} sahte, {{ leave }} ayrılma)"
+				"other": "{{{ target }}}'ın {{ total }} daveti var! ({{ regular }} düzenli, {{ custom }} bonus, {{ fake }} sahte, {{ leave }} ayrılma)",
+				"self": "Senin {{ total }} davetin var! ({{ regular }} düzenli, {{ custom }} bonus, {{ fake }} sahte, {{ leave }} ayrılma)"
 			},
 			"highestRank": {
 				"other": "{{{ target }}} şu anda en yüksek rütbeye sahip!",
