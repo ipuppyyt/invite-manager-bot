@@ -11,8 +11,8 @@ import { Command, Context } from '../../Command';
 export default class extends Command {
 	public constructor(client: IMClient) {
 		super(client, {
-			name: BotCommand.setJoinChannel,
-			aliases: ['setJoinChannels'],
+			name: BotCommand.setLeaveChannel,
+			aliases: ['setLeaveChannels'],
 			group: CommandGroup.EasyConfig,
 			guildOnly: true,
 			defaultAdminOnly: true,
@@ -31,7 +31,7 @@ export default class extends Command {
 		const { guild, settings, t, me } = context;
 		const embed = this.createEmbed();
 		const prefix = settings.prefix;
-		const key = 'joinMessageChannel';
+		const key = 'leaveMessageChannel';
 		let value: string;
 		embed.title = key;
 
@@ -89,7 +89,7 @@ export default class extends Command {
 		}
 
 		// save
-		await this.client.cache.guilds.setOne(guild.id, GuildSettingsKey.joinMessageChannel, value);
+		await this.client.cache.guilds.setOne(guild.id, GuildSettingsKey.leaveMessageChannel, value);
 
 		embed.description = t('cmd.config.changed.text', { prefix, key });
 

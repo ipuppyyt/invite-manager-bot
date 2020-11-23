@@ -93,6 +93,7 @@ export enum BotCommand {
 	permissions = 'permissions',
 	interactiveConfig = 'interactiveConfig',
 	setJoinChannel = 'setJoinChannel',
+	setLeaveChannel = 'setLeaveChannel',
 
 	botInfo = 'botInfo',
 	credits = 'credits',
