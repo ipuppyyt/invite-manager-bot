@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "cross-env NODE_ENV=dev node index.js",
 		"debug": "cross-env NODE_ENV=dev node index.js debug",
-		"dev": "cross-env NODE_ENV=dev node scripts/dev-run.js",
+		"dev": "npm run build && cross-env NODE_ENV=dev node scripts/dev-run.js",
 		"build": "tsc",
 		"lint": "tslint --project tsconfig.json --config tslint.json --format stylish",
 		"format": "prettier --write \"src/**/*.ts\" \"docs/**/*.md\" \"README.md\" \"CHANGELOG.md\"",
