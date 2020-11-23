@@ -1,4 +1,4 @@
-import { Embed, Message, TextChannel, VoiceChannel } from 'eris';
+import { Embed, Message, TextChannel } from 'eris';
 
 import { IMClient } from '../../../client';
 import { beautify, guildSettingsInfo } from '../../../settings';

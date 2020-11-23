@@ -58,6 +58,7 @@ export enum CommandGroup {
 	Invites = 'Invites',
 	Ranks = 'Ranks',
 	Config = 'Config',
+	EasyConfig = 'EasyConfig',
 	Info = 'Info',
 	Premium = 'Premium',
 	Moderation = 'Moderation',
@@ -91,6 +92,7 @@ export enum BotCommand {
 	memberConfig = 'memberConfig',
 	permissions = 'permissions',
 	interactiveConfig = 'interactiveConfig',
+	setJoinChannel = 'setJoinChannel',
 
 	botInfo = 'botInfo',
 	credits = 'credits',

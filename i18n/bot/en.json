@@ -4,7 +4,7 @@
 			"title": "Add bot to your server"
 		},
 		"patreon": {
-			"title": "Patreon"
+			"title": "Support us"
 		},
 		"supportDiscord": {
 			"title": "Support Discord"
@@ -1200,6 +1200,14 @@
 			},
 			"notATextChannel": "That channel is not a text channel.",
 			"noSuitingRoleFound": "No suitable role found to start a lockdown!"
+		},
+		"setJoinChannel": {
+			"self": {
+				"args": {
+					"channel": "Channel where the welcome message will be sent"
+				},
+				"description": "Set the channel where the welcome message is sent"
+			}
 		}
 	},
 	"messages": {

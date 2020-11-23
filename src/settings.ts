@@ -28,6 +28,8 @@ export type InternalSettingsTypes =
 	| 'Enum<ActivityStatus>'
 	| 'Enum<ActivityType>';
 
+export type setChannelSettingsTypes = 'String' | 'Channel';
+
 export interface SettingsInfo<T> {
 	type: InternalSettingsTypes;
 	grouping: SettingsGroup[];
