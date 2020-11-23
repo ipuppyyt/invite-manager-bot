@@ -24,3 +24,10 @@ This is the code repository for the invitelogger classic Discord Bot.
 1. Copy the `config.example.json` to `config.json` and fill in required data
 1. `npm run build`
 1. `npm start`
+
+
+### ⚠ Disclaimer
+
+This repo is for invitelogger classic and may not run for selfhosters (for exemple you can't selfhost my manager).
+Please use the last releases and not download master branch to avoid dev breach and others bugs.
+Please do not remove developers and translators name in `credits` command.
