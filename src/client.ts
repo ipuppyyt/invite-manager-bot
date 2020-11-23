@@ -16,6 +16,7 @@ import { DatabaseService } from './framework/services/DatabaseService';
 import { MessagingService } from './framework/services/Messaging';
 import { PremiumService } from './framework/services/PremiumService';
 import { RabbitMqService } from './framework/services/RabbitMq';
+import { SocketioService } from './framework/services/Socket';
 import { SchedulerService } from './framework/services/Scheduler';
 import { IMService } from './framework/services/Service';
 import { InviteCodeSettingsCache } from './invites/cache/InviteCodeSettingsCache';
@@ -84,6 +85,7 @@ export interface ClientServiceObject {
 
 	database: DatabaseService;
 	rabbitmq: RabbitMqService;
+	socket: SocketioService;
 	message: MessagingService;
 	moderation: ModerationService;
 	scheduler: SchedulerService;
@@ -115,6 +117,7 @@ export class IMClient extends Client {
 	// Service shortcuts
 	public db: DatabaseService;
 	public rabbitmq: RabbitMqService;
+	public socket: SocketioService;
 	public msg: MessagingService;
 	public mod: ModerationService;
 	public scheduler: SchedulerService;
@@ -184,6 +187,7 @@ export class IMClient extends Client {
 		this.service = {
 			database: new DatabaseService(this),
 			rabbitmq: new RabbitMqService(this),
+			socket: new SocketioService(this),
 			message: new MessagingService(this),
 			moderation: new ModerationService(this),
 			scheduler: new SchedulerService(this),
@@ -247,7 +251,10 @@ export class IMClient extends Client {
 			() => console.log(`Waiting for ticket since ${chalk.blue(Math.floor(process.uptime() - start))} seconds...`),
 			10000
 		);
-		await this.service.rabbitmq.waitForStartupTicket();
+
+		await this.service.socket.waitForStartupTicket();
+
+		//await this.service.rabbitmq.waitForStartupTicket();
 		clearInterval(interval);
 	}
 

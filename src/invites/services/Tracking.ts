@@ -98,6 +98,7 @@ export class TrackingService extends IMService {
 
 				if (this.pendingGuilds.size === 0) {
 					console.log(chalk.green(`Loaded all pending guilds!`));
+					await this.client.service.socket.finishLoad();
 					this.startupDone();
 				}
 

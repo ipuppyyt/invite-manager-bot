@@ -4,17 +4,38 @@ const config = require('./config.json');
 const { spawn } = require('child_process');
 const colors = require('colors');
 
-let isAShardLoading = false;
-let startQueue = [];
 let debug = false;
 
 // init shard object
 let shardsMap = new Map();
+
 for (var actualshard = 1; actualshard <= config.controller.shardCount; actualshard++) {
 	shardsMap.set(actualshard, { status: 'down', id: actualshard, port: config.controller.firstDebugPort + actualshard });
 }
 
 let channel;
+
+//if the launch isn't managed by the manager the controller will control the launch himself
+if (!config.controller.socket) {
+	let isAShardLoading = false;
+	let startQueue = [];
+	async function checkQueue() {
+		startQueue.forEach(async (shard) => {
+			if (isAShardLoading) return;
+
+			console.log('need to start the shard ' + shard);
+			await shardStart(shard);
+
+			startQueue.shift();
+		});
+	}
+	setInterval(checkQueue, 10000);
+} // if the launch is managed by the socket we can launch all shards at the same time
+else {
+	for (let [id, shard] of shardsMap) {
+		shardStart(id);
+	}
+}
 
 function shardStart(id) {
 	return new Promise(async (resolve, reject) => {
@@ -41,42 +62,57 @@ function shardStart(id) {
 
 		child.stdout.on('data', function (data) {
 			console.log(('[SHARD'.black + id.toString().red + ']'.black).bgCyan + '  ' + data.toString());
-			if (data.includes('Loaded all pending guilds!')) {
-				shard = shardsMap.get(id);
-				shard.status = 'ok';
-				shardsMap.set(id, shard);
 
-				channel.send('Shard ' + id + ' fully started');
+			if (!config.controller.socket) {
+				if (data.includes('Loaded all pending guilds!')) {
+					shard = shardsMap.get(id);
+					shard.status = 'ok';
+					shardsMap.set(id, shard);
 
-				isAShardLoading = false;
+					channel.send('Shard ' + id + ' fully started');
+
+					isAShardLoading = false;
+					resolve();
+				}
+				if (data.includes('guilds in parallel during startup')) {
+					shard = shardsMap.get(id);
+					shard.status = 'loading';
+
+					channel.send('Shard ' + id + ' started, begin loading');
+
+					shardsMap.set(id, shard);
+				}
+			} else {
+				if (data.includes('Loaded all pending guilds!')) {
+					shard = shardsMap.get(id);
+					shard.status = 'ok';
+					shardsMap.set(id, shard);
+
+					channel.send('Shard ' + id + ' fully started');
+				}
+				if (data.includes('guilds in parallel during startup')) {
+					shard = shardsMap.get(id);
+					shard.status = 'loading';
+
+					channel.send('Shard ' + id + ' started, begin loading');
+
+					shardsMap.set(id, shard);
+				}
 				resolve();
-			}
-			if (data.includes('guilds in parallel during startup')) {
-				shard = shardsMap.get(id);
-				shard.status = 'loading';
-
-				channel.send('Shard ' + id + ' started, begin loading');
-
-				shardsMap.set(id, shard);
 			}
 		});
 
 		child.on('close', (data) => {
-			if (data == null) {
-				shard = shardsMap.get(id);
-				shard.status = 'down';
-				shardsMap.set(id, shard);
-
-				channel.send('Shard ' + id + ' stopped');
-			} else {
-				shard = shardsMap.get(id);
-				shard.status = 'crashed';
-				shardsMap.set(id, shard);
-
-				// add the crashed shard to the reboot list
-				startQueue.push(shard.id);
-
-				channel.send('Shard ' + id + ' crashed');
+			if (config.controller.autoRestart) {
+				if (config.controller.socket) {
+					shard.status = 'crashed';
+					shardStart(id);
+					channel.send('Shard ' + id + ' crashed');
+				} else {
+					shard.status = 'crashed';
+					startQueue.push(shard.id);
+					channel.send('Shard ' + id + ' crashed');
+				}
 			}
 		});
 
@@ -84,18 +120,6 @@ function shardStart(id) {
 		shardsMap.set(id, shard);
 	});
 }
-
-async function checkQueue() {
-	startQueue.forEach(async (shard) => {
-		if (isAShardLoading) return;
-
-		console.log('need to start the shard ' + shard);
-		await shardStart(shard);
-
-		startQueue.shift();
-	});
-}
-setInterval(checkQueue, 10000);
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);

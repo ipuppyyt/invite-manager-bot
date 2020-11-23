@@ -33,6 +33,10 @@
 		"password": "guest",
 		"prefix": ""
 	},
+	"socketio": {
+		"url": "http://localhost:2000",
+		"key": "your socket key"
+	},
 	"databases": [
 		{
 			"host": "localhost",
@@ -60,6 +64,8 @@
 		"shardCount": 2,
 		"owners": ["417977361011572747", "302901933419790347", "your id in this array"],
 		"incidentChannel": "id of a log channel",
-		"firstDebugPort": 40000
+		"firstDebugPort": 40000,
+		"socket": false,
+		"autoRestart": true
 	}
 }
