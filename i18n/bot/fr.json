@@ -981,7 +981,7 @@
 		"tryPremium": {
 			"alreadyUsed": "Vous avez déjà utilisé votre essai premium gratuit! Si vous aimez ce bot, envisagez de payer le premium.",
 			"currentlyActive": "Vous avez un abonnement premium actif !",
-			"prompt": "Veuillez répondre par **oui** ou par **non**.",
+			"prompt": "Veuillez répondre par **yes** ou par **no**.",
 			"timedOut": "The request has timed out, please try again.",
 			"canceled": "The try-premium process has been aborted.",
 			"self": {

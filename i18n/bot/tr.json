@@ -981,7 +981,7 @@
 		"tryPremium": {
 			"alreadyUsed": "Ücretsiz premium denemenizi zaten kullandınız! Bu botu beğendiyseniz, lütfen premium almayı düşünün.\n ",
 			"currentlyActive": "Şu anda aktif bir premium aboneliğiniz var!",
-			"prompt": "Lütfen **evet** veya **hayır** yazarak cevap verin.\n ",
+			"prompt": "Lütfen **yes** veya **no** yazarak cevap verin.\n ",
 			"timedOut": "The request has timed out, please try again.",
 			"canceled": "The try-premium process has been aborted.",
 			"self": {
