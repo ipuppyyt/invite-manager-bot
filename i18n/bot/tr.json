@@ -7,7 +7,7 @@
 			"title": "Support us"
 		},
 		"supportDiscord": {
-			"title": "Destek Discord'u"
+			"title": "Destek Sunucusu"
 		},
 		"website": {
 			"title": "Botun sitesi"
@@ -133,18 +133,18 @@
 				},
 				"description": "Belirli bir durumu silin."
 			},
-			"title": "Kasa #{{ id }}"
+			"title": "Vaka #{{ id }}"
 		},
 		"caseView": {
-			"notFound": "Kasa bulunamadı",
+			"notFound": "Vaka bulunamadı",
 			"self": {
 				"args": {
-					"caseNumber": "Kasa numarası"
+					"caseNumber": "Vaka numarası"
 				},
 				"description": "Belirli bir kasa hakkındaki bilgileri görüntüleyin."
 			},
 			"strike": "{{{ member }}}, {{{ violation }}} kuralını ihlal ettiği için {{{ amount }}} uyarı aldı. {{{ date }}}",
-			"title": "Kasa #{{ id }}"
+			"title": "Vaka #{{ id }}"
 		},
 		"check": {
 			"noHistory": "Kullanıcı geçmişi yok.",
@@ -162,8 +162,8 @@
 			},
 			"strikes": {
 				"entry": "# {{id}} - {{ violation }} için {{ amount }} uyarı aldı {{ date }}",
-				"title": "Grevler",
-				"total": "Grev Toplamı",
+				"title": "Uyarılar",
+				"total": "Uyarılar Toplamı",
 				"totalText": "{{{ Amount }}} ihlali için {{{ total }}} ceza alındı."
 			}
 		},
@@ -679,7 +679,7 @@
 			}
 		},
 		"mentionRole": {
-			"alreadyDone": "{{{ role }}} is already mentionable.",
+			"alreadyDone": "{{{ role }}} zaten etiketlenebilir.",
 			"roleTooHigh": "Bahsedilen rol en yüksek rolümün üstünde, bu yüzden değiştiremiyorum.",
 			"self": {
 				"args": {
@@ -710,7 +710,7 @@
 			}
 		},
 		"permissions": {
-			"added": "{{{ role }}} can now use {{{ cmds }}}",
+			"added": "{{{ role }}} rolündeki kişiler artık {{{ cmds }}} komutunu kullanabilir.",
 			"adminOnly": "Bu komut sadece Adminler tarafından kullanılabilir",
 			"adminsCanUseAll": "*Sunucu Yöneticileri* 'nin *her zaman*  *tüm* komutları kullanabileceğini unutmayın",
 			"everyone": "Bu komut herkes tarafından kullanılabilir",
@@ -726,7 +726,7 @@
 		},
 		"ping": {
 			"self": {
-				"description": "botun pingi"
+				"description": "Botun Gecikmesi"
 			}
 		},
 		"prefix": {
@@ -744,7 +744,7 @@
 				"noSubscription": "Aktif bir premium aboneliğiniz yok.\n\nDaha fazla bilgi için {{{ cmd }}} kullanın.",
 				"title": "Bu sunucuda premium'u etkinleştir",
 				"permissions": "Bu komutu bu sunucuda kullanmak için `Sunucuyu Yönet` izinine ihtiyacınız vardır.",
-				"maxGuilds": "Maksimum lonca sayısı için premiumu etkinleştirdiniz."
+				"maxGuilds": "Maksimum sunucu sayısı için premiumu etkinleştirdiniz."
 			},
 			"check": {
 				"declined": "Prim ödemeniz reddedildi, lütfen Patreon'unuzu kontrol edin.",
@@ -786,7 +786,7 @@
 			"premium": {
 				"activate": "Use {{{ cmd }}} to activate it on this server",
 				"deactivate": "Use {{{ cmd }}} to deactivate it on this server",
-				"text": "Your premium subscription is valid for {{ date }}.\n\nYou have activated premium on {{{ limit }}} servers.\n{{{ guildList }}}\n\n[What can I do with premium?]({{{ link }}})",
+				"text": "Aboneliğin {{ date }} kadar süre ile geçerli.\n\nPremium özelliğini {{{ limit }}} sunucuda aktif ettin.\n{{{ guildList }}}\n\n[Premium ile ne yapabilirim?]({{{ link }}})",
 				"title": "InviteManager Premium"
 			},
 			"self": {
@@ -839,7 +839,7 @@
 			"inProgress": "Temizleniyor..."
 		},
 		"ranks": {
-			"entry": "{{{ role }}}: **{{ numInvites }} davet** yapıyor. Açıklama: {{ description }}",
+			"entry": "{{{ role }}}: **{{ numInvites }} davet** ile alınabiliyor. Açıklama: {{ description }}",
 			"none": "Henüz hiçbir rütbe oluşturulmadı.",
 			"self": {
 				"description": "Tüm rütbeleri göster.",
@@ -888,7 +888,7 @@
 				"title": "Yardım"
 			},
 			"joinLeave": {
-				"text": "Kanallarınızdan birinde katılma veya ayrılma mesajı bırakmak istiyorsanız, bu kanalı yapılandırarak yapılandırmanız gerekir. O kanalı `! Config joinMessageChannel # channel` veya`! Config leaveMessageChannel # channel` yaparak yapılandırmanız gerekir. Botun bu kanallarda yazma izinlerine sahip olduğundan emin olun!",
+				"text": "Kanallarınızdan birinde katılma veya ayrılma mesajı bırakmak istiyorsanız, bu kanalı yapılandırarak yapılandırmanız gerekir. O kanalı `!config joinMessageChannel #kanal` veya `!config leaveMessageChannel #kanal` yaparak yapılandırmanız gerekir. Botun bu kanallarda yazma izinlerine sahip olduğundan emin olun!",
 				"title": "Katılma - Ayrılma Mesaj Kanalını Ayarlama."
 			},
 			"manageGuild": {
@@ -900,7 +900,7 @@
 				"title": "Eksik izin: Rolleri Yönetme"
 			},
 			"prefix": {
-				"text": "Öneki `!config <öneki>! 'Yaparak değiştirebilirsiniz.\n\nBotların önekini bilmiyorsanız, bunu `@InviteManager config prefix` yazarak öğrenebilirsiniz.",
+				"text": "Öneki `!config <önek>` Yaparak değiştirebilirsiniz.\n\nBotların önekini bilmiyorsanız, bunu `@InviteManager config prefix` yazarak öğrenebilirsiniz.",
 				"title": "Ön-eki Değiştirme."
 			},
 			"premium": {
@@ -983,7 +983,7 @@
 			"currentlyActive": "Şu anda aktif bir premium aboneliğiniz var!",
 			"prompt": "Lütfen **yes** veya **no** yazarak cevap verin.\n ",
 			"timedOut": "The request has timed out, please try again.",
-			"canceled": "The try-premium process has been aborted.",
+			"canceled": "Premium deneme özelliği red edildi..",
 			"self": {
 				"description": "InviteManager'ın premium sürümünü sınırlı bir süre için ücretsiz deneyin."
 			},
@@ -1186,14 +1186,14 @@
 					"channel": "Kilitlemek istediğiniz kanal."
 				}
 			},
-			"notATextChannel": "That channel is not a text channel.",
+			"notATextChannel": "Bu kanal biz metin kanalı değil.",
 			"noSuitingRoleFound": "Bir kilitleme başlatmak için uygun bir rol bulunamadı!"
-		},
+ 		},
 		"setJoinChannel": {
 			"self": {
-				"description": "Set the channel where the welcome message is sent",
+				"description": "Hoşgeldin mesajının atılcağı kanal ayarlayın",
 				"args": {
-					"channel": "Channel where the welcome message will be sent"
+					"channel": "Giriş mesajı kanalı."
 				}
 			}
 		}
