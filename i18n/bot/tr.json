@@ -726,7 +726,7 @@
 		},
 		"ping": {
 			"self": {
-				"description": "Botun Gecikmedi"
+				"description": "Botun Gecikmesi"
 			}
 		},
 		"prefix": {
@@ -983,7 +983,7 @@
 			"currentlyActive": "Şu anda aktif bir premium aboneliğiniz var!",
 			"prompt": "Lütfen **yes** veya **no** yazarak cevap verin.\n ",
 			"timedOut": "The request has timed out, please try again.",
-			"canceled": "The try-premium process has been aborted.",
+			"canceled": "Premium deneme özelliği red edildi..",
 			"self": {
 				"description": "InviteManager'ın premium sürümünü sınırlı bir süre için ücretsiz deneyin."
 			},
@@ -1186,14 +1186,14 @@
 					"channel": "Kilitlemek istediğiniz kanal."
 				}
 			},
-			"notATextChannel": "That channel is not a text channel.",
+			"notATextChannel": "Bu kanal biz metin kanalı değil.",
 			"noSuitingRoleFound": "Bir kilitleme başlatmak için uygun bir rol bulunamadı!"
-		},
+ 		},
 		"setJoinChannel": {
 			"self": {
 				"description": "Hoşgeldin mesajının atılcağı kanal ayarlayın",
 				"args": {
-					"channel": "Giril mesajı kanalı."
+					"channel": "Giriş mesajı kanalı."
 				}
 			}
 		}
