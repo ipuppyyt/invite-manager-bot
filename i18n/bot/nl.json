@@ -839,7 +839,7 @@
 			"inProgress": "Verwijderen..."
 		},
 		"ranks": {
-			"entry": "<@&{{ role }}>: **{{ numInvites }} invites**{{ description ?}}",
+			"entry": "{{{ role }}}:  **{{ numInvites }} invites**{{ description ?}}",
 			"none": "Er zijn geen ranken gecreëerd.",
 			"self": {
 				"description": "Zie alle ranks.",
