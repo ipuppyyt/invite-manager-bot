@@ -2,7 +2,8 @@
 
 ## Description
 
-This is the code repository for the invitelogger classic Discord Bot.
+This is the code repository for the invitelogger classic Discord Bot. 
+This fork is made to maintain the code of inviteManager and keep the incredible work of its devs alive. I'm not a perfect developer, I'm currently learning so don't hesitate to PR/contact me for code advices and improvements.
 
 ## Docs
 
