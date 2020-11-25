@@ -47,7 +47,7 @@ export type ShowPaginatedFunc = (
 
 export class MessagingService extends IMService {
 	public createEmbed(options: EmbedOptions = {}, overrideFooter: boolean = true): Embed {
-		let color = options.color ? (options.color as number | string) : parseInt('00cbeb', 16);
+		let color = this.client.config.bot.embedColor;
 		// Parse colors in hashtag/hex format
 		if (typeof color === 'string') {
 			const code = color.startsWith('#') ? color.substr(1) : color;

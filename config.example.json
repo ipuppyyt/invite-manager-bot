@@ -4,15 +4,17 @@
 	"bot": {
 		"dbPrefix": "im",
 		"type": "regular",
+		"embedColor": "00cbeb",
+		"status": "invitelogger.me !",
 		"ids": {
 			"regular": "",
 			"pro": ""
 		},
 		"links": {
-			"add": "https://invitemanager.co/add-bot/",
-			"support": "https://discord.gg/Am6p2Hs",
-			"website": "https://andreasgassmann.github.io/discord-invite-manager/",
-			"patreon": "https://www.patreon.com/invitemanager"
+			"add": "https://invlogger.chaun14.fr/bot",
+			"support": "https://discord.gg/zDSBpDu",
+			"website": "https://invitelogger.me",
+			"patreon": "https://paypal.me/chaun14"
 		},
 		"dm": {
 			"guild": "",
