@@ -14,27 +14,31 @@ for (var actualshard = 1; actualshard <= config.controller.shardCount; actualsha
 }
 
 let channel;
+let isAShardLoading = false;
+let startQueue = [];
 
-//if the launch isn't managed by the manager the controller will control the launch himself
-if (!config.controller.socket) {
-	let isAShardLoading = false;
-	let startQueue = [];
-	async function checkQueue() {
-		startQueue.forEach(async (shard) => {
-			if (isAShardLoading) return;
+async function loadController() {
+	return new Promise(async (resolve, reject) => {
+		//if the launch isn't managed by the manager the controller will control the launch himself
+		if (!config.controller.socket) {
+			async function checkQueue() {
+				startQueue.forEach(async (shard) => {
+					if (isAShardLoading) return;
 
-			console.log('need to start the shard ' + shard);
-			await shardStart(shard);
+					console.log('need to start the shard ' + shard);
+					await shardStart(shard);
 
-			startQueue.shift();
-		});
-	}
-	setInterval(checkQueue, 10000);
-} // if the launch is managed by the socket we can launch all shards at the same time
-else {
-	for (let [id, shard] of shardsMap) {
-		shardStart(id);
-	}
+					startQueue.shift();
+				});
+			}
+			setInterval(checkQueue, 10000);
+		} // if the launch is managed by the socket we can launch all shards at the same time
+		else {
+			for (let [id, shard] of shardsMap) {
+				shardStart(id);
+			}
+		}
+	});
 }
 
 function shardStart(id) {
@@ -48,6 +52,7 @@ function shardStart(id) {
 		shard.status = 'launching';
 		shardsMap.set(id, shard);
 		console.log('starting' + shard.id);
+		channel.send('starting ' + id);
 
 		const child = spawn('node', [
 			`--inspect${debug ? '-brk' : ''}=${shard.port}`,
@@ -107,12 +112,16 @@ function shardStart(id) {
 				if (config.controller.socket) {
 					shard.status = 'crashed';
 					shardStart(id);
-					channel.send('Shard ' + id + ' crashed');
+					channel.send('Shard ' + id + ' crashed, restarting');
 				} else {
 					shard.status = 'crashed';
 					startQueue.push(shard.id);
-					channel.send('Shard ' + id + ' crashed');
+					channel.send('Shard ' + id + ' crashed, restarting');
 				}
+			} else {
+				shard.status = 'crashed';
+				shardsMap.set(id, shard);
+				channel.send('Shard ' + id + ' crashed autorestart not enabled');
 			}
 		});
 
@@ -121,111 +130,130 @@ function shardStart(id) {
 	});
 }
 
-client.on('ready', () => {
-	console.log(`Logged in as ${client.user.tag}!`);
-	channel = client.channels.cache.get(config.controller.incidentChannel);
-});
+async function loadBotController() {
+	return new Promise(async (resolve, reject) => {
+		client.on('ready', () => {
+			console.log(`Logged in as ${client.user.tag}!`);
+			channel = client.channels.cache.get(config.controller.incidentChannel);
+		});
 
-client.on('message', (message) => {
-	if (message.content.toLowerCase() === '.startall') {
-		if (!config.controller.owners.includes(message.author.id)) {
-			message.reply("You're not allowed to do that");
-			return;
-		}
+		client.on('message', (message) => {
+			if (message.content.toLowerCase() === '.startall') {
+				if (!config.controller.owners.includes(message.author.id)) {
+					message.reply("You're not allowed to do that");
+					return;
+				}
 
-		let count = 0;
-		for (let [id, shard] of shardsMap) {
-			console.log(shard);
-			if (shard.status == 'down') {
-				// send this shard to the queue
-				startQueue.push(shard.id);
+				let count = 0;
+				for (let [id, shard] of shardsMap) {
+					console.log(shard);
+					if (shard.status == 'down') {
+						if (!config.controller.socket) {
+							// send this shard to the queue
+							startQueue.push(shard.id);
 
-				shard.status = 'queued';
-				shardsMap.set(shard.id, shard);
-
-				count++;
+							shard.status = 'queued';
+							shardsMap.set(shard.id, shard);
+						} else {
+							shardStart(shard.id);
+						}
+						count++;
+					}
+				}
+				message.channel.send('All downed shards has been queued to starting');
 			}
-		}
-		message.channel.send('All downed shards has been queued to starting');
-	}
 
-	if (message.content.startsWith('.kill ')) {
-		if (!config.controller.owners.includes(message.author.id)) {
-			message.reply("You're not allowed to do that");
-			return;
-		}
+			if (message.content.startsWith('.kill ')) {
+				if (!config.controller.owners.includes(message.author.id)) {
+					message.reply("You're not allowed to do that");
+					return;
+				}
 
-		let shardId = message.content.toLowerCase().slice(6);
+				let shardId = message.content.toLowerCase().slice(6);
 
-		let shard = shardsMap.get(parseInt(shardId));
+				let shard = shardsMap.get(parseInt(shardId));
 
-		if (!shard) return message.channel.send('Unknow shard');
+				if (!shard) return message.channel.send('Unknow shard');
 
-		if (!shard.child) return message.channel.send('Shard not started');
+				if (!shard.child) return message.channel.send('Shard not started');
 
-		shard.child.kill();
-		shard.child = undefined;
-		shard.status = 'down';
+				shard.child.kill();
+				shard.child = undefined;
+				shard.status = 'down';
 
-		shardsMap.set(shard.id, shard);
-		message.channel.send('The given shard has been killed');
-	}
+				shardsMap.set(shard.id, shard);
+				message.channel.send('The given shard has been killed');
+			}
 
-	if (message.content.startsWith('.start ')) {
-		if (!config.controller.owners.includes(message.author.id)) {
-			message.reply("You're not allowed to do that");
-			return;
-		}
+			if (message.content.startsWith('.start ')) {
+				if (!config.controller.owners.includes(message.author.id)) {
+					message.reply("You're not allowed to do that");
+					return;
+				}
 
-		let shardId = message.content.toLowerCase().slice(7);
+				let shardId = message.content.toLowerCase().slice(7);
 
-		let shard = shardsMap.get(parseInt(shardId));
+				let shard = shardsMap.get(parseInt(shardId));
 
-		if (!shard) return message.channel.send('Unknow shard');
+				if (!shard) return message.channel.send('Unknow shard');
 
-		if (shard.child) return message.channel.send('Shard already started');
+				if (shard.child) return message.channel.send('Shard already started');
 
-		// send this shard to the queue
-		startQueue.push(shard.id);
+				if (!config.controller.socket) {
+					// send this shard to the queue
+					startQueue.push(shard.id);
 
-		shard.status = 'queued';
-		shardsMap.set(shard.id, shard);
+					shard.status = 'queued';
+					shardsMap.set(shard.id, shard);
 
-		message.channel.send('The given shard has been queued');
-	}
+					message.channel.send('The given shard has been queued');
+				} else {
+					shardStart(shard.id);
+					message.channel.send('The given shard has been started');
+				}
+			}
 
-	if (message.content.startsWith('.help')) {
-		if (!config.controller.owners.includes(message.author.id)) {
-			message.reply("You're not allowed to do that");
-			return;
-		}
+			if (message.content.startsWith('.help')) {
+				if (!config.controller.owners.includes(message.author.id)) {
+					message.reply("You're not allowed to do that");
+					return;
+				}
 
-		let embed = new Discord.MessageEmbed();
-		embed.setDescription(
-			"Commands:\n .botstatus --> show bot's shards status\n.startAll --> start all downed shard\n.start <shardid> --> start a specific shard\n.stop <shardid> --> stop a specific shard"
-		);
-		embed.setFooter('We control the world');
-		embed.setTimestamp();
-		embed.setColor('#5400db');
+				let embed = new Discord.MessageEmbed();
+				embed.setDescription(
+					"Commands:\n .botstatus --> show bot's shards status\n.startAll --> start all downed shard\n.start <shardid> --> start a specific shard\n.stop <shardid> --> stop a specific shard"
+				);
+				embed.setFooter('We control the world');
+				embed.setTimestamp();
+				embed.setColor('#5400db');
 
-		message.channel.send(embed);
-	}
+				message.channel.send(embed);
+			}
 
-	if (message.content.toLowerCase() === '.botstatus') {
-		let builder = '';
+			if (message.content.toLowerCase() === '.botstatus') {
+				let builder = '';
 
-		for (let [id, shard] of shardsMap) {
-			builder = builder + `**Shard: ${shard.id}** --> \`${shard.status}\`` + '\n';
-		}
+				for (let [id, shard] of shardsMap) {
+					builder = builder + `**Shard: ${shard.id}** --> \`${shard.status}\`` + '\n';
+				}
 
-		let embed = new Discord.MessageEmbed();
-		embed.setDescription(builder);
-		embed.setFooter('We control the world');
-		embed.setTimestamp();
-		embed.setColor('#5400db');
+				let embed = new Discord.MessageEmbed();
+				embed.setDescription(builder);
+				embed.setFooter('We control the world');
+				embed.setTimestamp();
+				embed.setColor('#5400db');
 
-		message.channel.send(embed);
-	}
-});
+				message.channel.send(embed);
+			}
+		});
 
-client.login(config.controller.botToken);
+		client.login(config.controller.botToken);
+	});
+}
+
+// init
+const init = async () => {
+	await loadBotController();
+	loadController();
+};
+init();
