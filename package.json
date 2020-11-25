@@ -29,7 +29,7 @@
 	"bugs": {
 		"url": "https://github.com/chaun14/invite-manager-bot/issues"
 	},
-	"homepage": "https://docs.invitemanager.co/",
+	"homepage": "https://classic.invitelogger.me/",
 	"dependencies": {
 		"@sentry/node": "5.15.5",
 		"@types/socket.io-client": "1.4.34",

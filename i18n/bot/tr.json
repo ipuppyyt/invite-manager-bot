@@ -880,7 +880,7 @@
 		},
 		"setup": {
 			"faq": {
-				"text": "Botun kurulumu hakkında eksiksiz bir kılavuz burada bulunabilir: https://docs.invitemanager.co/",
+				"text": "Botun kurulumu hakkında eksiksiz bir kılavuz burada bulunabilir: https://classic.invitelogger.me/",
 				"title": "SSS (Sıkça Sorulan Sorular) ve daha fazlası"
 			},
 			"help": {
@@ -1188,7 +1188,7 @@
 			},
 			"notATextChannel": "Bu kanal biz metin kanalı değil.",
 			"noSuitingRoleFound": "Bir kilitleme başlatmak için uygun bir rol bulunamadı!"
- 		},
+		},
 		"setJoinChannel": {
 			"self": {
 				"description": "Hoşgeldin mesajının atılcağı kanal ayarlayın",
