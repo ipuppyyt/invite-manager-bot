@@ -1,3 +1,0 @@
-# Harita yolu
-
-TODO
