@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.8.2](https://github.com/chaun14/invite-manager-bot/compare/v9.8.1...v9.8.2) (2020-11-25)
+
+### Features
+
+- **core:** implement yggdrasil manager to replace rabbitmq ([ea67aaf](https://github.com/chaun14/invite-manager-bot/commit/ea67aaf9cbffd6103c82cc4bcf2ada96cf2c7033))
+- **core:** sharding manager improvements ([cbc2c3c](https://github.com/chaun14/invite-manager-bot/commit/cbc2c3c87decdf6d2afe07ea8c187353c9f886a0))
+- **config:** setJoinChannel and setLeaveChannel commands added ([fd726d3](https://github.com/chaun14/invite-manager-bot/commit/fd726d325918d3a9047f9eacbf2b19a7d7e290b2))
+- **config:** make branding more customizable from config.json ([1ab1356](https://github.com/chaun14/invite-manager-bot/commit/1ab1356b7c956c66f4a81bd28511789450ceceea))
+- **docs:** move docs to [this repo](https://github.com/chaun14/invlogclassic-docs/) ([a03c2d2](https://github.com/chaun14/invite-manager-bot/commit/a03c2d22c9d8e9ea8645c58c5a52d716f62aa9d1))
+- **docs:** change docs link to new [docs](https://classic.invitelogger.me/) ([9d7ca53](https://github.com/chaun14/invite-manager-bot/commit/9d7ca53aeed5198cf113ea0e2b9aee10302db82e))
+- **translations:** few tr translations improvemebts
+
+
+### Bug Fixes
+
+- **translations:** Make translations more accurate and remove some errors. ([284b18b](https://github.com/chaun14/invite-manager-bot/commit/284b18ba7718385bf6f1546cc858f44a3d272b61))([d50e0a0](https://github.com/chaun14/invite-manager-bot/commit/d50e0a081f22f7c256cd4fab060f2ab5eac518a4))
+
+
 ### [9.8.1](https://github.com/chaun14/invite-manager-bot/compare/v9.8.0...v9.8.1) (2020-10-18)
 
 ### Features
