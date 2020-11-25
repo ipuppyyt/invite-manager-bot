@@ -7,6 +7,7 @@ This fork is made to maintain the code of inviteManager and keep the incredible 
 
 ## Docs
 
+⚠ OUTDATED DOC, WILL BE REPLACED SOON
 [Click here to view the documentation](https://docs.invitemanager.co)
 
 ## Self hosting quick setup
