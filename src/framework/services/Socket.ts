@@ -6,12 +6,15 @@ export class SocketioService extends IMService {
 	private socket: Socket;
 	private waitingForTicket: boolean;
 	public connected: boolean;
+	private canceled: boolean = false;
 
 	public async init() {
+		console.log('Init Websocket');
 		this.connected = false;
 		this.waitingForTicket = true;
-		if (this.client.flags.includes('--no-socket')) {
-			return;
+		if (this.client.flags.includes('--no-socket') || this.client.config.socketio.url == '') {
+			this.canceled = true;
+			return console.log('Websocket init canceled');
 		}
 
 		await this.initConnection();
@@ -50,7 +53,12 @@ export class SocketioService extends IMService {
 				this.sendStatusToManager();
 			}, 5000);
 
-			// laod will be blocked if no socket connection
+			// load will be blocked if no socket connection
+			setTimeout(() => {
+				if (!this.connected) {
+					console.log("UNABLE TO CONNECT TO MANAGER WEBSOCKET, PLEASE KEEP SOCKET URL EMPTY WHEN YOU HAVEN'T ANY");
+				}
+			}, 1000);
 		});
 	}
 
@@ -70,22 +78,29 @@ export class SocketioService extends IMService {
 
 	public async waitForStartupTicket() {
 		return new Promise(async (resolve, reject) => {
-			if (this.connected) {
-				console.log('TICKET ASKED');
-				await this.askTicket();
-
+			if (this.canceled) {
+				console.log('SOCKET DISABLED, FORCE ALLOW TICKETS');
 				resolve();
 			} else {
-				console.log('NO SOCKET TO ASK TICKET');
+				if (this.connected) {
+					console.log('TICKET ASKED');
+					await this.askTicket();
 
-				setTimeout(() => {
-					this.waitForStartupTicket();
-				}, 10000);
+					resolve();
+				} else {
+					console.log('NO SOCKET TO ASK TICKET');
+
+					setTimeout(() => {
+						this.waitForStartupTicket();
+					}, 10000);
+				}
 			}
 		});
 	}
 	public async finishLoad() {
-		this.socket.emit('ticketFinishLoad');
+		if (!this.canceled) {
+			this.socket.emit('ticketFinishLoad');
+		}
 	}
 
 	private async askTicket() {
