@@ -116,7 +116,7 @@ CREATE TABLE `inviteCodes` (
   `maxUses` int(11) DEFAULT NULL,
   `uses` int(11) DEFAULT NULL,
   `temporary` tinyint(1) DEFAULT NULL,
-  `clearedAmount` int(11) NOT NULL DEFAULT '0',
+  `clearedAmount` int(11) DEFAULT '0' NULL,
   `isVanity` tinyint(4) NOT NULL DEFAULT '0',
   `isWidget` tinyint(4) NOT NULL DEFAULT '0',
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
