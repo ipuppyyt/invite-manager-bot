@@ -46,7 +46,7 @@
 				},
 				"description": "Yeni bir rütbe ekle."
 			},
-			"updated": "Rütbe {{{ role }}} güncellendi: Şimdi {{ invites }} davete ihtiyacı var ve açıklaması: {{ description }}"
+			"updated": "Rütbe {{{ role }}} güncellendi: Artık {{ invites }} davet ile alınabilecek ve açıklaması: {{ description }}"
 		},
 		"ban": {
 			"canNotBan": "Bu kullanıcıyı yasaklayamam.",
@@ -331,10 +331,10 @@
 				},
 				"description": "Bu sunucudaki çeşitli istatistikler hakkındaki grafikleri gösterir."
 			},
-			"minDays": "En az {{{ days }}} gün seçmelisiniz !",
-			"maxDays": "En fazla {{{ days }}} gün seçebilirsiniz !",
+			"minDays": "En az {{{ days }}} gün seçmelisiniz!",
+			"maxDays": "En fazla {{{ days }}} gün seçebilirsiniz!",
 			"joinsAndLeaves": {
-				"title": "Katılan ve ayrılan kullanıcılar",
+				"title": "Katılan ve ayrılan üyeler",
 				"text": "Bu grafik sunucunuza katılan ve sunucunuzdan ayrılan kullanıcıların sayısını göstermektedir."
 			}
 		},
@@ -349,7 +349,7 @@
 				"title": "Açıklama"
 			},
 			"links": "Linkler",
-			"missingPermissions": "Botta şu anda aşağıdaki izinler eksik: {{{ value }}}",
+			"missingPermissions": "Botun çalışması için eksik olan yetkiler: {{{ value }}}",
 			"self": {
 				"args": {
 					"command": "Hakkında ayrıntılı bilgi alma komutu."
@@ -364,9 +364,9 @@
 		"info": {
 			"bonusInvites": {
 				"details": "Detaylar için {{{ cmd }}} kullan.",
-				"entry": "{{ amount }} from {{{ creator }}} - {{ date }}, reason: {{ reason }}",
+				"entry": "{{{ creator }}} Tarafından {{ amount }} Eklendi - {{ date }}, Sebep: {{ reason }}",
 				"more": "Plus another {{ amount }} more bonus invites",
-				"none": "Bu üye şu ana kadar hiç bonus almadı",
+				"none": "Bu üye şu ana kadar hiç bonus davet almadı",
 				"noReason": "Sebep yok",
 				"title": "Bonus davet"
 			},
@@ -397,15 +397,15 @@
 					"text": "{{ total }} kere {{ time }}, davet eden:"
 				},
 				"more": "Ayrıca başka {{ amount }} katılım daha",
-				"title": "Katılan",
-				"unknown": "bilinmeyen (bu sadece yeni üyeler için çalışır)"
+				"title": "Sunucuya Katıldığı Kişi",
+				"unknown": "Bilinmiyor (Bu sadece yeni üyeler için çalışır)"
 			},
 			"lastJoined": {
 				"notInGuild": "Kullanıcı sunucunuzda değil",
-				"title": "Son katılan"
+				"title": "Son katılma"
 			},
 			"regularInvites": {
-				"entry": "{{ code }} kodu ile {{ uses }} kullanım  - oluşturulma tarihi {{ createdAt }}",
+				"entry": "{{ code }} kodu ile {{ uses }} kaytılım  - oluşturulma tarihi {{ createdAt }}",
 				"more": "Plus another {{ amount }} more invite codes",
 				"none": "Bu üye şu ana kadar kimseyi davet etmedi",
 				"title": "Düzenli davetler"
@@ -510,12 +510,12 @@
 			"canNotClear": "The config setting **{{ key }}** can not be cleared. You can use `inviteCodeConfig {{ key }} default` to reset it to the default value."
 		},
 		"inviteCodes": {
-			"dmSent": "Özel mesajlarından tüm davet kodlarını gönderdim.",
+			"dmSent": "Özel mesajlarına tüm davet kodlarını gönderdim.",
 			"noCodes": "Etkin davet kodunuz yok. Lütfen sunucunun moderatörlerine nasıl bir tane oluşturacağınızı sorun.",
 			"permanent": {
-				"entry": "**Uses**: {{ uses }}\n**Max Age**: {{ maxAge }}\r\n**Max Uses**: {{ maxUses }}\r\n**Channel**: {{{ channel }}}",
+				"entry": "**Kullanım Sayısı**: {{ uses }}\n**Kullanım Ömrü**: {{ maxAge }}\r\n**Maksimum Kullanım**: {{ maxUses }}\r\n**Davet Kodunun Oluşturulduğu Kanal**: {{{ channel }}}",
 				"text": "Bu davetlerin süresi dolmaz.",
-				"title": "kalıcı"
+				"title": "Kalıcı Davetler"
 			},
 			"recommendedCode": {
 				"none": "Lütfen kalıcı bir davet kodu oluşturun.",
@@ -525,12 +525,12 @@
 				"description": "Tüm davet kodlarınızın bir listesini alın"
 			},
 			"temporary": {
-				"entry": "**Kullanım**: {{ uses }}\n**Maksimum Yaş**: {{ maxAge }}\r\n**Maksimum Kullanım**: {{ maxUses }}\r\n**Kanal**: {{{ channel }}}\r\n**Sona Erme**: {{ expires }}",
+				"entry": "**Kullanım Sayısı**: {{ uses }}\n**Kullanım Ömrü**: {{ maxAge }}\r\n**Maksimum Kullanım**: {{ maxUses }}\r\n**Davet Kodunun Oluşturulduğu Kanal**: {{{ channel }}}\r\n**Sona Ermesine Kalan**: {{ expires }}",
 				"text": "Bu davetlerin süresi belirli bir süre sonra dolar.",
 				"title": "Geçici"
 			},
 			"title": "Sunucuda aşağıdaki kodlar var {{ guild }}",
-			"error": "Davet kodlarınızı gönderemedim, bu sunucudan özel mesajlara izin verdiğinizden emin olun."
+			"error": "Davet kodlarını gönderemedim, bu sunucudaki özel mesajlarını kapatmış olabilirsin."
 		},
 		"inviteDetails": {
 			"entry": "{{{ code }}} kodu ile **{{ uses }}** kullanım - oluşturulma tarihi **{{ createdAt }}**",
@@ -552,8 +552,8 @@
 				"self": "Tebrikler, şuan en yüksek rütbedesin!"
 			},
 			"nextRank": {
-				"other": "{{{ target }}}'ın **{{ nextRankName }}** seviyesine ulaşması için **{{ nextRankPointsDiff }} davet daga yapması lazım!",
-				"self": "** {{ nextRankName }}** rütbesine ulaşman için ** {{ nextRankPointsDiff }} ** davet daha gerekiyor!"
+				"other": "{{{ target }}}'ın **{{ nextRankName }}** rütbesine ulaşması için **{{ nextRankPointsDiff }} davet daha yapması gerekiyor!",
+				"self": "** {{ nextRankName }}** rütbesine ulaşman için **{{ nextRankPointsDiff }}** davet daha yapman gerekiyor!"
 			},
 			"self": {
 				"args": {
@@ -577,24 +577,24 @@
 		},
 		"leaderboard": {
 			"col": {
-				"change": "Değişiklik",
+				"change": "Change",
 				"custom": "B",
-				"fake": "S",
-				"leave": "A",
-				"name": "İsim",
-				"regular": "N",
+				"fake": "F",
+				"leave": "L",
+				"name": "Name",
+				"regular": "R",
 				"total": "T"
 			},
 			"comparedTo": "ile karşılaştırıldığında değişiklikler {{{ karşı }}}",
-			"entry": "**{{ pos }}** **{{{ name }}}** - **{{ total }}** davet (**{{ regular }}** normal, **{{ custom }}** bonus, **{{ fake }}** sahte, **{{ leave }}** ayrılma)",
+			"entry": "**{{ pos }}** **{{{ name }}}** - **{{ total }}** davet (**{{ regular }}** düzenli, **{{ custom }}** bonus, **{{ fake }}** sahte, **{{ leave }}** ayrılan)",
 			"from": "Şu tarihten beri sayılıyor: {{{ from }}}",
 			"invalidDate": "Geçersiz tarih: {{ date }}",
-			"legend": "`T` = Toplam\n`N` = Normal\r\n`B` = Bonus\r\n`S` = Sahte \r\n`A` = Ayrılma",
+			"legend": "`T` = Toplam\n`R` = Düzenli\r\n`B` = Bonus\r\n`F` = Sahte\r\n`L` = Ayrılan",
 			"noInvites": "Davet yok!",
 			"self": {
 				"args": {
 					"date": "The date (& time) for which the leaderboard is shown.",
-					"duration": "Skor tablosunun hesaplanacağı süre.",
+					"duration": "Davet tablosunun hesaplanacağı süre.",
 					"page": "Afiş almak için hangi sayfa."
 				},
 				"description": "En çok davet edilen üyeleri göster.",
@@ -712,7 +712,7 @@
 		"permissions": {
 			"added": "{{{ role }}} rolündeki kişiler artık {{{ cmds }}} komutunu kullanabilir.",
 			"adminOnly": "Bu komut sadece Adminler tarafından kullanılabilir",
-			"adminsCanUseAll": "*Sunucu Yöneticileri* 'nin *her zaman*  *tüm* komutları kullanabileceğini unutmayın",
+			"adminsCanUseAll": "*Sunucu Yöneticileri*'nin *her zaman* *tüm* komutları kullanabileceğini unutmayın",
 			"everyone": "Bu komut herkes tarafından kullanılabilir",
 			"removed": "{{{ role }}} rolündeki kişiler artık {{{ cmds }}} komutunu kullanamaz.",
 			"self": {
@@ -741,7 +741,7 @@
 				"customBot": "Özel bir bot kullanıyorsunuz. Özel botlar her zaman premiumludur.",
 				"done": "Bu sunucu için Premium başarıyla etkinleştirildi.",
 				"noGuild": "Bu komutu bir sunucunun içinde çalıştırmalısınız.",
-				"noSubscription": "Aktif bir premium aboneliğiniz yok.\n\nDaha fazla bilgi için {{{ cmd }}} kullanın.",
+				"noSubscription": "Aktif bir premium aboneliğiniz yok.\n\nDaha fazla bilgi için {{{ cmd }}} komutunu kullanın.",
 				"title": "Bu sunucuda premium'u etkinleştir",
 				"permissions": "Bu komutu bu sunucuda kullanmak için `Sunucuyu Yönet` izinine ihtiyacınız vardır.",
 				"maxGuilds": "Maksimum sunucu sayısı için premiumu etkinleştirdiniz."
@@ -763,7 +763,7 @@
 			},
 			"feature": {
 				"embeds": {
-					"text": "Katılma/Ayrılma mesajları işleminizde bir embed kullanabilir ve çok daha iyi görünen mesajlar bırakabilirsiniz.\n[Buradaki bazı örneklere bakın] ({{{ link }}})",
+					"text": "Katılma/Ayrılma mesajları işleminizde bir embed kullanabilir ve çok daha iyi görünen mesajlar yapabilirsinşz.\n[Buradaki bazı örneklere bakın] ({{{ link }}})",
 					"title": "Premium Özellik: Katılma/Ayrılma mesajlarına embed ekleyin."
 				},
 				"export": {
@@ -776,7 +776,7 @@
 				},
 				"servers": {
 					"text": "Premium olur olmaz, seçtiğiniz 99 sunucuya kadar etkinleştirebilirsiniz ve istediğiniz zaman bu 99 sunucuyu değiştirebilirsiniz.",
-					"title": "Premium Özellik: 99 sunucuya kadar"
+					"title": "Premium Özelliği: 99 Sunucuya Kadar Kullanılabilir"
 				}
 			},
 			"noPremium": {
@@ -793,7 +793,7 @@
 				"args": {
 					"action": "Gerçekleştirilecek eylem. Premium bilgi için yok. Premium durumunuzu kontrol etmek için ` check`. bu sunucu için priminizi kullanmak için `activate` ."
 				},
-				"description": "InviteLogger'ın premium versiyonu hakkında bilgi edinmek."
+				"description": "InviteLogger'ın premium versiyonu hakkında bilgi edin."
 			}
 		},
 		"punishmentConfig": {
@@ -821,7 +821,7 @@
 				},
 				"description": "Bir kanaldaki mesajları temizleme"
 			},
-			"text": "{{ amount }} mesaj silindi.\nBu mesaj 5 saniye içinde silinecek.",
+			"text": "{{ amount }} mesaj silindi. \nBu mesaj 5 saniye içinde silinecek.",
 			"title": "Silinmiş mesajlar"
 		},
 		"purgeUntil": {
@@ -834,8 +834,8 @@
 				},
 				"description": "Bir kanaldaki mesajları belirtilen mesaja kadar temizleyin."
 			},
-			"text": "{{ amount }} mesaj silindi.\nBu mesaj 5 saniye içinde silinecek.",
-			"title": "Mesajları sil",
+			"text": "{{ amount }} mesaj silindi. \nBu mesaj 5 saniye içinde silinecek.",
+			"title": "Mesajları silme",
 			"inProgress": "Temizleniyor..."
 		},
 		"ranks": {
@@ -974,18 +974,18 @@
 		},
 		"support": {
 			"self": {
-				"description": "Destek sunucumuza katılmak için davet bağlantısı alın."
+				"description": "Destek sunucumuza katılmak için davet bağlantısını kullan."
 			},
 			"server": "Destek Sunucusu"
 		},
 		"tryPremium": {
 			"alreadyUsed": "Ücretsiz premium denemenizi zaten kullandınız! Bu botu beğendiyseniz, lütfen premium almayı düşünün.\n ",
-			"currentlyActive": "Şu anda aktif bir premium aboneliğiniz var!",
+			"currentlyActive": "Şu anda aktif bir premium aboneliğin var!",
 			"prompt": "Lütfen **yes** veya **no** yazarak cevap verin.\n ",
-			"timedOut": "The request has timed out, please try again.",
+			"timedOut": "Komut zaman aşımına uğradı, lütfen tekrar deneyiniz.",
 			"canceled": "Premium deneme özelliği red edildi..",
 			"self": {
-				"description": "InviteManager'ın premium sürümünü sınırlı bir süre için ücretsiz deneyin."
+				"description": "InviteLogger'ın premium sürümünü sınırlı bir süre için ücretsiz deneyin."
 			},
 			"started": "Ücretsiz premium denemesi başlatıldı! `{{ prefix }}premium` komutu ile ne kadar deneme sürenizin kaldığına bakın.",
 			"text": "{{ duration }} için premium özelliklerimizi deneyebilirsiniz. Bunu sadece bir kez yapabilirsiniz. Şimdi test etmek ister misiniz?",
@@ -1200,7 +1200,7 @@
 	},
 	"messages": {
 		"joinUnknownInviter": "<@{{ id }}> sunucuya nasıl katıldığını anlayamıyorum.",
-		"joinVanityUrl": "<@{{ id }}> özel bir davetle sunucuya katıldı. (discord.gg/)",
+		"joinVanityUrl": "<@{{ id }}> sunucunun özel daveti ile katıldı.",
 		"leaveUnknownInviter": "{{ tag }} sunucudan ayrıldı, ancak onu kimin davet ettiğini bulamadım",
 		"joinServerWidget": "Kullanıcı bir sunucu widget'ı kullanarak katıldı.",
 		"joinLeaveEmbedsIsPremium": "Using an embed as your join/leave message is a premium feature. Premium does not seem to be active on this server. Please contact us to learn more about how to purchase premium."
@@ -1221,17 +1221,17 @@
 		}
 	},
 	"permissions": {
-		"adminOnly": "Bu komutu kullanma izniniz yok.\nBu komutu yalnızca ** Yönetici ** kullanabilir.",
-		"createInstantInvite": "Create Instant Invite",
+		"adminOnly": "Bu komutu kullanma yetkinşx yok.\nBu komutu yalnızca **Yönetici** yetkisindekiler kullanabilir.",
+		"createInstantInvite": "Davet Oluştur",
 		"manageGuild": "Sunucuyu Yönet",
 		"manageRoles": "Rolleri Yönet",
 		"premiumOnly": "Bu komut yalnızca premium aboneler için geçerlidir!",
-		"rateLimit": "Yavaşla! Lütfen {{ cooldown }} saniye bekleyin ve tekrar deneyin.",
-		"role": "Bu komutu kullanmak için yetkin yok\nAşağıdaki rollerden birine ihtiyacınız var: {{{roller}}}",
+		"rateLimit": "Çok Hızlısın Yavaşla! Lütfen {{ cooldown }} saniye bekleyin ve tekrar deneyin.",
+		"role": "Bu komutu kullanmak için yetkin yok. \nAşağıdaki rollerden birine ihtiyacın var: {{{roller}}}",
 		"viewAuditLogs": "Denetim Kaydını Görüntüle",
 		"manageMessages": "Mesajları Yönet",
-		"readMessageHistory": "Read Message History",
-		"missing": "InviteLogger'da {{{ channel }}} içindeki {{{ permissions }}} izinleri eksik",
+		"readMessageHistory": "Mesaj Geçmişini Oku",
+		"missing": "InviteLogger'da {{{ channel }}}'daki {{{ permissions }}} yetkisi eksik",
 		"banMembers": "Üyeleri Yasakla",
 		"kickMembers": "Üyeleri At",
 		"memberError": "Could not get member"
@@ -1520,7 +1520,7 @@
 					"title": "Yasaklı Kelimeler."
 				},
 				"caps": {
-					"description": "Prevent spamming with CAPS LOCK ON",
+					"description": "Caps Lock Açık Mesajları Engelle",
 					"title": "Büyük Harfler"
 				},
 				"captcha": {
@@ -1592,11 +1592,11 @@
 			"description": "Botun komutları görmezden geleceği kanallar."
 		},
 		"joinMessage": {
-			"description": "Birisi sunucuya katıldığında gönderilen mesaj.",
+			"description": "Birisi sunucuya katıldığında gönderilecek mesaj.",
 			"title": "Mesaj"
 		},
 		"joinMessageChannel": {
-			"description": "Katılmadaki iletinin gönderildiği kanal",
+			"description": "Birisi sunucuya katıldığında mesajın gönderilceği kanal",
 			"title": "Mesaj Kanalı"
 		},
 		"lang": {
@@ -1604,7 +1604,7 @@
 			"title": "Dil"
 		},
 		"leaderboardStyle": {
-			"description": "Skor tablosunun görüntü stili.",
+			"description": "Davet tablosunun görüntü stili.",
 			"title": "Stil"
 		},
 		"leaveMessage": {
@@ -1612,7 +1612,7 @@
 			"title": "Mesaj"
 		},
 		"leaveMessageChannel": {
-			"description": "Ayrılma mesajının gönderildiği kanal.",
+			"description": "Birisi sunucufan çıktığında gönderilcek mesaj kanalı.",
 			"title": "Mesaj Kanalı"
 		},
 		"logChannel": {
@@ -1652,15 +1652,15 @@
 			"title": "Prefix"
 		},
 		"rankAnnouncementChannel": {
-			"description": "Yeni bir rütbe alan kullanıcıların duyurulduğu kanal.",
-			"title": "Duyuru Kanalı"
+			"description": "Yeni bir rütbe alan kazanan kullanıcılarının bildiri mesajının atıldığı kanal.",
+			"title": "Rütbe Kazanma Bildirisi Kanalı"
 		},
 		"rankAnnouncementMessage": {
 			"description": "Bir kullanıcı yeni bir rütbe aldığında gönderilen mesaj.",
-			"title": "Duyuru Mesajı"
+			"title": "Rütbe Kazanma Bildirisi Mesajı"
 		},
 		"rankAssignmentStyle": {
-			"description": "Ranklar kullanıcılara nasıl ödüllendirilir.",
+			"description": "Rütbelerin kullanıcılara ödüllendirilme şekli.",
 			"title": "Assignment Style"
 		},
 		"musicVolume": {
@@ -1696,8 +1696,8 @@
 			"description": "Music platforms that are disabled and cannot be used to play music."
 		},
 		"joinRoles": {
-			"title": "Katılma rolleri",
-			"description": "Katılırken tüm üyelere atanan roller."
+			"title": "Otorol",
+			"description": "Katılan tüm üyelere verilen roller."
 		}
 	},
 	"strikeConfig": {
@@ -1770,8 +1770,8 @@
 		"voiceChannelRequired": "Bu komutu kullanmak için ses kanalında olmanız gerekir!"
 	},
 	"roles": {
-		"shouldHave": "Bu kullanıcı {{{ shouldHave }}} rollerine sahip olmalı, ama ben onları atayamam.",
-		"shouldNotHave": "Bu kullanıcı  {{{ shouldNotHave }}} rolüne sahip olmamalı, ama onları alamam.",
+		"shouldHave": "Bu kullanıcı {{{ shouldHave }}} rollerine sahip olmalı, ama benim verme yetkim yok.",
+		"shouldNotHave": "Bu kullanıcı  {{{ shouldNotHave }}} rolüne sahip olmamalı, ama benim verme alma yok.",
 		"dangerous": "{{{ dangerous }}} Rolleri çok önemlidir çünki özel yetkiler içerir."
 	}
 }
