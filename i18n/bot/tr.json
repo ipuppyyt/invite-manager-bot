@@ -405,7 +405,7 @@
 				"title": "Son katılma"
 			},
 			"regularInvites": {
-				"entry": "{{ code }} kodu ile {{ uses }} kaytılım  - oluşturulma tarihi {{ createdAt }}",
+				"entry": "{{ code }} kodu ile {{ uses }} katılım  - oluşturulma tarihi {{ createdAt }}",
 				"more": "Plus another {{ amount }} more invite codes",
 				"none": "Bu üye şu ana kadar kimseyi davet etmedi",
 				"title": "Düzenli davetler"
