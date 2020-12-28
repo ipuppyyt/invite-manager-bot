@@ -135,6 +135,7 @@ async function loadBotController() {
 		client.on('ready', () => {
 			console.log(`Logged in as ${client.user.tag}!`);
 			channel = client.channels.cache.get(config.controller.incidentChannel);
+			resolve();
 		});
 
 		client.on('message', (message) => {
