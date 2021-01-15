@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Client, Embed, Guild, Member, Message, TextChannel } from 'eris';
+import Eris, { Client, Embed, Guild, Member, Message, TextChannel } from 'eris';
 import i18n from 'i18n';
 import moment, { Moment } from 'moment';
 
@@ -603,26 +603,21 @@ export class IMClient extends Client {
 	}
 
 	public async setActivity() {
-		const status = this.settings.activityStatus;
+		const status: Eris.Status = this.config.bot.activity.status;
 
-		if (!this.settings.activityEnabled) {
-			this.editStatus(status);
-			return;
-		}
-
-		const type =
-			this.settings.activityType === 'playing'
+		const type: Eris.BotActivityType =
+			this.config.bot.activity.type === 'playing'
 				? 0
-				: this.settings.activityType === 'streaming'
+				: this.config.bot.activity.type === 'streaming'
 				? 1
-				: this.settings.activityType === 'listening'
+				: this.config.bot.activity.type === 'listening'
 				? 2
-				: this.settings.activityType === 'watching'
+				: this.config.bot.activity.type === 'watching'
 				? 3
 				: 0;
 
-		const name = this.settings.activityMessage || this.config.bot.status;
-		const url = this.settings.activityUrl;
+		const name: string = this.config.bot.activity.message + ` | s${this.shardId}`;
+		const url: string = this.config.bot.activity.url;
 
 		this.editStatus(status, { name, type, url });
 	}

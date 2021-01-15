@@ -5,7 +5,12 @@
 		"dbPrefix": "im",
 		"type": "regular",
 		"embedColor": "00cbeb",
-		"status": "invitelogger.me !",
+		"activity": {
+			"status": "online",
+			"message": "invitelogger.me !",
+			"type": "streaming",
+			"url": "https://www.twitch.tv/arftnl"
+		},
 		"ids": {
 			"regular": "",
 			"pro": ""
