@@ -42,6 +42,32 @@ export class SocketioService extends IMService {
 			this.socket.on('disconnect', function (data: any) {
 				this.connected = false;
 			});
+
+			this.socket.on('classicServerBan', async (data: { id: string; reason: string }) => {
+				let dbGuild = await this.client.db.getGuild(data.id);
+
+				this.client.cache.guilds;
+				console.log(dbGuild);
+				if (!dbGuild) return;
+
+				dbGuild.banReason = data.reason;
+				await this.client.db.saveGuild(dbGuild);
+
+				let guild = this.client.guilds.get(data.id);
+				const dmChannel = await this.client.getDMChannel(guild.ownerID);
+				await dmChannel
+					.createMessage(
+						`Hi! Thanks for using me to your server \`${guild.name}\`!\n\n` +
+							'It looks like this guild was banned from using the Invitelogger classic bot.\n' +
+							'If you believe this was a mistake please contact staff on our support server.\n\n' +
+							`${this.client.config.bot.links.support}\n\n` +
+							'I will be leaving your server now, thanks for having me!\n' +
+							`Reason: \`${dbGuild.banReason}\``
+					)
+					.catch(() => undefined);
+				await guild.leave();
+			});
+
 			/*
 			this.socket.on('yggdrasilLoad', (data: any) => {
 				if (this.waitingForTicket) {

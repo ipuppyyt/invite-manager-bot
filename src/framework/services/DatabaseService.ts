@@ -234,6 +234,16 @@ export class DatabaseService extends IMService {
 		);
 	}
 
+	public async saveGuild(guild: Partial<Guild>) {
+		await this.insertOrUpdate(
+			TABLE.guilds,
+			['id', 'name', 'icon', 'memberCount', 'banReason', 'deletedAt'],
+			['name', 'icon', 'memberCount', 'banReason', 'deletedAt'],
+			[guild],
+			(g) => g.id
+		);
+	}
+
 	// ------------------
 	//   Guild settings
 	// ------------------
