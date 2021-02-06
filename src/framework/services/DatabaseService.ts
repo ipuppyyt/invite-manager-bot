@@ -227,8 +227,8 @@ export class DatabaseService extends IMService {
 	public async saveGuilds(guilds: Partial<Guild>[]) {
 		await this.insertOrUpdate(
 			TABLE.guilds,
-			['id', 'name', 'icon', 'memberCount', 'banReason', 'deletedAt'],
-			['name', 'icon', 'memberCount', 'banReason', 'deletedAt'],
+			['id', 'name', 'icon', 'memberCount', 'deletedAt'],
+			['name', 'icon', 'memberCount', 'deletedAt'],
 			guilds,
 			(g) => g.id
 		);

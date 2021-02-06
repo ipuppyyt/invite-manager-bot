@@ -278,6 +278,8 @@ export class IMClient extends Client {
 		// Init all caches
 		await Promise.all(Object.values(this.cache).map((c) => c.init()));
 
+		const bannedGuilds = await this.db.getBannedGuilds(this.guilds.map((g) => g.id));
+
 		// Insert guilds into db
 		await this.db.saveGuilds(
 			this.guilds.map((g) => ({
@@ -285,12 +287,9 @@ export class IMClient extends Client {
 				name: g.name,
 				icon: g.iconURL,
 				memberCount: g.memberCount,
-				deletedAt: null,
-				banReason: null
+				deletedAt: null
 			}))
 		);
-
-		const bannedGuilds = await this.db.getBannedGuilds(this.guilds.map((g) => g.id));
 
 		// Do some checks for all guilds
 		this.guilds.forEach(async (guild) => {
@@ -302,10 +301,11 @@ export class IMClient extends Client {
 				await dmChannel
 					.createMessage(
 						`Hi! Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
-							'It looks like this guild was banned from using the InviteManager bot.\n' +
+							'It looks like this guild was banned from using the Invitelogger classic bot.\n' +
 							'If you believe this was a mistake please contact staff on our support server.\n\n' +
 							`${this.config.bot.links.support}\n\n` +
-							'I will be leaving your server now, thanks for having me!'
+							'I will be leaving your server now, thanks for having me!\n' +
+							`Reason: \`${bannedGuild.banReason}\``
 					)
 					.catch(() => undefined);
 				await guild.leave();
@@ -407,10 +407,11 @@ export class IMClient extends Client {
 			await channel
 				.createMessage(
 					`Hi! Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
-						'It looks like this guild was banned from using the InviteManager bot.\n' +
+						'It looks like this guild was banned from using the Invitelogger classic bot.\n' +
 						'If you believe this was a mistake please contact staff on our support server.\n\n' +
 						`${this.config.bot.links.support}\n\n` +
-						'I will be leaving your server soon, thanks for having me!'
+						'I will be leaving your server now, thanks for having me!\n' +
+						`Reason: \`${dbGuild.banReason}\``
 				)
 				.catch(() => undefined);
 			await guild.leave();
