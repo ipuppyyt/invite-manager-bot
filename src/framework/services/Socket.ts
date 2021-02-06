@@ -68,6 +68,17 @@ export class SocketioService extends IMService {
 				await guild.leave();
 			});
 
+			this.socket.on('classicServerUnban', async (data: { id: string; reason: string }) => {
+				let dbGuild = await this.client.db.getGuild(data.id);
+
+				this.client.cache.guilds;
+				console.log(dbGuild);
+				if (!dbGuild) return;
+
+				dbGuild.banReason = null;
+				await this.client.db.saveGuild(dbGuild);
+			});
+
 			/*
 			this.socket.on('yggdrasilLoad', (data: any) => {
 				if (this.waitingForTicket) {
