@@ -37,7 +37,7 @@ export class SocketioService extends IMService {
 			this.socket.on('connected', (data: any) => {
 				console.log('####################### Socket connected #######################');
 				this.connected = true;
-				resolve();
+				resolve(true);
 			});
 			this.socket.on('disconnect', function (data: any) {
 				this.connected = false;
@@ -80,13 +80,13 @@ export class SocketioService extends IMService {
 		return new Promise(async (resolve, reject) => {
 			if (this.canceled) {
 				console.log('SOCKET DISABLED, FORCE ALLOW TICKETS');
-				resolve();
+				resolve(false);
 			} else {
 				if (this.connected) {
 					console.log('TICKET ASKED');
 					await this.askTicket();
 
-					resolve();
+					resolve(false);
 				} else {
 					console.log('NO SOCKET TO ASK TICKET');
 
@@ -110,7 +110,7 @@ export class SocketioService extends IMService {
 			this.socket.on('sendTicket', (ticket: any) => {
 				console.log('TICKET RECIEVED');
 				this.waitingForTicket = false;
-				resolve();
+				resolve(true);
 			});
 		});
 	}
