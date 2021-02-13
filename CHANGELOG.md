@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+
+### [9.8.3](https://github.com/chaun14/invite-manager-bot/compare/v9.8.2...v9.8.3) (2021-02-13)
+
+### Features
+
+- **premium:** Removal of all premium systems to avoid scam using it ([f644f263](https://github.com/chaun14/invite-manager-bot/commit/d6c35d183c0a5b75a18dfbdd58999de8e4f5d4c9))
+- **config:** Allow a better status customization from config ([1904203a](https://github.com/chaun14/invite-manager-bot/commit/1904203a110c7f955b19b54c787d28f033c70bf8))
+- **translations:** Turkish translations rework ([d4168eea](https://github.com/chaun14/invite-manager-bot/commit/d4168eea6851d800705c8f6edecae38bc3e3d75e))
+
+### Bug Fixes
+
+- **core:** Server ban system is working again and now use manager websocket ([d6c35d18](https://github.com/chaun14/invite-manager-bot/commit/d6c35d183c0a5b75a18dfbdd58999de8e4f5d4c9) [9082023b](https://github.com/chaun14/invite-manager-bot/commit/9082023b992246d940f28214bb8390e0b3ba31d9) [f8d4dd47](https://github.com/chaun14/invite-manager-bot/commit/f8d4dd47df058ca48361e1480211a85a5d6def48))
+- **controller:** Fixed a bug which cause the queue being not treated when running without socket ([49c16000](https://github.com/chaun14/invite-manager-bot/commit/49c160006805b3d8ff969d29915c8745911ec700))
+
 ### [9.8.2](https://github.com/chaun14/invite-manager-bot/compare/v9.8.1...v9.8.2) (2020-11-25)
 
 ### Features
