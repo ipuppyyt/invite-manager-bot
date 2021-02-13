@@ -248,13 +248,6 @@ export class CommandsService extends IMService {
 			lastCall.last = now;
 		}
 
-		const isPremium = guild ? await this.client.cache.premium.get(guild.id) : false;
-
-		if (!isPremium && cmd.premiumOnly) {
-			await this.client.msg.sendReply(message, t('permissions.premiumOnly'));
-			return;
-		}
-
 		let me: Member = undefined;
 
 		// Guild only stuff
@@ -321,8 +314,7 @@ export class CommandsService extends IMService {
 			guild,
 			me,
 			t,
-			settings: sets,
-			isPremium
+			settings: sets
 		};
 
 		// Format arguments

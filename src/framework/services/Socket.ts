@@ -175,7 +175,6 @@ export class SocketioService extends IMService {
 			roles: roleCount,
 			ranks: this.client.cache.ranks.getSize(),
 			settings: this.client.cache.guilds.getSize(),
-			premium: this.client.cache.premium.getSize(),
 			permissions: this.client.cache.permissions.getSize(),
 			strikes: this.client.cache.strikes.getSize(),
 			punishments: this.client.cache.punishments.getSize(),

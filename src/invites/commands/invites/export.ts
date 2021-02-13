@@ -2,8 +2,8 @@ import { Message } from 'eris';
 
 import { IMClient } from '../../../client';
 import { BotCommand, CommandGroup } from '../../../types';
-import { EnumResolver } from '../../resolvers';
-import { Command, Context } from '../Command';
+import { EnumResolver } from '../../../framework/resolvers';
+import { Command, Context } from '../../../framework/commands/Command';
 
 enum ExportType {
 	leaderboard = 'leaderboard'
@@ -21,20 +21,15 @@ export default class extends Command {
 					required: true
 				}
 			],
-			group: CommandGroup.Premium,
+			group: CommandGroup.Invites,
 			guildOnly: true,
 			defaultAdminOnly: true,
-			premiumOnly: true,
+			premiumOnly: false,
 			extraExamples: ['!export leaderboard']
 		});
 	}
 
-	public async action(
-		message: Message,
-		[type]: [ExportType],
-		flags: {},
-		{ guild, t, isPremium }: Context
-	): Promise<any> {
+	public async action(message: Message, [type]: [ExportType], flags: {}, { guild, t }: Context): Promise<any> {
 		const embed = this.createEmbed({
 			title: t('cmd.export.title')
 		});
@@ -67,7 +62,7 @@ export default class extends Command {
 					return message.channel
 						.createMessage('', {
 							file: Buffer.from(csv),
-							name: 'InviteManagerExport.csv'
+							name: 'InviteLoggerClassic.csv'
 						})
 						.then(() => msg.delete().catch(() => undefined))
 						.catch(() => undefined);

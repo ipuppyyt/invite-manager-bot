@@ -63,7 +63,6 @@ export type Context = {
 	me: Member;
 	t: TranslateFunc;
 	settings: GuildSettingsObject;
-	isPremium: boolean;
 };
 
 export abstract class Command {

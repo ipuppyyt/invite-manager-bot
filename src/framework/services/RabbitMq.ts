@@ -175,7 +175,7 @@ export class RabbitMqService extends IMService {
 
 					// Save the ticket so we can return it to the queue when our startup is done
 					this.startTicket = msg;
-					resolve();
+					resolve(true);
 				},
 				{ noAck: false, priority: this.client.hasStarted ? 1 : 0 }
 			);
@@ -335,13 +335,10 @@ export class RabbitMqService extends IMService {
 
 				const owner = await this.client.getRESTUser(guild.ownerID).catch(() => undefined);
 
-				const premium = await this.client.cache.premium.get(guildId);
-
 				const disabled = this.client.disabledGuilds.has(guildId);
 
 				await sendResponse({
 					owner,
-					premium,
 					disabled,
 					settings: sets,
 					perms,
@@ -447,7 +444,6 @@ export class RabbitMqService extends IMService {
 			roles: roleCount,
 			ranks: this.client.cache.ranks.getSize(),
 			settings: this.client.cache.guilds.getSize(),
-			premium: this.client.cache.premium.getSize(),
 			permissions: this.client.cache.permissions.getSize(),
 			strikes: this.client.cache.strikes.getSize(),
 			punishments: this.client.cache.punishments.getSize(),

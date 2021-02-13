@@ -7,14 +7,12 @@ import { Cache } from './framework/cache/Cache';
 import { GuildSettingsCache } from './framework/cache/GuildSettingsCache';
 import { MemberSettingsCache } from './framework/cache/MemberSettingsCache';
 import { PermissionsCache } from './framework/cache/PermissionsCache';
-import { PremiumCache } from './framework/cache/PremiumCache';
 import { GuildSettingsKey } from './framework/models/GuildSetting';
 import { LogAction } from './framework/models/Log';
 import { IMRequestHandler } from './framework/RequestHandler';
 import { CommandsService } from './framework/services/Commands';
 import { DatabaseService } from './framework/services/DatabaseService';
 import { MessagingService } from './framework/services/Messaging';
-import { PremiumService } from './framework/services/PremiumService';
 import { RabbitMqService } from './framework/services/RabbitMq';
 import { SocketioService } from './framework/services/Socket';
 import { SchedulerService } from './framework/services/Scheduler';
@@ -73,7 +71,6 @@ export interface ClientCacheObject {
 	ranks: RanksCache;
 	members: MemberSettingsCache;
 	permissions: PermissionsCache;
-	premium: PremiumCache;
 	punishments: PunishmentCache;
 	guilds: GuildSettingsCache;
 	strikes: StrikesCache;
@@ -93,7 +90,6 @@ export interface ClientServiceObject {
 	captcha: CaptchaService;
 	invites: InvitesService;
 	tracking: TrackingService;
-	premium: PremiumService;
 	management: ManagementService;
 }
 
@@ -125,7 +121,6 @@ export class IMClient extends Client {
 	public captcha: CaptchaService;
 	public invs: InvitesService;
 	public tracking: TrackingService;
-	public premium: PremiumService;
 	public management: ManagementService;
 	// End service shortcuts
 
@@ -195,7 +190,6 @@ export class IMClient extends Client {
 			captcha: new CaptchaService(this),
 			invites: new InvitesService(this),
 			tracking: new TrackingService(this),
-			premium: new PremiumService(this),
 			management: new ManagementService(this)
 		};
 		this.startingServices = Object.values(this.service);
@@ -207,7 +201,6 @@ export class IMClient extends Client {
 			ranks: new RanksCache(this),
 			members: new MemberSettingsCache(this),
 			permissions: new PermissionsCache(this),
-			premium: new PremiumCache(this),
 			punishments: new PunishmentCache(this),
 			guilds: new GuildSettingsCache(this),
 			strikes: new StrikesCache(this),
@@ -224,7 +217,6 @@ export class IMClient extends Client {
 		this.captcha = this.service.captcha;
 		this.invs = this.service.invites;
 		this.tracking = this.service.tracking;
-		this.premium = this.service.premium;
 		this.management = this.service.management;
 
 		this.on('ready', this.onClientReady);
@@ -311,57 +303,6 @@ export class IMClient extends Client {
 				await guild.leave();
 				return;
 			}
-
-			switch (this.type) {
-				case BotType.regular:
-					if (guild.members.has(this.config.bot.ids.pro)) {
-						// Otherwise disable the guild if the pro bot is in it
-						this.disabledGuilds.add(guild.id);
-					}
-					break;
-
-				case BotType.pro:
-					// If this is the pro bot then leave any guilds that aren't pro
-					let premium = await this.cache.premium._get(guild.id);
-
-					if (!premium) {
-						// Let's try and see if this guild had pro before, and if maybe
-						// the member renewed it, but it didn't update.
-						const oldPremium = await this.db.getPremiumSubscriptionGuildForGuild(guild.id, false);
-						if (oldPremium) {
-							await this.premium.checkPatreon(oldPremium.memberId);
-							premium = await this.cache.premium._get(guild.id);
-						}
-
-						if (!premium) {
-							const dmChannel = await this.getDMChannel(guild.ownerID);
-							await dmChannel
-								.createMessage(
-									'Hi!' +
-										`Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
-										'I am the pro version of InviteManager, and only available to people ' +
-										'that support me on Patreon with the pro tier.\n\n' +
-										'To purchase the pro tier visit https://www.patreon.com/invitemanager\n\n' +
-										'If you purchased premium run `!premium check` and then `!premium activate` in the server\n\n' +
-										'I will be leaving your server soon, thanks for having me!'
-								)
-								.catch(() => undefined);
-							const onTimeout = async () => {
-								// Check one last time before leaving
-								if (await this.cache.premium._get(guild.id)) {
-									return;
-								}
-
-								await guild.leave();
-							};
-							setTimeout(onTimeout, 3 * 60 * 1000);
-						}
-					}
-					break;
-
-				default:
-					break;
-			}
 		});
 
 		await this.setActivity();
@@ -423,34 +364,6 @@ export class IMClient extends Client {
 		if (dbGuild && dbGuild.deletedAt) {
 			dbGuild.deletedAt = null;
 			await this.db.saveGuilds([dbGuild]);
-		}
-
-		// Check pro bot
-		if (this.type === BotType.pro) {
-			// We use a DB query instead of getting the value from the cache
-			const premium = await this.cache.premium._get(guild.id);
-
-			if (!premium) {
-				await channel
-					.createMessage(
-						`Hi! Thanks for inviting me to your server \`${guild.name}\`!\n\n` +
-							'I am the pro version of InviteManager, and only available to people ' +
-							'that support me on Patreon with the pro tier.\n\n' +
-							'To purchase the pro tier visit https://www.patreon.com/invitemanager\n\n' +
-							'If you purchased premium run `!premium check` and then `!premium activate` in the server\n\n' +
-							'I will be leaving your server soon, thanks for having me!'
-					)
-					.catch(() => undefined);
-				const onTimeout = async () => {
-					if (await this.cache.premium._get(guild.id)) {
-						return;
-					}
-
-					await guild.leave();
-				};
-				setTimeout(onTimeout, 2 * 60 * 1000);
-				return;
-			}
 		}
 
 		// Insert tracking data
