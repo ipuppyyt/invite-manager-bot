@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+
+### [9.8.3](https://github.com/chaun14/invite-manager-bot/compare/v9.8.2...v9.8.3) (2021-02-13)
+
+### Features
+
+- **premium:** Removal of all premium systems to avoid scam using it ([f644f263](https://github.com/chaun14/invite-manager-bot/commit/d6c35d183c0a5b75a18dfbdd58999de8e4f5d4c9))
+- **config:** Allow a better status customization from config ([1904203a](https://github.com/chaun14/invite-manager-bot/commit/1904203a110c7f955b19b54c787d28f033c70bf8))
+- **translations:** Turkish translations rework ([d4168eea](https://github.com/chaun14/invite-manager-bot/commit/d4168eea6851d800705c8f6edecae38bc3e3d75e))
+
+### Bug Fixes
+
+- **core:** Server ban system is working again and now use manager websocket ([d6c35d18](https://github.com/chaun14/invite-manager-bot/commit/d6c35d183c0a5b75a18dfbdd58999de8e4f5d4c9) [9082023b](https://github.com/chaun14/invite-manager-bot/commit/9082023b992246d940f28214bb8390e0b3ba31d9) [f8d4dd47](https://github.com/chaun14/invite-manager-bot/commit/f8d4dd47df058ca48361e1480211a85a5d6def48))
+- **controller:** Fixed a bug which cause the queue being not treated when running without socket ([49c16000](https://github.com/chaun14/invite-manager-bot/commit/49c160006805b3d8ff969d29915c8745911ec700))
+
+### [9.8.2](https://github.com/chaun14/invite-manager-bot/compare/v9.8.1...v9.8.2) (2020-11-25)
+
+### Features
+
+- **core:** implement yggdrasil manager to replace rabbitmq ([ea67aaf](https://github.com/chaun14/invite-manager-bot/commit/ea67aaf9cbffd6103c82cc4bcf2ada96cf2c7033))
+- **core:** sharding manager improvements ([cbc2c3c](https://github.com/chaun14/invite-manager-bot/commit/cbc2c3c87decdf6d2afe07ea8c187353c9f886a0))
+- **config:** setJoinChannel and setLeaveChannel commands added ([fd726d3](https://github.com/chaun14/invite-manager-bot/commit/fd726d325918d3a9047f9eacbf2b19a7d7e290b2))
+- **config:** make branding more customizable from config.json ([1ab1356](https://github.com/chaun14/invite-manager-bot/commit/1ab1356b7c956c66f4a81bd28511789450ceceea))
+- **docs:** move docs to [this repo](https://github.com/chaun14/invlogclassic-docs/) ([a03c2d2](https://github.com/chaun14/invite-manager-bot/commit/a03c2d22c9d8e9ea8645c58c5a52d716f62aa9d1))
+- **docs:** change docs link to new [docs](https://classic.invitelogger.me/) ([9d7ca53](https://github.com/chaun14/invite-manager-bot/commit/9d7ca53aeed5198cf113ea0e2b9aee10302db82e))
+- **translations:** few tr translations improvemebts
+
+
+### Bug Fixes
+
+- **translations:** Make translations more accurate and remove some errors. ([284b18b](https://github.com/chaun14/invite-manager-bot/commit/284b18ba7718385bf6f1546cc858f44a3d272b61))([d50e0a0](https://github.com/chaun14/invite-manager-bot/commit/d50e0a081f22f7c256cd4fab060f2ab5eac518a4))
+
+
 ### [9.8.1](https://github.com/chaun14/invite-manager-bot/compare/v9.8.0...v9.8.1) (2020-10-18)
 
 ### Features

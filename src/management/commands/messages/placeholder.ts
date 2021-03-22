@@ -45,7 +45,6 @@ export default class extends Command {
 				return this.sendReply(message, t('cmd.placeholder.noMessage'));
 			}
 
-			// TODO: Premium can post embed messages
 			const newMessage = await this.sendReply(message, placeholder);
 			await this.client.db.saveMessage({
 				guildId: guild.id,

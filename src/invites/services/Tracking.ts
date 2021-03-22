@@ -303,8 +303,7 @@ export class TrackingService extends IMService {
 			if (!guild.members.get(this.client.user.id).permission.has(GuildPermission.MANAGE_ROLES)) {
 				console.log(`TRYING TO SET JOIN ROLES IN ${guild.id} WITHOUT MANAGE_ROLES PERMISSION`);
 			} else {
-				const premium = await this.client.cache.premium.get(guild.id);
-				const roles = premium ? sets.joinRoles : sets.joinRoles.slice(0, 1);
+				const roles = sets.joinRoles;
 
 				roles.forEach((role) => guild.addMemberRole(member.id, role, 'Join role'));
 			}

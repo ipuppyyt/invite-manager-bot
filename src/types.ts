@@ -60,7 +60,6 @@ export enum CommandGroup {
 	Config = 'Config',
 	EasyConfig = 'EasyConfig',
 	Info = 'Info',
-	Premium = 'Premium',
 	Moderation = 'Moderation',
 	Report = 'Report',
 	Other = 'Other'
@@ -105,9 +104,7 @@ export enum BotCommand {
 	setup = 'setup',
 	support = 'support',
 
-	export = 'export',
-	premium = 'premium',
-	tryPremium = 'tryPremium'
+	export = 'export'
 
 	/*report = 'report',*/
 }

@@ -16,12 +16,7 @@ export default class extends Command {
 		});
 	}
 
-	public async action(
-		message: Message,
-		args: any[],
-		flags: {},
-		{ t, guild, settings, isPremium }: Context
-	): Promise<any> {
+	public async action(message: Message, args: any[], flags: {}, { t, guild, settings }: Context): Promise<any> {
 		const lang = settings.lang;
 
 		const embed = this.createEmbed();
@@ -45,17 +40,6 @@ export default class extends Command {
 			name: t('cmd.botInfo.shards.current'),
 			value: `${this.client.shardId} (${this.client.db.getDbShardForGuild(guild.id)})`,
 			inline: true
-		});
-
-		// Premium
-		embed.fields.push({
-			name: t('cmd.botInfo.premium.title'),
-			value:
-				this.client.type === BotType.custom
-					? '**' + t('cmd.botInfo.premium.custom') + '**'
-					: isPremium
-					? t('cmd.botInfo.premium.active')
-					: t('cmd.botInfo.premium.none')
 		});
 
 		// Support discord

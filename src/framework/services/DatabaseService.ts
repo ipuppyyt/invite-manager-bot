@@ -25,8 +25,6 @@ import { Leave } from '../models/Leave';
 import { Log } from '../models/Log';
 import { Member } from '../models/Member';
 import { MemberSetting } from '../models/MemberSetting';
-import { PremiumSubscription } from '../models/PremiumSubscription';
-import { PremiumSubscriptionGuild } from '../models/PremiumSubscriptionGuild';
 import { Role } from '../models/Role';
 import { RolePermission } from '../models/RolePermission';
 import { ScheduledAction, ScheduledActionType } from '../models/ScheduledAction';
@@ -227,9 +225,19 @@ export class DatabaseService extends IMService {
 	public async saveGuilds(guilds: Partial<Guild>[]) {
 		await this.insertOrUpdate(
 			TABLE.guilds,
+			['id', 'name', 'icon', 'memberCount', 'deletedAt'],
+			['name', 'icon', 'memberCount', 'deletedAt'],
+			guilds,
+			(g) => g.id
+		);
+	}
+
+	public async saveGuild(guild: Partial<Guild>) {
+		await this.insertOrUpdate(
+			TABLE.guilds,
 			['id', 'name', 'icon', 'memberCount', 'banReason', 'deletedAt'],
 			['name', 'icon', 'memberCount', 'banReason', 'deletedAt'],
-			guilds,
+			[guild],
 			(g) => g.id
 		);
 	}
@@ -829,80 +837,6 @@ export class DatabaseService extends IMService {
 	}
 	public async removeScheduledAction(guildId: string, id: number) {
 		await this.delete(guildId, TABLE.scheduledActions, '`id` = ?', [id]);
-	}
-
-	// ------------------------
-	//   Premium subscription
-	// ------------------------
-	public async getPremiumSubscriptionsForMember(
-		memberId: string,
-		onlyActive: boolean = true,
-		onlyFree: boolean = false
-	) {
-		return this.findMany<PremiumSubscription>(
-			GLOBAL_SHARD_ID,
-			TABLE.premiumSubscriptions,
-			'`memberId` = ? ' + (onlyActive ? 'AND `validUntil` > NOW() ' : '') + (onlyFree ? 'AND `isFreeTier` = 1 ' : ''),
-			[memberId]
-		);
-	}
-	public async savePremiumSubscription(sub: Partial<PremiumSubscription>) {
-		const res = await this.insertOrUpdate(
-			TABLE.premiumSubscriptions,
-			['memberId', 'validUntil', 'isFreeTier', 'isPatreon', 'isStaff', 'amount', 'maxGuilds', 'reason'],
-			['validUntil'],
-			[sub],
-			() => GLOBAL_SHARD_ID
-		);
-		return res[0].insertId;
-	}
-
-	// ------------------------------
-	//   Premium subscription guild
-	// ------------------------------
-	public async getPremiumSubscriptionGuildForGuild(guildId: string, onlyActive: boolean = true) {
-		const [db, pool] = this.getDbInfo(GLOBAL_SHARD_ID);
-		const [rows] = await pool.query<RowDataPacket[]>(
-			`SELECT psg.* FROM ${db}.${TABLE.premiumSubscriptionGuilds} psg ` +
-				`INNER JOIN ${db}.${TABLE.premiumSubscriptions} ps ON ps.\`memberId\` = psg.\`memberId\` ` +
-				`WHERE psg.\`guildId\` = ? ` +
-				(onlyActive ? `AND ps.\`validUntil\` > NOW() ` : '') +
-				`ORDER BY ps.\`validUntil\` DESC ` +
-				`LIMIT 1`,
-			[guildId]
-		);
-		return rows[0] as PremiumSubscriptionGuild;
-	}
-	public async getPremiumSubscriptionGuildsForMember(memberId: string) {
-		const [db, pool] = this.getDbInfo(GLOBAL_SHARD_ID);
-		const [rows] = await pool.query<RowDataPacket[]>(
-			`SELECT psg.* FROM ${db}.${TABLE.premiumSubscriptionGuilds} psg WHERE psg.\`memberId\` = ?`,
-			[memberId]
-		);
-		const guilds = await this.findManyOnSpecificShards<Guild>(
-			TABLE.guilds,
-			`id IN(?)`,
-			rows.map((r) => r.guildId)
-		);
-		return rows.map((r) => ({
-			...r,
-			guildName: (guilds.find((g) => g.id === r.guildId) || { name: r.guildId }).name
-		})) as Array<PremiumSubscriptionGuild & { guildName: string }>;
-	}
-	public async savePremiumSubscriptionGuild(sub: Partial<PremiumSubscriptionGuild>) {
-		await this.insertOrUpdate(
-			TABLE.premiumSubscriptionGuilds,
-			['guildId', 'memberId'],
-			[],
-			[sub],
-			() => GLOBAL_SHARD_ID
-		);
-	}
-	public async removePremiumSubscriptionGuild(memberId: string, guildId: string) {
-		await this.delete(GLOBAL_SHARD_ID, TABLE.premiumSubscriptionGuilds, '`guildId` = ? AND `memberId` = ?', [
-			guildId,
-			memberId
-		]);
 	}
 
 	// ----------

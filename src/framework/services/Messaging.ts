@@ -47,7 +47,7 @@ export type ShowPaginatedFunc = (
 
 export class MessagingService extends IMService {
 	public createEmbed(options: EmbedOptions = {}, overrideFooter: boolean = true): Embed {
-		let color = options.color ? (options.color as number | string) : parseInt('00cbeb', 16);
+		let color = this.client.config.bot.embedColor;
 		// Parse colors in hashtag/hex format
 		if (typeof color === 'string') {
 			const code = color.startsWith('#') ? color.substr(1) : color;
@@ -204,12 +204,7 @@ export class MessagingService extends IMService {
 
 		try {
 			const temp = JSON.parse(msg);
-			if (await this.client.cache.premium.get(guild.id)) {
-				return this.createEmbed(temp, false);
-			} else {
-				const lang = (await this.client.cache.guilds.get(guild.id)).lang;
-				msg += '\n\n' + i18n.__({ locale: lang, phrase: 'messages.joinLeaveEmbedsIsPremium' });
-			}
+			return this.createEmbed(temp, false);
 		} catch (e) {
 			//
 		}

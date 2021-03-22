@@ -1,3 +1,0 @@
-# ウェブパネル
-
-other.webpanel.description

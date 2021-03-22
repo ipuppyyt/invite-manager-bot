@@ -4,15 +4,22 @@
 	"bot": {
 		"dbPrefix": "im",
 		"type": "regular",
+		"embedColor": "00cbeb",
+		"activity": {
+			"status": "online",
+			"message": "invitelogger.me !",
+			"type": "streaming",
+			"url": "https://www.twitch.tv/arftnl"
+		},
 		"ids": {
 			"regular": "",
 			"pro": ""
 		},
 		"links": {
-			"add": "https://invitemanager.co/add-bot/",
-			"support": "https://discord.gg/Am6p2Hs",
-			"website": "https://andreasgassmann.github.io/discord-invite-manager/",
-			"patreon": "https://www.patreon.com/invitemanager"
+			"add": "https://invlogger.chaun14.fr/bot",
+			"support": "https://discord.gg/zDSBpDu",
+			"website": "https://classic.invitelogger.me/",
+			"patreon": "https://paypal.me/chaun14"
 		},
 		"dm": {
 			"guild": "",

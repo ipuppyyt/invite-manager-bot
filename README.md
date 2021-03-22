@@ -3,17 +3,18 @@
 ## Description
 
 This is the code repository for the invitelogger classic Discord Bot.
+This fork is made to maintain the code of inviteManager and keep the incredible work of its devs alive. I'm not a perfect developer, I'm currently learning so don't hesitate to PR/contact me for code advices and improvements.
 
 ## Docs
 
-[Click here to view the documentation](https://docs.invitemanager.co)
+[Click here to view the documentation](https://classic.invitelogger.me)
 
 ## Self hosting quick setup
 
 ### Requirements
 
 - NodeJS (tested using v12)
-- Database (tested using `MySQL` 5.7+, ⚠`MariaDB` 10.2+ shouldn't work )
+- Database (tested using `MySQL` 5.7+, ⚠`MariaDB` shouldn't work )
 
 ### Setup
 
@@ -24,7 +25,6 @@ This is the code repository for the invitelogger classic Discord Bot.
 1. Copy the `config.example.json` to `config.json` and fill in required data
 1. `npm run build`
 1. `npm start`
-
 
 ### ⚠ Disclaimer
 
