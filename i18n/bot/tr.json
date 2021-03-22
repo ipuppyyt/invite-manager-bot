@@ -1175,8 +1175,8 @@
 			"unknownEmoji": "Bilinmeyen emoji. Emojinin geldiği sunucuda InviteLogger'ın olması gerekiyor.!"
 		},
 		"lockdown": {
-			"channelUnlocked": "The lockdown for {{{ channel }}} has ended.",
-			"channelLockedDown": "The {{{ channel }}} channel is now locked down.",
+			"channelUnlocked": "{{{ channel }}} kanalı için olan kilit açıldı.",
+			"channelLockedDown": "{{{ channel }}} başarıyla kitlendi.",
 			"self": {
 				"description": "Lockdown a specific channel (Prevents anyone without special roles from sending messages)",
 				"flags": {
@@ -1221,12 +1221,12 @@
 		}
 	},
 	"permissions": {
-		"adminOnly": "Bu komutu kullanma yetkinşx yok.\nBu komutu yalnızca **Yönetici** yetkisindekiler kullanabilir.",
+		"adminOnly": "Bu komutu kullanma yetkiniz yok.\nBu komutu yalnızca **Yönetici** yetkisindekiler kullanabilir.",
 		"createInstantInvite": "Davet Oluştur",
 		"manageGuild": "Sunucuyu Yönet",
 		"manageRoles": "Rolleri Yönet",
 		"premiumOnly": "Bu komut yalnızca premium aboneler için geçerlidir!",
-		"rateLimit": "Çok Hızlısın Yavaşla! Lütfen {{ cooldown }} saniye bekleyin ve tekrar deneyin.",
+		"rateLimit": "Çok Hızlısın, Yavaşla! Lütfen {{ cooldown }} saniye bekleyin ve tekrar deneyin.",
 		"role": "Bu komutu kullanmak için yetkin yok. \nAşağıdaki rollerden birine ihtiyacın var: {{{roller}}}",
 		"viewAuditLogs": "Denetim Kaydını Görüntüle",
 		"manageMessages": "Mesajları Yönet",
@@ -1234,7 +1234,7 @@
 		"missing": "InviteLogger'da {{{ channel }}}'daki {{{ permissions }}} yetkisi eksik",
 		"banMembers": "Üyeleri Yasakla",
 		"kickMembers": "Üyeleri At",
-		"memberError": "Could not get member"
+		"memberError": "Üye tanımlanamıyor"
 	},
 	"resolvers": {
 		"boolean": {
