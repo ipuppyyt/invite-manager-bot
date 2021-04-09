@@ -722,7 +722,7 @@
 				},
 				"description": "Komutları kullanmak için izinleri yapılandırın."
 			},
-			"canNotChange": "The permissions for the {{{ cmd }}} command cannot be changed."
+			"canNotChange": "{{{ cmd }}} komutu için izinler değiştirilemiyor."
 		},
 		"ping": {
 			"self": {
@@ -1005,7 +1005,7 @@
 			"error": "Could not unban user because of the following error:\n{{{ error }}}"
 		},
 		"unhoist": {
-			"done": "**Completed!**\n\nProcessed: {{ processed }}\n**Changed: {{ changed }}**\nExcluded: {{ excluded }}\nErrored: {{ errored }}\n",
+			"done": "**Completed!**\n\nİşleme Alınan: {{ processed }}\n**Başarılı: {{ changed }}**\nExcluded: {{ excluded }}\nHata Yaşanan: {{ errored }}\n",
 			"processing": "Processing, this might take a while...\n\nProcessed: {{ processed }}/{{ total }}\n**Changed: {{ changed }}**\nExcluded: {{ excluded }}\nErrored: {{ errored }}",
 			"self": {
 				"description": "Tüm üyelerin önüne, adlarının önünde özel bir karakter olacak şekilde bir karakter ekleyin, böylece üye listesinin sonunda gösterilirler."
@@ -1022,7 +1022,7 @@
 				"args": {
 					"user": "Susturulması gereken kullanıcı"
 				},
-				"description": "Unmute a user"
+				"description": "Bir kullanıcıyı sustur"
 			}
 		},
 		"warn": {
