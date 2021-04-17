@@ -31,8 +31,6 @@
 	},
 	"homepage": "https://classic.invitelogger.me/",
 	"dependencies": {
-		"@sentry/node": "5.15.5",
-		"@types/socket.io-client": "1.4.34",
 		"amqplib": "0.5.6",
 		"axios": "0.19.2",
 		"bufferutil": "4.0.1",
@@ -44,7 +42,7 @@
 		"colors": "1.4.0",
 		"discord-webhook-node": "1.1.8",
 		"discord.js": "12.3.1",
-		"eris": "github:abalabahaha/eris#3607027f1ea64b81b302006f564ff69679b800d1",
+		"eris": "0.15.0",
 		"eris-lavalink": "github:SideProjectGuys/eris-lavalink#8e3156a968033c1f037b5424dd46aacb8af76436",
 		"erlpack": "github:abalabahaha/erlpack",
 		"eventemitter3": "4.0.4",
@@ -60,11 +58,13 @@
 		"zlib-sync": "0.1.6"
 	},
 	"devDependencies": {
+		"@sentry/node": "5.15.5",
+		"@types/socket.io-client": "1.4.34",
 		"@sentry/cli": "1.53.0",
 		"@types/amqplib": "0.5.13",
 		"@types/chart.js": "2.9.21",
 		"@types/i18n": "0.8.6",
-		"@types/mysql2": "github:types/mysql2",
+		"@types/mysql2": "1.0.0",
 		"@types/node": "14.0.5",
 		"@types/xmldoc": "1.1.4",
 		"cross-env": "7.0.2",

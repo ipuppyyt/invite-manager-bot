@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { AnyChannel, ChannelInvite, Guild, GuildAuditLog, GuildChannel, Member, Role, TextChannel } from 'eris';
+import { AnyChannel, Guild, GuildAuditLog, GuildChannel, Member, Role, TextChannel, Invite } from 'eris';
 import i18n from 'i18n';
 import moment from 'moment';
 import os from 'os';
@@ -109,7 +109,7 @@ export class TrackingService extends IMService {
 		}
 	}
 
-	private async onInviteCreate(guild: Guild, invite: ChannelInvite) {
+	private async onInviteCreate(guild: Guild, invite: Invite) {
 		await this.client.db.saveInviteCodes([
 			{
 				createdAt: invite.createdAt ? new Date(invite.createdAt) : new Date(),
@@ -128,7 +128,7 @@ export class TrackingService extends IMService {
 		]);
 	}
 
-	private async onDeleteInvite(guild: Guild, invite: ChannelInvite) {
+	private async onDeleteInvite(guild: Guild, invite: Invite) {
 		await this.client.db.saveInviteCodes([
 			{
 				createdAt: invite.createdAt ? new Date(invite.createdAt) : new Date(),
@@ -315,7 +315,7 @@ export class TrackingService extends IMService {
 			return;
 		}
 
-		let invs = await guild.getInvites().catch(() => [] as ChannelInvite[]);
+		let invs = await guild.getInvites().catch(() => [] as Invite[]);
 		const lastUpdate = this.inviteStoreUpdate[guild.id];
 		const newInvs = this.getInviteCounts(invs);
 		const oldInvs = this.inviteStore[guild.id];
@@ -340,11 +340,13 @@ export class TrackingService extends IMService {
 			const logs = await guild.getAuditLogs(50, undefined, INVITE_CREATE).catch(() => null as GuildAuditLog);
 			if (logs && logs.entries.length) {
 				const createdCodes = logs.entries
+					// @ts-ignore #todo fix that
 					.filter((e) => deconstruct(e.id) > lastUpdate && newInvs[e.after.code] === undefined)
 					.map((e) => ({
 						code: e.after.code,
 						channel: {
 							id: e.after.channel_id,
+							// @ts-ignore #todo fix that
 							name: (e.guild.channels.get(e.after.channel_id) || {}).name
 						},
 						guild: e.guild,
@@ -355,7 +357,7 @@ export class TrackingService extends IMService {
 						temporary: e.after.temporary,
 						createdAt: deconstruct(e.id)
 					}));
-				inviteCodesUsed = inviteCodesUsed.concat(createdCodes.map((c) => c.code));
+				inviteCodesUsed = inviteCodesUsed.concat(createdCodes.map((c) => c.code as string));
 				invs = invs.concat(createdCodes as any);
 			}
 		}
@@ -785,7 +787,7 @@ export class TrackingService extends IMService {
 		}
 
 		// Get the invites
-		const invs = await guild.getInvites().catch(() => [] as ChannelInvite[]);
+		const invs = await guild.getInvites().catch(() => [] as Invite[]);
 
 		// Filter out new invite codes
 		const newInviteCodes = invs.filter(
@@ -845,7 +847,7 @@ export class TrackingService extends IMService {
 
 		await Promise.all(promises);
 
-		const codes = invs.map((inv) => ({
+		const codes = invs.map((inv: Invite) => ({
 			createdAt: inv.createdAt ? moment(inv.createdAt).toDate() : new Date(),
 			code: inv.code,
 			channelId: inv.channel ? inv.channel.id : null,
@@ -866,7 +868,7 @@ export class TrackingService extends IMService {
 		}
 	}
 
-	private getInviteCounts(invites: ChannelInvite[]): { [key: string]: { uses: number; maxUses: number } } {
+	private getInviteCounts(invites: Invite[]): { [key: string]: { uses: number; maxUses: number } } {
 		const localInvites: {
 			[key: string]: { uses: number; maxUses: number };
 		} = {};

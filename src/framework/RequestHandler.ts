@@ -1,3 +1,4 @@
+import { Constants } from 'eris';
 import { IMClient } from '../client';
 
 // tslint:disable-next-line: variable-name
@@ -12,13 +13,16 @@ export interface RequestStat {
 export class IMRequestHandler extends RequestHandler {
 	public requestStats: Map<string, RequestStat> = new Map();
 
-	public constructor(client: IMClient, forceQueueing?: boolean) {
-		super(client, forceQueueing);
+	public constructor(client: IMClient, options: any) {
+		super({ client, options });
+		this.globalBlock = false;
+		this._client = client;
 	}
 
 	public request(method: string, url: string, auth: boolean, body: any, file: any, _route: string, short: string) {
 		// This is similar to https://github.com/abalabahaha/eris/blob/master/lib/rest/RequestHandler.js#L46
 		// but we don't actually care about rate limits, so no exceptions in grouping
+
 		const route = url
 			.replace(/\/(?:[0-9]+)/g, `/:id`)
 			.replace(/\/reactions\/[^/]+/g, '/reactions/:id')

@@ -105,6 +105,7 @@ export class IMClient extends Client {
 	public shardId: number;
 	public shardCount: number;
 
+	// @ts-ignore
 	public requestHandler: IMRequestHandler;
 	public service: ClientServiceObject;
 	private startingServices: IMService[];
@@ -168,7 +169,7 @@ export class IMClient extends Client {
 			cmdErrors: 0
 		};
 
-		this.requestHandler = new IMRequestHandler(this);
+		this.requestHandler = new IMRequestHandler(this, true);
 		this.version = version;
 		this.type = type;
 		this.instance = instance;
